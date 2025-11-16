@@ -1,0 +1,401 @@
+@use './variable' as *;
+@use './function.scss'as *;
+.dialog {
+    position                : fixed;
+    top                     : 0;
+    left                    : 0;
+    bottom                  : 0;
+    right                   : 0;
+    background              : rgba($color: #000000, $alpha: .3);
+    display                 : flex;
+    align-items             : center;
+    justify-content         : center;
+    box-shadow              : 0 10px 15px rgba($color: #000000, $alpha: .1);
+    box-sizing              : border-box;
+    // backdrop-filter      : blur(3px);
+    background-blend-mode   : overlay;
+    overflow                : hidden;
+    opacity                 : 0;
+
+    .dialog-wrapper {
+        width          : 100%;
+        max-height     : 100%;
+        padding        : 10px 0;
+        overflow       : auto;
+        display        : flex;
+        justify-content: center;
+    }
+
+    .dialog-container {
+        background   : #fff;
+        width        : fit-content;
+        height       : fit-content;
+        padding      : 25px;
+        border-radius: $border-radius;
+
+        &.withBackdrop {
+            box-shadow           : 0 10px 15px rgba($color: #000000, $alpha: .3);
+            box-sizing           : border-box;
+            backdrop-filter      : blur(3px);
+            background-blend-mode: overlay;
+        }
+
+        .dialog-form {
+            display       : flex;
+            flex-direction: column;
+
+            .dialog-form-header {
+                display        : flex;
+                flex-direction : row;
+                align-items    : center;
+                justify-content: space-between;
+
+                h3 {
+                    margin     : 0;
+                    line-height: normal;
+                }
+
+                svg {
+                    width : 40px;
+                    height: 40px;
+                    color : #fff;
+                }
+            }
+
+            .dialog-form-body {
+                padding: 15px 0;
+
+                .form-row {
+                    margin-bottom : 18px;
+                    line-height   : 0;
+                    position      : relative;
+                    display       : flex;
+                    flex-direction: column;
+                    align-items   : flex-start;
+
+                    &.no-label {
+                        margin: 0;
+                    }
+
+                    & * {
+                        line-height: normal;
+                    }
+
+                    label {
+                        text-align   : right;
+                        float        : left;
+                        font-size    : 14px;
+                        color        : #5a5e66;
+                        padding      : 0 12px 0 0;
+                        box-sizing   : border-box;
+                        margin-bottom: 5px;
+
+                        span {
+                            color      : #fa5555;
+                            margin-left: 4px;
+                        }
+                    }
+
+                    .error {
+                        color      : #ff9d9d;
+                        font-size  : 12px;
+                        line-height: 1;
+                        padding-top: 4px;
+                        position   : absolute;
+                        top        : 100%;
+                        left       : 0;
+                    }
+
+                    >input,
+                    select {
+                        background-color: #fff;
+                        border-radius   : 4px;
+                        border          : 1px solid #d8dce5;
+                        box-sizing      : border-box;
+                        color           : #5a5e66;
+                        display         : inline-block;
+                        font-size       : 14px;
+                        height          : 40px;
+                        line-height     : 1;
+                        outline         : 0;
+                        padding         : 0 15px;
+                        transition      : border-color .2s cubic-bezier(.645, .045, .355, 1);
+                        width           : 100%;
+
+                        &::placeholder {
+                            color: #b7bac1;
+                        }
+
+                        &.required {
+                            border-color: #fa5555;
+                        }
+                    }
+
+                    .form-select-file {
+                        background-color   : #fff;
+                        border             : 1px dashed #d9d9d9;
+                        border-radius      : 6px;
+                        box-sizing         : border-box;
+                        width              : 100%;
+                        height             : 100px;
+                        text-align         : center;
+                        position           : relative;
+                        // overflow        : hidden;
+                        cursor             : pointer;
+                        transition         : .2s;
+                        position           : relative;
+                        display            : inline-block;
+
+                        input {
+                            position: absolute;
+                            top     : 0;
+                            left    : 0;
+                            right   : 0;
+                            bottom  : 0;
+                            width   : 100%;
+                            cursor  : pointer;
+                            opacity : 0;
+                        }
+
+                        .select-file {
+                            position       : absolute;
+                            top            : 0;
+                            right          : 0;
+                            bottom         : 0;
+                            left           : 0;
+                            display        : flex;
+                            flex-direction : column;
+                            align-items    : center;
+                            justify-content: center;
+
+
+                            .icon {
+                                margin-bottom: 5px;
+                                line-height  : 0;
+
+                                svg {
+                                    width      : 40px;
+                                    height     : 40px;
+                                    line-height: 0;
+                                    color      : #b4bccc;
+                                    transition : .2s;
+                                }
+                            }
+
+                            .title {
+                                color     : #5a5e66;
+                                font-size : 14px;
+                                text-align: center;
+                                transition: .2s;
+                            }
+
+                        }
+
+                    }
+
+                }
+
+                .file-upload-list {
+                    width         : 100%;
+                    display       : flex;
+                    flex-direction: column;
+                    row-gap       : 15px;
+                    padding       : 10px 0;
+
+                    .file-upload-item {
+                        width         : 100%;
+                        display       : flex;
+                        flex-direction: column;
+                        padding       : 10px;
+                        border-radius : 5px;
+                        border        : 1px solid $border;
+
+                        .file-upload-item-header {
+                            display        : flex;
+                            align-items    : center;
+                            justify-content: center;
+                            gap            : 10px;
+                            padding-bottom : 10px;
+                            box-sizing     : border-box;
+
+                            .item-thumbnail {
+                                width    : 40px;
+                                min-width: 40px;
+                                height   : 40px;
+
+                                img {
+                                    width     : 100%;
+                                    height    : 100%;
+                                    object-fit: cover;
+                                }
+                            }
+
+                            .file-upload-item-title {
+                                flex     : auto;
+                                font-size: 14px;
+                                color    : $dark;
+
+                                span {
+                                    word-break: break-all;
+                                    @include subString(2);
+                                }
+                            }
+
+                            .action-item {
+                                display        : flex;
+                                justify-content: flex-end;
+                                gap            : 10px;
+
+                                button {
+                                    min-width : unset;
+                                    padding   : 5px;
+                                    background: unset;
+                                    border    : 1px solid rgba($color: $primary, $alpha: .2);
+                                    color     : rgba($color: $primary, $alpha: 1);
+
+                                    svg {
+                                        width : 18px;
+                                        height: 18px;
+                                    }
+
+                                    &.cancel {
+                                        background: unset;
+                                        border    : 1px solid rgba($color: $danger, $alpha: .2);
+                                        color     : rgba($color: $danger, $alpha: 1);
+                                    }
+                                }
+                            }
+
+                        }
+
+                        .file-upload-item-body {
+                            .item-progress-bar {
+                                height    : 5px;
+                                background: rgba($success, .5);
+
+                                &.pause {
+                                    background: rgba($warning, .5);
+                                }
+
+                                &.error {
+                                    background: rgba($danger, .5);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                .form-check {
+                    .form-check-input[type=checkbox] {
+                        margin-right: unset;
+                    }
+
+                    label {
+                        text-align: left;
+                        font-size : 14px;
+                    }
+                }
+
+                p {
+                    color     : $dark;
+                    margin    : 0;
+                    padding   : 0 5px;
+                    box-sizing: border-box;
+                    font-size : 14px;
+                    word-break: break-all;
+                }
+            }
+
+            .dialog-form-footer {
+                display        : flex;
+                justify-content: flex-end;
+
+                button {
+                    background   : $primary;
+                    border-radius: $border-radius;
+                    color        : #fff;
+                    font-size    : 15px;
+                    font-weight  : 500;
+                    padding      : 0 15px;
+
+                    &.close {
+                        background  : none;
+                        border-color: rgba($color: #000000, $alpha: .2);
+                        color       : rgba($color: #f00, $alpha: .8);
+                    }
+
+                    .loader {
+                        margin-left      : 5px;
+                        font-size        : 10px;
+                        text-indent      : -9999em;
+                        width            : 2.5em;
+                        height           : 2.5em;
+                        border-radius    : 50%;
+                        background       : #ffffff;
+                        background       : -moz-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                        background       : -webkit-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                        background       : -o-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                        background       : -ms-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                        background       : linear-gradient(to right, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                        position         : relative;
+                        -webkit-animation: load3 1s infinite linear;
+                        animation        : load3 1s infinite linear;
+                        -webkit-transform: translateZ(0);
+                        -ms-transform    : translateZ(0);
+                        transform        : translateZ(0);
+                    }
+
+                    .loader:before {
+                        width        : 50%;
+                        height       : 50%;
+                        background   : #fff;
+                        border-radius: 100% 0 0 0;
+                        position     : absolute;
+                        top          : 0;
+                        left         : 0;
+                        content      : '';
+                    }
+
+                    .loader:after {
+                        background   : rgb(224 224 224) !important;
+                        width        : 75%;
+                        height       : 75%;
+                        border-radius: 50%;
+                        content      : '';
+                        margin       : auto;
+                        position     : absolute;
+                        top          : 0;
+                        left         : 0;
+                        bottom       : 0;
+                        right        : 0;
+                    }
+
+                    @-webkit-keyframes load3 {
+                        0% {
+                            -webkit-transform: rotate(0deg);
+                            transform        : rotate(0deg);
+                        }
+
+                        100% {
+                            -webkit-transform: rotate(360deg);
+                            transform        : rotate(360deg);
+                        }
+                    }
+
+                    @keyframes load3 {
+                        0% {
+                            -webkit-transform: rotate(0deg);
+                            transform        : rotate(0deg);
+                        }
+
+                        100% {
+                            -webkit-transform: rotate(360deg);
+                            transform        : rotate(360deg);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+}

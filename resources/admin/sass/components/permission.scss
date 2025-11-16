@@ -1,0 +1,250 @@
+.permissionLayoutGp {
+    display: flex;
+    flex-direction: column;
+    .permissionControl {
+        margin-top: 10px;
+        padding-right: 10px;
+    }
+    label {
+        span {
+            color: red;
+        }
+        .span {
+            color: #5a5e66 !important;
+        }
+    }
+    .error {
+        color: red !important;
+        font-size: 12px !important;
+        margin-top: 0;
+    }
+    .parentLabel {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0 0;
+        font-size: 17px;
+    }
+    .headerListPermission {
+        display: flex;
+        align-items: center;
+        height: 55px;
+        border-bottom: 1px solid #eeeeee;
+        background: #e0e0e0;
+        padding: 0 10px 0 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        .titlePer {
+            flex: 1;
+            font-size: 24px;
+        }
+    }
+}
+
+.permissionLayout {
+    display: flex;
+    width: calc(100% - -15px);
+    flex-wrap: wrap;
+    margin-top: 5px;
+    .permissionItem {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        background: #f7f7f7;
+        border-radius: 4px;
+        padding: 5px 15px;
+        cursor: pointer;
+        margin-right: 15px;
+        // margin-bottom: 5px;
+        flex-wrap: wrap;
+        flex-direction: column;
+        .arrowPermission {
+            svg {
+                width: 30px;
+                height: 30px;
+                transition: all 0.3s ease;
+                margin-right: 10px;
+            }
+        }
+        .permissionHeader {
+            display: flex;
+            width: 100%;
+            height: 40px;
+            align-items: center;
+            .permissionHdLeft {
+                flex: 1;
+                display: flex;
+            }
+            .textItem {
+                flex: 1;
+            }
+            .arrowPermission {
+                margin-right: 10px;
+            }
+        }
+        .form-check-label {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            .textItem {
+                flex: 1;
+            }
+            .inputItem {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                input {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+            .icheckbox_square-blue {
+                display: flex;
+                align-items: center;
+                .chk-permission-group {
+                    position: unset !important;
+                    width: 22px;
+                    height: 22px;
+                    opacity: 1 !important;
+                }
+            }
+        }
+        .permissionListItemGpCh {
+            width: 100%;
+            padding: 0 0 0 25px;
+            display: none;
+        }
+        .permissionListItemSubModule {
+            width: 100%;
+            padding: 0 0 0 25px;
+            display: none;
+        }
+        .permissionListItemPermission {
+            width: 100%;
+            padding: 0 0 0 25px;
+            display: none;
+        }
+        .permissionListItemSubModuleLevel3 {
+            width: 100%;
+            padding: 0 0 0 25px;
+            display: none;
+        }
+        .permissionListItemPermissionLevel3 {
+            width: 100%;
+            padding: 0 0 0 25px;
+            display: none;
+        }
+        .permissionItemCh {
+            width: 100%;
+            display: flex;
+            border-bottom: 1px solid #75757530;
+            line-height: 40px;
+            align-items: center;
+            cursor: pointer;
+            .material-icons {
+                margin-right: 10px;
+                font-size: 10px;
+                width: 15px;
+                padding-left: 5px;
+            }
+            .textItem {
+                flex: 1;
+                font-size: 15px;
+                span {
+                    color: black;
+                }
+                .price {
+                    color: red !important;
+                    font-weight: 600;
+                    font-size: 15px !important;
+                    margin-left: 30px;
+                    font-weight: unset;
+                    -webkit-text-stroke: .3px;
+                }
+            }
+            .inputItem {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                input {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+            &:last-child {
+                border-bottom: 0;
+            }
+            // &:hover {
+            //     .textItem {
+            //         font-size: 15px;
+            //         span {
+            //             color: $primary;
+            //         }
+            //     }
+            //     color: $primary;
+            // }
+        }
+        &.showMenu {
+            .permissionListItemGpCh {
+                display: block;
+            }
+            .permissionListItemSubModule {
+                display: block;
+            }
+            .arrowPermission {
+                .material-icons.parent-module {
+                    transform: rotate(-180deg);
+                }
+            }
+        }
+    }
+    .permissionListItemSubModule {
+        &.showMenu {
+            .permissionListItemPermission {
+                display: block;
+            }
+            .arrowPermission {
+                .material-icons.sub-module {
+                    transform: rotate(-180deg);
+                }
+            }
+            .permissionListItemSubModuleLevel3 {
+                display: block;
+            }
+        }
+    }
+    .permissionListItemSubModuleLevel3 {
+        &.showMenu {
+            .permissionListItemPermissionLevel3 {
+                display: block;
+            }
+            .arrowPermission {
+                .material-icons.sub-level3-module {
+                    transform: rotate(-180deg);
+                }
+            }
+        }
+    }
+}
+
+.permissionListCheckall {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    padding: 20px 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    .icheckbox_square-blue {
+        display: flex;
+        align-items: center;
+        .chk-permissionSelectAll {
+            position: unset !important;
+            width: 22px;
+            height: 22px;
+        }
+    }
+    .chk-permissionSelectAll {
+        opacity: 1 !important;
+    }
+    span {
+        margin-right: 10px;
+    }
+}

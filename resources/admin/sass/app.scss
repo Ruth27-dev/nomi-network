@@ -1,0 +1,111 @@
+@use "./variable" as *;
+@use "./function.scss" as *;
+@use "./font.scss" as *;
+@use "./component.scss" as *;
+@use "./content.scss" as *;
+@use "./sidebar.scss" as *;
+@use "./dialog.scss" as *;
+@use "./form.scss" as *;
+@use "./message.scss" as *;
+@use "./loading.scss" as *;
+@use "./empty.scss" as *;
+@use "./header.scss" as *;
+@use "./table.scss" as *;
+@use "./file-manager.scss" as *;
+@use "./no-permission.scss" as *;
+@use "./auth/login.scss" as *;
+@use "./error.scss" as *;
+@use "./components/index.component" as *;
+@use "./dashboard.scss" as *;
+@use "./category.scss" as *;
+@import "material-icons/iconfont/material-icons.css";
+@import "daterangepicker/daterangepicker.css";
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #fff;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $primary;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: $primary;
+}
+
+button:disabled {
+    background: rgba(0, 0, 0, 0.12) !important;
+    color: rgba(0, 0, 0, 0.26) !important;
+    cursor: no-drop !important;
+}
+
+input:disabled,
+select:disabled,
+.select2-container--disabled {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: rgba(0, 0, 0, 0.5) !important;
+    cursor: no-drop !important;
+}
+
+.drp-buttons {
+    display: flex !important;
+    justify-content: space-between;
+    .applyBtn {
+        background: #357ebd;
+        color: white;
+    }
+}
+
+*[readonly] {
+    cursor: default !important;
+}
+
+*:focus {
+    outline: none;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.paragraph {
+    text-align: right;
+    font-size: 14px;
+    color: #5a5e66;
+    padding: 0 12px 0 0;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+    display: flex;
+    column-gap: 3px;
+    font-weight: 600;
+}
+
+@media print {
+    body {
+        visibility: hidden;
+    }
+    .print {
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+    }
+    @page {
+        margin: unset !important;
+    }
+}

@@ -1,0 +1,149 @@
+@use './variable' as *;
+@use './function.scss'as *;
+.header {
+    background   : $header;
+    padding      : 0 20px;
+    // box-shadow: $shadow;
+    z-index      : 1;
+    position     : sticky;
+    top          : 0;
+
+    &-wrapper {
+        width          : 100%;
+        height         : 60px; //50px;
+        display        : flex;
+        align-items    : center;
+        justify-content: space-between;
+
+        .btn-back {
+            cursor: pointer;
+        }
+
+        .btn-toggle-sidebar {
+            width         : fit-content;
+            height        : 100%;
+            // cursor     : pointer;
+            color         : $header-text;
+            display       : flex;
+            align-items   : center;
+
+            span {
+                font-size  : 18px;
+                font-weight: 600;
+                color      : $header-title;
+            }
+        }
+
+        .right {
+            display    : flex;
+            align-items: center;
+            gap        : 10px;
+
+            .profile-info {
+                display    : flex;
+                align-items: center;
+                gap        : 10px;
+
+                .image {
+                    width        : 40px;
+                    height       : 40px;
+                    border-radius: 50%;
+                }
+
+                .name {
+                    font-size     : 14px;
+                    font-weight   : 600;
+                    text-transform: uppercase;
+                }
+            }
+
+            .btn-logout {
+                width      : fit-content;
+                height     : 100%;
+                color      : $danger;
+                display    : flex;
+                align-items: center;
+                cursor     : pointer;
+                font-size  : 14px;
+                font-weight: 600;
+                gap        : 5px;
+
+                svg {
+                    width: 16px;
+                }
+            }
+
+             // switch language
+            .switch-lang-content {
+                // position: absolute;
+                // top     : 10px;
+                // z-index : 999;
+
+                // &.right {
+                //     right: 0;
+                // }
+
+                // &.left {
+                //     left: 0;
+                // }
+
+                .switch-lang {
+                    display         : grid;
+                    place-items     : center;
+                    grid-auto-flow  : column;
+                    grid-gap        : 10px;
+                    background-color: #fff;
+                    padding         : 5px;
+                    border-radius   : 50px;
+                    box-shadow      : rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+
+                    &-item {
+                        position       : relative;
+                        display        : flex;
+                        align-items    : center;
+                        justify-content: center;
+                        cursor         : pointer;
+                        height         : 25px;
+                        width          : 25px;
+                        border-radius  : 100%;
+
+                        svg {
+                            display  : none;
+                            position : absolute;
+                            top      : 50%;
+                            left     : 50%;
+                            transform: translate(-50%, -50%);
+                            color    : #fff;
+                        }
+
+                        &.active {
+                            svg {
+                                display: block;
+                                z-index: 1;
+                            }
+
+                            &::before {
+                                content         : '';
+                                position        : absolute;
+                                top             : 0;
+                                left            : 0;
+                                width           : 100%;
+                                height          : 100%;
+                                border-radius   : 100%;
+                                background-color: #0000004f;
+                            }
+                        }
+
+                        img {
+                            width        : 100%;
+                            height       : 100%;
+                            border-radius: 50%;
+                        }
+                    }
+                }
+            }
+
+
+        }
+    }
+}

@@ -1,0 +1,230 @@
+.form-admin {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.form-admin .form-wrapper {
+    padding: 0;
+    margin: 0 auto;
+    position: relative;
+    height: 100%;
+    max-width: 90%;
+}
+
+.form-admin .form-wrapper .form-header {
+    width: 100%;
+    display: flex;
+    color: #fff;
+    font-size: 20px;
+    padding: 10px 0;
+    color: #757575;
+}
+
+.form-admin .form-wrapper .form-body {
+    box-sizing: border-box;
+    background: #fff;
+    padding: 40px;
+    border-radius: 5px;
+    box-shadow: 0px 3px 8px -3px rgb(0 0 0 / 20%);
+}
+
+.form-admin .form-wrapper .form-body .switch-lang {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-admin .form-wrapper .form-body .switch-lang button {
+    background-color: #fff;
+    color: #0099ff;
+    border: 1px solid #0099ff;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.form-admin .form-wrapper .form-body .switch-lang button.active {
+    background-color: #ffae60;
+    color: #fff;
+    border: 1px solid #ffae60;
+}
+
+.form-admin .form-wrapper .form-body .row .textarea-form {
+    display: none;
+}
+
+.form-admin .form-wrapper .form-body .row .textarea-form.active {
+    display: inline;
+}
+
+.tox-edit-area {
+    max-width: unset !important;
+}
+
+.table-wrapper .table-body .column {
+    height: 60px;
+}
+
+.table-wrapper .table-body .column .row input,
+select {
+    border-radius: 4px;
+    border: 1px solid #d8dce5;
+    box-sizing: border-box;
+    color: #5a5e66;
+    background: #fcfcfc;
+    display: inline-block;
+    font-size: 14px;
+    height: 40px;
+    line-height: 1;
+    outline: 0;
+    padding: 0 15px;
+    transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+    width: 100%;
+}
+
+.table-wrapper .table-body .column .row .form-checkbox {
+    width: 20px;
+    height: 20px;
+}
+
+.table-wrapper .table-body .no-data-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.table-wrapper .table-body .no-data-container .image {
+    width: 120px;
+}
+
+.table-wrapper .table-body .no-data-container .image img {
+    width: 100%;
+}
+
+.table-wrapper .table-body .no-data-container .no-data {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.row .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.row .button-group .button {
+    display: flex;
+    gap: 10px;
+}
+
+.row .button-group .button button {
+    color: grey;
+    border: 1px solid grey;
+    font-size: 14px;
+    background: unset;
+}
+
+.row .button-group .subtotal-group {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.row .button-group .subtotal {
+    font-weight: 600;
+}
+
+.amount {
+    font-weight: 600;
+}
+
+.row .taxable {
+    text-align: right;
+    margin-right: 100px;
+    font-size: 13px;
+}
+.row-based-location {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+.row-based-location .base-location {
+    flex-direction: column;
+    width: calc(100% / 2);
+}
+
+.row-based-location .base-location .tax-rate {
+    font-size: 12px;
+}
+
+.row-based-location .base-location .locate {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+.see-the-math {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 12px;
+}
+.color-box-preview {
+    width: 100%;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-top: 6px;
+}
+.invoice-a4 {
+    width: 210mm;
+    min-height: auto;
+    margin: 0 auto;
+    border: 1px solid #e0e0e0;
+}
+
+.invoice-content {
+    padding: 8mm;
+}
+
+.kh {
+    font-family: "Khmer OS Siemreap", "Noto Sans Khmer", system-ui, sans-serif;
+}
+
+.en {
+    font-family: "Times New Roman", Times, serif !important;
+}
+
+.kh-moul {
+    font-family: "Moul", "Hanuman", "Inter", sans-serif !important;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    border: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    vertical-align: top;
+}
+
+.table thead th {
+    background: #f8fafc;
+    font-weight: 700;
+}
+
+.muted {
+    color: #6b7280;
+}
+
+.stamp {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    /* padding: 10px 12px; */
+    min-height: 60px;
+}
+
+

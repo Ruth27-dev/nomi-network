@@ -1,0 +1,281 @@
+:root {
+    --text: #111;
+    --muted: #666;
+    --line: #111;
+    --kh: "Khmer OS Battambang", "Hanuman", system-ui, sans-serif;
+    --en: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.receipt-80 {
+    color: var(--text);
+    font-family: var(--en);
+    font-size: 11.5px;
+    line-height: 1.25;
+    background: #fff;
+}
+
+.receipt-80 .kh {
+    font-family: var(--kh);
+}
+
+.receipt-80 .kh-strong {
+    font-family: var(--kh);
+    font-weight: 700;
+}
+
+.receipt-80 .center {
+    text-align: center;
+}
+
+.receipt-80 .right {
+    text-align: right;
+}
+
+.receipt-80 .muted {
+    color: var(--muted);
+}
+
+.receipt-80 .logo {
+    height: 65px;
+    display: block;
+    margin: 6px auto 2px;
+}
+
+.receipt-80 .h1 {
+    font-size: 21px;
+    font-weight: 500;
+}
+
+.receipt-80 .h2 {
+    font-size: 20px;
+}
+
+.receipt-80 .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.receipt-80 .cut {
+    border-top: 1.6px solid var(--line);
+    margin: 10px 0;
+}
+
+.receipt-80 .thin {
+    border-top: 1px solid var(--line);
+    margin: 8px 0;
+}
+
+.receipt-80 table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.receipt-80 th,
+.receipt-80 td {
+    padding: 8px 4px;
+    vertical-align: top;
+    font-size: 11.5px;
+}
+
+.receipt-80 thead {
+    border: 1px solid var(--line);
+    font-weight: 600;
+}
+
+.receipt-80 tbody td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.receipt-80 .qty {
+    width: 70px;
+}
+
+.receipt-80 .up {
+    width: 70px;
+}
+
+.receipt-80 .amt {
+    width: 80px;
+}
+
+.receipt-80 .desc {
+    width: auto;
+}
+
+.receipt-80 .footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 11px;
+}
+
+.receipt-80 .grand {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#receiptArea.receipt-80 {
+    width: 80mm;
+    min-height: 297mm;
+    max-width: calc(100% - 40px);
+    margin: 20px auto;
+    padding: 3mm;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    height: auto;
+}
+
+@media print {
+    @page {
+        /* Consider: size: 80mm auto; for continuous roll printers */
+        size: 80mm 297mm;
+        margin: 0;
+    }
+
+    /* Hide everything, then reveal #receiptArea */
+    body * {
+        visibility: hidden !important;
+    }
+
+    #receiptArea,
+    #receiptArea * {
+        visibility: visible !important;
+    }
+
+    /* Pin and normalize the printable area */
+    #receiptArea {
+        position: fixed !important;
+        /* If content is long, consider 'static' */
+        left: 0 !important;
+        top: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        z-index: 9999 !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 12px !important;
+        /* unified */
+        border: none !important;
+        height: auto !important;
+        font-size: 20px;
+        color: black;
+    }
+
+    /* Optional: shared receipt container rule (kept minimal) */
+    .receipt-80 {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0px !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: black;
+    }
+
+    .receipt-80 .footer {
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .receipt-80 .grand {
+        font-size: 20px;
+        font-weight: 800;
+    }
+    .receipt-80 .right {
+        font-weight: 800;
+    }
+    .receipt-80 .center div {
+        font-weight: 600 !important;
+    }
+    .receipt-80 div.row.info div span {
+        font-weight: 600 !important;
+    }
+    .receipt-80 .info {
+        font-weight: 600 !important;
+    }
+    .receipt-80 .cu-info {
+        font-weight: 600 !important;
+    }
+
+    .receipt-80 th,
+    .receipt-80 td {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 2 !important;
+    }
+
+    .receipt-80 td span {
+        line-height: 1.7 !important;
+    }
+
+    .receipt-80 .h1 {
+        font-size: 29px;
+        font-weight: 800;
+    }
+
+    .receipt-80 .h2 {
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    /* Neutralize app chrome spacing */
+    html,
+    body,
+    .form-admin,
+    .form-wrapper,
+    .form-body,
+    .container {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+        display: block !important;
+        background: #fff !important;
+        box-shadow: none !important;
+    }
+
+    /* If you keep an action/footer inside #receiptArea, hide it */
+    .no-print {
+        display: none !important;
+        /* single, stronger rule */
+    }
+
+    #receiptArea .receipt-content {
+        padding: 0px !important;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        page-break-inside: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    tr,
+    img,
+    .row,
+    .cut,
+    .thin {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        transform: scale(1);
+    }
+}

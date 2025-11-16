@@ -1,0 +1,93 @@
+#invoiceArea {
+    width: 280mm;
+    margin: 20px auto;
+    padding: 3mm;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+/* === PRINT MODE === */
+@page {
+    size: A4;
+    margin: 0;
+    /* we use invoice padding instead */
+}
+
+html,
+body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff !important;
+}
+
+body {
+    margin: 0 !important;
+}
+
+@media print {
+    /* === PRINT MODE (safe) === */
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    html,
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: #fff !important;
+        margin: 0 !important;
+    }
+
+    /* Hide everything visually but keep layout tree alive */
+    @media print {
+        body * {
+            visibility: hidden !important;
+        }
+        * {
+            font-family: "Courier New", monospace !important; /* or printer default */
+        }
+
+        /* Show only the invoice content */
+        #invoiceArea,
+        #invoiceArea * {
+            visibility: visible !important;
+        }
+
+        /* Take the invoice out of normal flow and pin it to the page */
+        #invoiceArea {
+            border: none !important;
+            position: fixed !important;
+            /* detach from hidden ancestors */
+            left: 0 !important;
+            top: 0 !important;
+            width: 210mm !important;
+            min-height: auto !important;
+            margin: 0 !important;
+            background: #fff !important;
+            box-shadow: none !important;
+            z-index: 9999 !important;
+            color: black;
+        }
+
+        /* Keep your internal page padding for the printed page */
+        #invoiceArea .invoice-content {
+            padding: 8mm !important;
+        }
+
+        /* Neutralize app chrome spacing that might peek through */
+        .form-admin,
+        .form-wrapper,
+        .form-body,
+        .container {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Hide footer/actions explicitly */
+        .no-print {
+            visibility: hidden !important;
+        }
+    }
+}

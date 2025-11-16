@@ -1,0 +1,274 @@
+.categoryControl {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    &.child-category {
+        margin-left: 30px;
+    }
+    .category-label {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 10px 0 0;
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+    }
+}
+
+.categoryLayoutGp {
+    display: flex;
+    flex-direction: column;
+    .categoryListItem {
+        width: 100%;
+        padding: 0 0 10px 10px;
+        display: none;
+    }
+    h3 {
+        margin-top: 0;
+        font-weight: unset;
+        -webkit-text-stroke: .5px;
+    }
+    label {
+        span {
+            color: red;
+        }
+    }
+    .error {
+        color: red !important;
+        font-size: 12px !important;
+        margin-top: 0;
+    }
+    .parentLabel {
+        font-size: 15px;
+        text-transform: capitalize;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+    .headerListPermission {
+        display: flex;
+        align-items: center;
+        // height       : 50px;
+        border-bottom: 1px solid #eeeeee;
+        height: 30px;
+        background: #eeeeee;
+        display: flex;
+        align-items: center;
+        padding: 23px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        .titlePer {
+            flex: 1;
+            font-size: 18px;
+        }
+    }
+    .category-option {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.categoryLayout {
+    display: flex;
+    width: calc(100% - -15px);
+    flex-wrap: wrap;
+    .categoryItemGroup {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        border-radius: 4px;
+        padding: 0 15px;
+        cursor: pointer;
+        margin-right: 15px;
+        margin-left: 15px;
+        margin-bottom: 5px;
+        flex-wrap: wrap;
+        flex-direction: column;
+        background: #eee;
+        .arrowPermission {
+            svg {
+                width: 30px;
+                height: 30px;
+                transition: all 0.3s ease;
+                margin-right: 10px;
+            }
+        }
+        .categoryHeader {
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            .permissionHdLeft {
+                flex: 1;
+                display: flex;
+            }
+            .textItem {
+                margin-left: 10px;
+                flex: 1;
+            }
+        }
+        .form-check-label {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 3px 0;
+            .textItem {
+                flex: 1;
+            }
+            .inputItem {
+                // width          : 40px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                input {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+            .icheckbox_square-blue {
+                display: flex;
+                align-items: center;
+                .chk-permission-group {
+                    position: unset !important;
+                    width: 22px;
+                    height: 22px;
+                    opacity: 1 !important;
+                }
+            }
+        }
+        .categoryListItem {
+            width: 100%;
+            padding: 0 0 10px 10px;
+            display: none;
+        }
+        .categoryItem {
+            width: 100%;
+            display: flex;
+            border-bottom: 1px solid #75757530;
+            line-height: 35px;
+            align-items: center;
+            cursor: pointer;
+            svg {
+                margin-right: 20px;
+                font-size: 5px;
+                width: 10px;
+            }
+            .textItem {
+                flex: 1;
+                align-items: center;
+                display: flex;
+            }
+            .inputItem {
+                // width          : 40px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                input {
+                    width: 22px;
+                    height: 22px;
+                }
+            }
+            &:last-child {
+                border-bottom: 0;
+            }
+            &:hover {
+                color: #00b74a;
+            }
+        }
+        &.showMenu {
+            .permissionListItemGpCh {
+                display: block;
+            }
+            .arrowPermission {
+                svg {
+                    transform: rotate(-180deg);
+                }
+            }
+        }
+    }
+}
+
+.permissionListCheckall {
+    height: 20px;
+    background: #eeeeee;
+    display: flex;
+    align-items: center;
+    padding: 20px 0;
+    // margin-top   : 10px;
+    border-radius: 4px;
+    // width           : 125px;
+    cursor: pointer;
+    .icheckbox_square-blue {
+        display: flex;
+        align-items: center;
+        .chk-permissionSelectAll {
+            position: unset !important;
+            width: 22px;
+            height: 22px;
+        }
+    }
+    .chk-permissionSelectAll {
+        opacity: 1 !important;
+    }
+    span {
+        margin-right: 10px;
+    }
+}
+
+.loaderCus {
+    margin-left: 5px;
+    font-size: 10px;
+    text-indent: -9999em;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+    background: #ffffff;
+    background: -moz-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+    background: -webkit-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+    background: -o-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+    background: -ms-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+    background: linear-gradient(to right, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+    position: relative;
+    -webkit-animation: load3 1s infinite linear;
+    animation: load3 1s infinite linear;
+    -webkit-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+.loaderCus:before {
+    width: 50%;
+    height: 50%;
+    background: #fff;
+    border-radius: 100% 0 0 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: '';
+}
+
+.loaderCus:after {
+    background: rgb(224 224 224) !important;
+    width: 75%;
+    height: 75%;
+    border-radius: 50%;
+    content: '';
+    margin: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+//endPermission
+.btnPermissionActinGp {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    button {
+        background: #0099ff;
+    }
+}

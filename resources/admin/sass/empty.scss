@@ -1,0 +1,63 @@
+@use './variable' as *;
+@use './function.scss'as *;
+.data-empty-container {
+    width  : 100%;
+    display: block;
+    padding: 100px 0;
+
+    .data-empty-wrapper {
+        display       : flex;
+        flex-direction: column;
+        align-items   : center;
+        width         : 100%;
+        box-sizing    : border-box;
+
+        .image {
+            width : auto;
+            height: 200px;
+
+            img {
+                height: 100%;
+            }
+        }
+
+        .message {
+            margin-top    : 10px;
+            display       : flex;
+            flex-direction: column;
+            text-align    : center;
+            align-items   : center;
+
+            .title {
+                color      : #333;
+                font-size  : 18px;
+                font-weight: 700;
+            }
+
+            .des {
+                font-size: 14px;
+                color    : $text;
+            }
+
+            button {
+                border-radius: $border-radius;
+                @include btn('create');
+                border    : unset;
+                color     : #fff;
+                margin-top: 10px;
+
+
+                span {
+                    font-size: 13px;
+                }
+
+                svg {
+                    width       : 18px;
+                    height      : 18px;
+                    line-height : 0;
+                    margin-right: 5px;
+                }
+            }
+        }
+    }
+}
