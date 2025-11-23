@@ -2,18 +2,7 @@
 
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin as Admin;
-use App\Http\Controllers\Admin\BankAccountController;
-use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\ExchangeRateController;
-use App\Http\Controllers\Admin\LOV\SocialMediaController;
-use App\Http\Controllers\Admin\Pages\AboutUsController;
-use App\Http\Controllers\Admin\Pages\ContactUsController;
-use App\Http\Controllers\Admin\Pages\FrequentlyAskedQuestionController;
-use App\Http\Controllers\Admin\Pages\OurMissionController;
-use App\Http\Controllers\Admin\Pages\OurStoryController;
-use App\Http\Controllers\Admin\Pages\OurTeamController;
-use App\Http\Controllers\Admin\Pages\PrivacyPolicyController;
-use App\Http\Controllers\Admin\Pages\WhyChooseUsController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Requests\Admin as AdminRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -35,10 +24,11 @@ Route::middleware(['locale'])->group(function () {
 
 
         // Validation
-        Route::prefix('validation')->name('validation-')->group(function () {});
+        Route::prefix('validation')->name('validation-')->group(function () {
+            Route::post('category', [AdminRequest\CategoryRequest::class, 'validate'])->name('category');
+        });
 
         Route::prefix('user')->group(function () {
-
             Route::controller(Admin\UserController::class)->prefix('user')->name('user-')->group(function () {
                 Route::get('list',  'index')->name('list');
                 Route::get('data',  'data')->name('data');
@@ -64,9 +54,25 @@ Route::middleware(['locale'])->group(function () {
             });
         });
 
+        // product
+        Route::prefix('product')->group(function () {
+            Route::controller(CategoryController::class)->prefix('category')->name('category-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
+                Route::delete('delete', 'delete')->name('delete');
+                Route::put('restore', 'restore')->name('restore');
+                Route::delete('destroy', 'destroy')->name('destroy');
+                Route::get('sequence', 'sequence')->name('sequence');
+            });
+        });
+
+
 
         Route::prefix('setting')->name('setting-')->group(function () {
-              // company
+            // company
             Route::controller(Admin\LOV\CompanyController::class)->prefix('company')->name('company-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');

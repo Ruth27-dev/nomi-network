@@ -12,16 +12,13 @@
                                 <div class="w-5/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span>@lang('table.field.no')</span>
                                 </div>
-                                <div class="w-30/100 text-sm font-bold text-gray-500 flex items-center">
+                                <div class="w-40/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span>@lang('table.field.name_km')</span>
                                 </div>                 
-                                <div class="w-30/100 text-sm font-bold text-gray-500 flex items-center">
-                                    <span>@lang('table.field.name_km')</span>
-                                </div>
-                                <div class="w-30/100 text-sm font-bold text-gray-500 grid place-items-center">
+                                <div class="w-45/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span>@lang('table.field.status')</span>
                                 </div>  
-                                <div class="w-5/100 text-sm font-bold text-gray-500 grid place-items-center">
+                                <div class="w-10/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span></span>
                                 </div>
                             </div>
@@ -37,13 +34,10 @@
                                 <div class="w-5/100 grid place-items-center text-gray-500">
                                     <span class="text-sm" x-text="index + 1"></span>
                                 </div>
-                                <div class="w-30/100 text-gray-500 flex items-center">
+                                <div class="w-40/100 text-gray-500 grid place-items-center">
                                     <span class="text-sm text-center" x-text="item.display_name?.en"></span>
                                 </div>
-                                <div class="w-30/100 text-gray-500 flex items-center">
-                                    <span class="text-sm" x-text="item?.display_name?.km ?? '-'"></span>
-                                </div>
-                                <div class="w-30/100 text-gray-500 grid place-items-center">
+                                <div class="w-45/100 text-gray-500 grid place-items-center">
                                     <template x-if="status == active">
                                         <span class="inline-block whitespace-nowrap rounded-full bg-green-100 px-[0.65em] pt-[0.35em] pb-[0.25em] text-center align-baseline text-[12px] font-bold leading-none text-green-600">
                                             {{ config('dummy.status.active.text') }}
@@ -55,7 +49,7 @@
                                         </span>
                                     </template>
                                 </div>
-                                <div class="w-5/100 text-gray-300 grid place-items-center">
+                                <div class="w-10/100 text-gray-300 grid place-items-center">
                                     <div x-data="{
                                         open: false,
                                         toggle() {

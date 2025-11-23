@@ -21,13 +21,6 @@
                             x-text="validate?.display_name_en"></span>
                     </div>
                     <div class="form-row">
-                        <label>@lang('form.body.label.name_km')</label>
-                        <input placeholder="@lang('form.body.placeholder.name_km')" type="text" x-model="form.display_name_km"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.display_name_km"
-                            x-text="validate?.display_name_km"></span>
-                    </div>
-                    <div class="form-row">
                         <label>@lang('form.body.label.status')<span>*</span> </label>
                         <select x-model="form.status" :disabled="form.disabled">
                             @foreach (config('dummy.status') as $key => $status)
@@ -54,7 +47,6 @@
         Alpine.data('storeRoleDialog', () => ({
             form: new FormGroup({
                 display_name_en: [null, ['required']],
-                display_name_km: [null, ['required']],
                 name: [null, ['required']],
                 status: [active, ['required']],
             }),
