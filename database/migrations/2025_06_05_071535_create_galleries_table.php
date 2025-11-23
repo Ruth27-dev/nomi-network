@@ -11,20 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('galleries', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('branch_id')->nullable()->comment('branch id');
-            $table->bigInteger('parent_id')->nullable()->comment('category id');
-            $table->string('code', 255)->nullable();
+            $table->bigInteger('foreign_id')->nullable()->comment('any model that need to have multi image');
+            $table->string('foreign_model')->nullable()->comment('namespace of model itself');
+            $table->string('image', 255)->nullable();
             $table->json('title')->nullable()->comment('multi language');
             $table->json('description')->nullable()->comment('multi language');
-            $table->string('image', 255)->nullable();
-            $table->bigInteger('sequence')->nullable()->comment('ordering');
-            $table->string('status')->nullable()->comment('ACTIVE, INACTIVE');
-            $table->string('slug',255)->nullable();
             $table->bigInteger('user_id')->nullable()->comment('last performed');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -33,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('galleries');
     }
 };

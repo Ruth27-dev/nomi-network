@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin as Admin;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Requests\Admin as AdminRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,18 @@ Route::middleware(['locale'])->group(function () {
         // product
         Route::prefix('product')->group(function () {
             Route::controller(CategoryController::class)->prefix('category')->name('category-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
+                Route::delete('delete', 'delete')->name('delete');
+                Route::put('restore', 'restore')->name('restore');
+                Route::delete('destroy', 'destroy')->name('destroy');
+                Route::get('sequence', 'sequence')->name('sequence');
+            });
+
+            Route::controller(ProductController::class)->prefix('product')->name('product-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
                 Route::post('save', 'save')->name('save');

@@ -11,20 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('product_variations', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('branch_id')->nullable()->comment('branch id');
-            $table->bigInteger('parent_id')->nullable()->comment('category id');
-            $table->string('code', 255)->nullable();
+            $table->bigInteger('product_id');
             $table->json('title')->nullable()->comment('multi language');
-            $table->json('description')->nullable()->comment('multi language');
-            $table->string('image', 255)->nullable();
-            $table->bigInteger('sequence')->nullable()->comment('ordering');
             $table->string('status')->nullable()->comment('ACTIVE, INACTIVE');
-            $table->string('slug',255)->nullable();
+            $table->double('price')->nullable();
+            $table->double('size')->nullable();
+            $table->json('description')->nullable()->comment('multi language');
+            $table->json('note')->nullable();
+            $table->boolean('is_available')->nullable()->default(false);
+            $table->string('image', 255)->nullable();
             $table->bigInteger('user_id')->nullable()->comment('last performed');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -33,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('product_variations');
     }
 };
