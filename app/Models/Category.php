@@ -29,6 +29,6 @@ class Category extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset('storage/category/' . $this->image) : asset("images/no.png");
+        return $this->image ? asset('storage/category/' . $this->image) : asset("images/no.jpg");
     }
 }

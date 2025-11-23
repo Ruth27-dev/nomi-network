@@ -12,13 +12,16 @@
                                 <div class="w-5/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span> @lang('table.field.no')</span>
                                 </div>
-                                <div class="w-30/100 text-sm font-bold text-gray-500 flex items-center">
+                                <div class="w-15/100 text-sm font-bold text-gray-500 flex items-center">
+                                    <span> @lang('table.field.image')</span>
+                                </div>
+                                <div class="w-25/100 text-sm font-bold text-gray-500 flex items-center">
                                     <span> @lang('table.field.title_en')</span>
                                 </div>
-                                <div class="w-30/100 text-sm font-bold text-gray-500 flex items-center">
+                                <div class="w-25/100 text-sm font-bold text-gray-500 flex items-center">
                                     <span> @lang('table.field.title_km')</span>
                                 </div>
-                                <div class="w-30/100 text-sm font-bold text-gray-500 grid place-items-center">
+                                <div class="w-25/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span> @lang('table.field.status')</span>
                                 </div>
                                 <div class="w-5/100 text-sm font-bold text-gray-500 grid place-items-center">
@@ -37,13 +40,20 @@
                                 <div class="w-5/100 grid place-items-center text-gray-500">
                                     <span class="text-sm" x-text="index + 1"></span>
                                 </div>
-                                <div class="w-30/100 text-gray-500 flex items-center">
+                                <div class="w-15/100 text-gray-500 flex items-center">
+                                    <div @click="onViewImage(item.image_url)"
+                                        class="cursor-pointer h-[50px] w-[50px]">
+                                        <img x-bind:src="item.image_url" class="h-full w-full rounded-[50px]"
+                                            onerror="(this).src='{{ asset('images/no.jpg') }}'" alt="" />
+                                    </div>
+                                </div>
+                                <div class="w-25/100 text-gray-500 flex items-center">
                                     <span class="text-sm" x-text="item?.title?.en ?? '-'"></span>
                                 </div>
-                                <div class="w-30/100 text-gray-500 flex items-center">
+                                <div class="w-25/100 text-gray-500 flex items-center">
                                     <span class="text-sm text-center" x-text="item.title?.km ?? '-'"></span>
                                 </div>
-                                <div class="w-30/100 text-gray-500 grid place-items-center">
+                                <div class="w-25/100 text-gray-500 grid place-items-center">
                                     <template x-if="item.status == active">
                                         <span
                                             class="inline-block whitespace-nowrap rounded-full bg-green-100 px-[0.65em] pt-[0.35em] pb-[0.25em] text-center align-baseline text-[12px] font-bold leading-none text-green-600">

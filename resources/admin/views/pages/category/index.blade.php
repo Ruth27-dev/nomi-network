@@ -65,7 +65,7 @@
                 this.formFilter.reset();
                 this.table.reset();
             },
-            onViewProfile(path) {
+            onViewImage(path) {
                 const thumbnail = Fancybox.show([{
                     src: path,
                     type: "image",
