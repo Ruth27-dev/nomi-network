@@ -23,6 +23,7 @@ npm-debug.log
 Thumbs.db
 yarn-error.log
 /public/uploads
+/storage/app/public/*
 /storage/app/public/uploads/
 /storage/app/firebase
 /vendor
