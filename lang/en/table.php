@@ -411,6 +411,7 @@ return [
         "cooking_duration"           => "Cooking Duration",
         "minute"                     => "mn",
         "payment"                    => "Payment",
+        "product_variate"            => "Product Variate",
     ],
     'option' => [
         //

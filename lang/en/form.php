@@ -180,7 +180,7 @@ return [
     ],
 
     "title" => [
-          "refund"                    => "Refund",
+        "refund"                    => "Refund",
         'delivery'              => "Delivery",
         'chef_group'            => "Chef Group",
         'user_role'             => 'User Role',
@@ -933,7 +933,9 @@ return [
             "payment"                    => "Payment",
             "total_order_amount"         => "Total Order Amount",
             "default_branch"             => "Default Branch",
-
+            "product_variate"            => "Product Variate",
+            "note_en"                    => "Note (English)",
+            "note_km"                    => "Note (Khmer)",
         ],
         "placeholder" => [
             'credit'                     => "Enter credit",
@@ -1306,7 +1308,10 @@ return [
             "show_hour"                    => "Show as hour",
             "payment"                      => "Select payment",
             "default_branch"               => "Select default branch",
-
+            "product_variate"              => "Enter product variate",
+            "note_en"                      => "Enter note (English)",
+            "note_km"                      => "Enter note (Khmer)",
+            "code"                         => "Enter code",
             // new
             'select_products'               => 'Select Products',
             'date'                          => 'DD/MM/YYYY',

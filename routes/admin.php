@@ -23,10 +23,14 @@ Route::middleware(['locale'])->group(function () {
     Route::middleware(['admin.guard', 'auth:admin'])->group(function () {
 
 
-
+        // Fetch data
+        Route::controller(Admin\FetchDataController::class)->prefix('fetch')->name('fetch-')->group(function () {
+            Route::get('category-data', 'fetchCategoryData')->name('category-data');
+        });
         // Validation
         Route::prefix('validation')->name('validation-')->group(function () {
             Route::post('category', [AdminRequest\CategoryRequest::class, 'validate'])->name('category');
+            Route::post('product', [AdminRequest\ProductRequest::class, 'validate'])->name('product');
         });
 
         Route::prefix('user')->group(function () {

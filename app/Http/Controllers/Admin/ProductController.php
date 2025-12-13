@@ -33,7 +33,7 @@ class ProductController extends Controller
             'type'      => request('type'),
         ];
 
-        return view('admin::pages.item.index', $data);
+        return view('admin::pages.product.index', $data);
     }
 
     public function data()
@@ -76,9 +76,6 @@ class ProductController extends Controller
                     'en'    => $request->title_en,
                     'km'    => $request->title_km,
                 ],
-                'unit_id'       => $request->unit_id,
-                'is_sellable'   => $request->is_sellable == 'true' ? true : false,
-                'is_consumable' => $request->is_consumable == 'true' ? true : false,
                 'status'        => $request->status,
                 'type'          => $request->display_type,
                 'description'   => [
@@ -186,23 +183,23 @@ class ProductController extends Controller
         }
     }
 
-    public function detail()
-    {
-        return (new ItemService)->detail(request('id'));
-    }
+    // public function detail()
+    // {
+    //     return (new ItemService)->detail(request('id'));
+    // }
 
-    public function updateStatus()
-    {
-        return (new ItemService)->updateStatus(request('id'), request('store'));
-    }
+    // public function updateStatus()
+    // {
+    //     return (new ItemService)->updateStatus(request('id'), request('store'));
+    // }
 
-    public function delete()
-    {
-        return (new ItemService)->delete(request('id'));
-    }
+    // public function delete()
+    // {
+    //     return (new ItemService)->delete(request('id'));
+    // }
 
-    public function restore()
-    {
-        return (new ItemService)->restore(request('id'));
-    }
+    // public function restore()
+    // {
+    //     return (new ItemService)->restore(request('id'));
+    // }
 }
