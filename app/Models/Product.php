@@ -52,7 +52,7 @@ class Product extends Model
         return $this->morphMany(Gallery::class, 'foreign', 'foreign_model', 'foreign_id');
     }
 
-    public function productVariation()
+    public function productVariations()
     {
         return $this->hasMany(ProductVariation::class, 'product_id');
     }
@@ -64,6 +64,6 @@ class Product extends Model
 
     public function scopeWithRelation($query)
     {
-        return $query->with(['categories', 'productVariation','galleries']);
+        return $query->with(['categories', 'productVariations.images']);
     }
 }

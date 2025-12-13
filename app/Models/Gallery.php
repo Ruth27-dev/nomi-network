@@ -16,11 +16,18 @@ class Gallery extends Model
         'user_id',
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function foreign(){
+    public function foreign()
+    {
         return $this->morphTo(__FUNCTION__, 'foreign_model', 'foreign_id');
+    }
+
+    public function getUrlAttribute()
+    {
+        return asset('storage/product/variation/' . $this->image);
     }
 }

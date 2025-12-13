@@ -64,7 +64,7 @@
                         <label>@lang('form.body.label.product_variate')</label>
 
                     </div>
-                    <template x-for="(variate, index) in product_variates">
+                    <template x-for="(variate, index) in product_variations">
                         <div>
                             <div class="row flex justify-end">
                                 <span class="material-icons-outlined cursor-pointer text-green-500"
@@ -79,16 +79,16 @@
                                         <input type="text" placeholder="@lang('form.body.placeholder.title_en')"
                                             x-model="variate.title_en" :disabled="form.disabled" autocomplete="off">
                                         <span class="error"
-                                            x-show="validate?.['product_variates.' + index + '.title_en']"
-                                            x-text="validate?.['product_variates.' + index + '.title_en']"></span>
+                                            x-show="validate?.['product_variations.' + index + '.title_en']"
+                                            x-text="validate?.['product_variations.' + index + '.title_en']"></span>
                                     </div>
                                     <div class="form-row">
                                         <label>@lang('form.body.label.title_km')</label>
                                         <input type="text" placeholder="@lang('form.body.placeholder.title_km')"
                                             x-model="variate.title_km" :disabled="form.disabled" autocomplete="off">
                                         <span class="error"
-                                            x-show="validate?.['product_variates.' + index + '.title_km']"
-                                            x-text="validate?.['product_variates.' + index + '.title_km']"></span>
+                                            x-show="validate?.['product_variations.' + index + '.title_km']"
+                                            x-text="validate?.['product_variations.' + index + '.title_km']"></span>
                                     </div>
                                     <div class="form-row">
                                         <label>@lang('form.body.label.status') </label>
@@ -100,41 +100,15 @@
                                             x-text="validate?.status"></span>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="form-row">
-                                        <label>@lang('form.body.label.image')</label>
-                                        <input type="file" :disabled="form.disabled" accept="image/*"
-                                            :id="`image-${index}`" class="!p-[12px]"
-                                            @change="onPreviewImage($el, index)">
-                                        <input type="hidden" x-model="variate.tmp_file">
-                                        <template x-if="variate.image_url">
-                                            <div
-                                                class="h-[250px] rounded-md border border-gray-100 overflow-hidden relative grid place-items-center group mt-2">
-                                                <img class="w-full h-full object-contain" :src="variate.image_url"
-                                                    alt="">
-                                                <div
-                                                    class="absolute flex gap-2 opacity-0 group-hover:opacity-100 duration-[0.2s]">
-                                                    <button type="button"
-                                                        class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                                        @click="onViewImage(variate.image_url)">
-                                                        <span
-                                                            class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                            visibility_on
-                                                        </span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
+
                                 <div class="row-2">
                                     <div class="form-row">
                                         <label>@lang('form.body.label.price') <span>*</span></label>
                                         <input type="number" placeholder="@lang('form.body.placeholder.price')"
                                             x-model="variate.price" :disabled="form.disabled" autocomplete="off">
                                         <span class="error"
-                                            x-show="validate?.['product_variates.' + index + '.price']"
-                                            x-text="validate?.['product_variates.' + index + '.price']"></span>
+                                            x-show="validate?.['product_variations.' + index + '.price']"
+                                            x-text="validate?.['product_variations.' + index + '.price']"></span>
                                     </div>
                                     <div class="form-row">
                                         <label>@lang('form.body.label.size')</label>
@@ -148,8 +122,8 @@
                                             autocomplete="off">
                                     </textarea>
                                         <span class="error"
-                                            x-show="validate?.['product_variates.' + index + '.description_en']"
-                                            x-text="validate?.['product_variates.' + index + '.description_en']"></span>
+                                            x-show="validate?.['product_variations.' + index + '.description_en']"
+                                            x-text="validate?.['product_variations.' + index + '.description_en']"></span>
                                     </div>
                                     <div class="form-row">
                                         <label>@lang('form.body.label.description_km')</label>
@@ -157,8 +131,8 @@
                                             autocomplete="off">
                                     </textarea>
                                         <span class="error"
-                                            x-show="validate?.['product_variates.' + index + '.description_km']"
-                                            x-text="validate?.['product_variates.' + index + '.description_km']"></span>
+                                            x-show="validate?.['product_variations.' + index + '.description_km']"
+                                            x-text="validate?.['product_variations.' + index + '.description_km']"></span>
                                     </div>
                                     <div class="form-row">
                                         <label>@lang('form.body.label.note_en')</label>
@@ -173,6 +147,50 @@
                                             x-model="variate.note_km" :disabled="form.disabled" autocomplete="off">
                                         <span class="error" x-show="validate?.note_km"
                                             x-text="validate?.note_km"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-row">
+                                        <label>@lang('form.body.label.image')</label>
+
+                                        <input type="file" multiple accept="image/*" :id="`image-${index}`"
+                                            class="!p-[12px]" @change="onPreviewVariateImages($event, index)">
+
+                                        <!-- MULTIPLE IMAGE PREVIEW (YOUR STYLE) -->
+                                        <div class="grid grid-cols-4 gap-2 mt-2"
+                                            x-show="variate.image_urls.length > 0">
+
+                                            <template x-for="(img, imgIndex) in variate.image_urls"
+                                                :key="imgIndex">
+                                                <div
+                                                    class="h-[120px] rounded-md border border-gray-100 overflow-hidden relative grid place-items-center group">
+
+                                                    <img class="w-full h-full object-cover" :src="img"
+                                                        alt="">
+
+                                                    <div
+                                                        class="absolute flex gap-2 opacity-0 group-hover:opacity-100 duration-[0.2s]">
+                                                        <button type="button"
+                                                            class="bg-black/80 w-[35px] h-[35px] border border-white rounded-full grid place-items-center !pl-[4px]"
+                                                            @click="onViewImage(img)">
+                                                            <span class="material-icons-outlined text-white text-sm"
+                                                                style="margin-right: 10px;">
+                                                                visibility_on
+                                                            </span>
+                                                        </button>
+
+                                                        <button type="button"
+                                                            class="bg-red-500 w-[35px] h-[35px] rounded-full grid place-items-center"
+                                                            @click="removeVariateImage(index, imgIndex)">
+                                                            <span class="material-icons-outlined text-white text-sm">
+                                                                close
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </template>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -240,14 +258,14 @@
                     []
                 ],
             }),
-            product_variates: [{
-                product_variate_id: '',
+            product_variations: [{
+                product_variation_id: '',
                 title_en: '',
                 title_km: '',
                 status: "ACTIVE",
-                image: '',
-                image_url: '',
-                tmp_file: '',
+                images: [],
+                image_urls: [],
+                tmp_files: [],
                 price: '',
                 size: '',
                 description_en: '',
@@ -269,11 +287,10 @@
                 if (this.dialogData?.id) {
                     await this.fetchDataForUpdate(Number(this.dialogData?.id), (res) => {
                         this.data = res?.data;
+                        console.log(res?.data);
+
                     });
                     this.setValue(this.data);
-                } else {
-                    this.form.is_sellable = this.form.type == 'customer' ? true : false;
-                    this.form.is_consumable = this.form.type == 'inventory' ? true : false;
                 }
             },
             async fetchDataForUpdate(id, callback) {
@@ -292,7 +309,7 @@
             resetValue() {
                 this.form.reset();
                 this.image_url = null;
-                this.product_variates = [];
+                this.product_variations = [];
                 this.addMoreItemVariate();
             },
             setValue(data) {
@@ -325,36 +342,34 @@
                     this.form.tmp_file = data.image;
                 }
 
-                if (data?.product_variates) {
-                    this.product_variates = [];
-                    this.product_variates = data.product_variates.map(item => ({
-                        product_variate_id: item.id ?? '',
+                if (data?.product_variations) {
+                    this.product_variations = [];
+                    this.product_variations = data.product_variations.map(item => ({
+                        product_variation_id: item.id ?? '',
                         title_en: item.title.en ?? '',
                         title_km: item.title.km ?? '',
-                        status: item.status ?? '',
-                        image: item?.image ?? '',
-                        image_url: item?.image ? item?.image : '',
-                        tmp_file: item?.image ?? '',
-                        price: item?.product?.price ?? '',
-                        size: item?.product?.size ?? '',
-                        description_en: item?.product?.description?.en ?? '',
-                        description_km: item?.product?.description?.km ?? '',
-                        note_en: item?.product?.note?.en ?? '',
-                        note_km: item?.product?.note?.km ?? '',
-                        is_note: item?.product?.is_note ?? false,
-                        is_available: item?.product?.is_available ?? false,
+                        status: item.status ?? 'ACTIVE',
+                        images: [],
+                        image_urls: item.images ?
+                            item.images.map(img => `/storage/product/variation/${img.image}`) :
+                            [],
+                        tmp_files: item.images ? item.images.map(img => img.path) : [],
+                        price: item.price ?? '',
+                        size: item.size ?? '',
+                        description_en: item.description?.en ?? '',
+                        description_km: item.description?.km ?? '',
+                        note_en: item.note?.en ?? '',
+                        note_km: item.note?.km ?? '',
+                        is_note: item.is_note ?? false,
+                        is_available: item.is_available ?? false,
                     }));
 
-                }
-                if (data?.branch) {
-                    this.form.branch_id = data?.branch?.id;
-                    this.form.branch_title = data?.branch?.title?.en;
                 }
             },
             onPreviewImage(el, index = null) {
                 const profile = URL.createObjectURL(el.files[0]);
                 if (index !== null) {
-                    this.product_variates[index].image_url = profile;
+                    this.product_variations[index].image_url = profile;
                     return;
                 }
                 this.image_url = profile;
@@ -373,14 +388,16 @@
                 });
             },
             addMoreItemVariate() {
-                this.product_variates.push({
-                    product_variate_id: '',
+                this.product_variations.push({
+                    product_variation_id: '',
                     title_en: '',
                     title_km: '',
                     status: "ACTIVE",
-                    image: '',
-                    image_url: '',
-                    tmp_file: '',
+
+                    images: [],
+                    image_urls: [],
+                    tmp_files: [],
+
                     price: '',
                     size: '',
                     description_en: '',
@@ -391,15 +408,34 @@
                     is_available: false
                 });
             },
+
             onRemoveItemVariate(index) {
-                if (this.product_variates[index].product_variate_id) {
+                if (this.product_variations[index].product_variation_id) {
                     toastr.info("Can't remove Item Variate!", {
                         progressBar: true,
                         timeOut: 5000
                     });
                 } else {
-                    this.product_variates.splice(index, 1);
+                    this.product_variations.splice(index, 1);
                 }
+            },
+            onPreviewVariateImages(event, index) {
+                const files = Array.from(event.target.files);
+
+                files.forEach(file => {
+                    this.product_variations[index].images.push(file);
+                    this.product_variations[index].image_urls.push(
+                        URL.createObjectURL(file)
+                    );
+                });
+
+                // reset input so same file can be reselected
+                event.target.value = '';
+            },
+
+            removeVariateImage(variateIndex, imageIndex) {
+                this.product_variations[variateIndex].images.splice(imageIndex, 1);
+                this.product_variations[variateIndex].image_urls.splice(imageIndex, 1);
             },
             selectCategory() {
                 SelectOption({
@@ -479,7 +515,7 @@
                     data: {
                         ...data,
                         id: this.dialogData?.id,
-                        product_variates: this.product_variates,
+                        product_variations: this.product_variations,
                     }
                 }).then((response) => {
                     callback(response?.data);
@@ -491,8 +527,8 @@
                 });
             },
             getImageBinary() {
-                if (this.product_variates.length > 0) {
-                    this.product_variates.forEach((item, index) => {
+                if (this.product_variations.length > 0) {
+                    this.product_variations.forEach((item, index) => {
                         if (!item.image || item.tmp_file == '') {
                             const file = document.querySelector(`#image-${index}`);
                             item.image = file.files[0] ?? '';
@@ -526,7 +562,7 @@
                                 let file = document.querySelector('#image');
                                 this.form.image = file.files[0] ?? '';
                                 this.getImageBinary();
-                                console.log(this.product_variates);
+                                console.log(this.product_variations);
 
                                 const data = this.form.value();
 
@@ -539,7 +575,7 @@
                                     data: {
                                         ...data,
                                         id: this.dialogData?.id,
-                                        product_variates: this.product_variates,
+                                        product_variations: this.product_variations,
                                     }
                                 }).then((res) => {
                                     if (res.data.error == false) {

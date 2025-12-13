@@ -102,7 +102,7 @@
                         id: id,
                     },
                     config: {
-                        width: '800px',
+                        width: '1000px',
                         position: 'right',
                         backdrop: false,
                         blur: 3,

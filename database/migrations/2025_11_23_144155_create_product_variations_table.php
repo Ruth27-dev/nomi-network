@@ -17,7 +17,7 @@ return new class extends Migration
             $table->json('title')->nullable()->comment('multi language');
             $table->string('status')->nullable()->comment('ACTIVE, INACTIVE');
             $table->double('price')->nullable();
-            $table->double('size')->nullable();
+            $table->string('size',255)->nullable();
             $table->json('description')->nullable()->comment('multi language');
             $table->json('note')->nullable();
             $table->boolean('is_available')->nullable()->default(false);
