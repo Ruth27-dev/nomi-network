@@ -2,6 +2,7 @@
 
 return [
     'field' => [
+        "code"                       => "កូដ",
         'plate_number'               => 'លេខចាន',
         'customer'                   => 'អតិថិជន',
         "sub_total"                  => "តម្លៃសរុប",

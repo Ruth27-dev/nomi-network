@@ -67,9 +67,9 @@
                     <template x-for="(variate, index) in product_variations">
                         <div>
                             <div class="row flex justify-end">
-                                <span class="material-icons-outlined cursor-pointer text-green-500"
+                                <span class="material-icons-outlined cursor-pointer text-green-500 !text-[30px]"
                                     @click="addMoreItemVariate(index)">add_circle</span>
-                                <span class="material-icons-outlined cursor-pointer text-rose-400 ml-[7px]"
+                                <span class="material-icons-outlined cursor-pointer text-rose-400 ml-[7px] !text-[30px]"
                                     @click="onRemoveItemVariate(index)">remove_circle</span>
                             </div>
                             <div class="row  border border-[#d8dce5] p-3 rounded mb-[10px] relative">
@@ -325,6 +325,7 @@
                 this.form.unit_title = data?.unit?.title?.en;
                 this.form.display_type = data?.type ?? "{{ config('dummy.item_type.customer.key') }}";
 
+
                 if (data.categories && data.categories.length > 0) {
                     this.selected_categories = data.categories.map(item => {
                         return {
@@ -338,7 +339,7 @@
                 }
 
                 if (data?.image) {
-                    this.image_url = this?.data?.image ? this.data?.image : null;
+                    this.image_url = this?.data?.image_url ? this.data?.image_url : null;
                     this.form.tmp_file = data.image;
                 }
 
@@ -349,11 +350,10 @@
                         title_en: item.title.en ?? '',
                         title_km: item.title.km ?? '',
                         status: item.status ?? 'ACTIVE',
-                        images: [],
-                        image_urls: item.images ?
-                            item.images.map(img => `/storage/product/variation/${img.image}`) :
-                            [],
-                        tmp_files: item.images ? item.images.map(img => img.path) : [],
+                        images: [], // new uploads only
+                        image_urls: item.images ? item.images.map(img => img.url) : [],
+                        tmp_files: item.images ? item.images.map(img => img.image) : [],
+
                         price: item.price ?? '',
                         size: item.size ?? '',
                         description_en: item.description?.en ?? '',
@@ -434,9 +434,22 @@
             },
 
             removeVariateImage(variateIndex, imageIndex) {
-                this.product_variations[variateIndex].images.splice(imageIndex, 1);
-                this.product_variations[variateIndex].image_urls.splice(imageIndex, 1);
+                const variate = this.product_variations[variateIndex];
+
+                // remove preview
+                variate.image_urls.splice(imageIndex, 1);
+
+                // remove existing image reference
+                if (variate.tmp_files && variate.tmp_files.length > imageIndex) {
+                    variate.tmp_files.splice(imageIndex, 1);
+                }
+
+                // remove newly added file (if exists)
+                if (variate.images && variate.images.length > imageIndex) {
+                    variate.images.splice(imageIndex, 1);
+                }
             },
+
             selectCategory() {
                 SelectOption({
                     title: "Select Category",

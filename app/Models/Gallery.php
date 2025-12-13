@@ -15,7 +15,7 @@ class Gallery extends Model
         'description',
         'user_id',
     ];
-
+    protected $appends = ['url'];
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

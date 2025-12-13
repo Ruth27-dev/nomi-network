@@ -37,6 +37,7 @@ class Product extends Model
         'is_popular'    => 'boolean',
     ];
 
+    protected $appends = ['image_url'];
     public function getImageUrlAttribute()
     {
         return $this->image ? asset('storage/product/' . $this->image) : asset("images/no.jpg");
@@ -45,11 +46,6 @@ class Product extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'product_categories', 'product_id', 'category_id');
-    }
-
-    public function galleries()
-    {
-        return $this->morphMany(Gallery::class, 'foreign', 'foreign_model', 'foreign_id');
     }
 
     public function productVariations()

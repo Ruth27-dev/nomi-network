@@ -2,8 +2,8 @@
 @section('layout')
     <div class="content-wrapper" x-data="productPage">
         @include('admin::shared.header', [
-            'title' => 'Item Management',
-            'header_name' => 'Item Management',
+            'title' =>  __('form.name.product'),
+            'header_name' =>  __('form.name.product'),
         ])
         <div class="content-body">
             <div class="content-tab">
@@ -34,7 +34,7 @@
                     @endcan
                     <button @click="viewTrash()" :class="formFilter.trash ? '!bg-rose-500 !text-white' : '!bg-white !text-rose-500'">
                         <i class="material-icons">delete</i>
-                        <span>Trash</span>
+                        <span>@lang('form.header.button.trash')</span>
                     </button>
                     <button @click="onReset()">
                         <i data-feather="refresh-ccw"></i>
@@ -44,7 +44,7 @@
             @include('admin::pages.product.table')
         </div>
         @include('admin::pages.product.store')
-        {{-- @include('admin::pages.product.copy') --}}
+        @include('admin::pages.product.copy')
         @include('admin::pages.product.view-detail')
         @include('admin::pages.product.form-search')
     </div>
@@ -120,7 +120,7 @@
                         id: id,
                     },
                     config: {
-                        width: '800px',
+                        width: '1000px',
                         position: 'right',
                         backdrop: false,
                         blur: 3,

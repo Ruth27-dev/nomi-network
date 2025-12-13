@@ -414,7 +414,7 @@ return [
         "pos_report_pdf"        => "",
         "change_structure"      => "Change Structure",
         "list_all_data"         => "List All Data",
-        'copy'                  => "Copy From",
+        'copy'                  => "Copy",
         'refund'                => "Refund",
         "button" => [
             "create"        => "Create New",

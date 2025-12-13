@@ -66,7 +66,9 @@ class ProductController extends Controller
     public function save(ProductRequest $request)
     {
         DB::beginTransaction();
+
         try {
+
             /* ================= PRODUCT ================= */
 
             $image = UploadFile::uploadFile(
@@ -75,9 +77,11 @@ class ProductController extends Controller
                 $request->tmp_file
             );
 
-            $product = Product::updateOrCreate(
-                ['id' => $request->id],
-                [
+            if (!$request->id) {
+
+                /* ================= CREATE ================= */
+
+                $product = Product::create([
                     'code'        => $request->code,
                     'title'       => [
                         'en' => $request->title_en,
@@ -91,69 +95,43 @@ class ProductController extends Controller
                     ],
                     'image'       => $image,
                     'user_id'     => Auth::id(),
-                ]
-            );
+                ]);
 
-            $product->categories()->sync($request->category_ids ?? []);
+                $product->categories()->sync($request->category_ids ?? []);
 
-            /* ================= PRODUCT VARIATES ================= */
+                $this->createVariations($product, $request);
+            } else {
 
-            if ($request->product_variations && is_array($request->product_variations)) {
+                /* ================= UPDATE ================= */
 
-                foreach ($request->product_variations as $index => $variate) {
+                $product = Product::findOrFail($request->id);
 
-                    $variation = ProductVariation::updateOrCreate(
-                        ['id' => $variate['product_variate_id'] ?? null],
-                        [
-                            'product_id' => $product->id,
-                            'title' => [
-                                'en' => $variate['title_en'] ?? null,
-                                'km' => $variate['title_km'] ?? null,
-                            ],
-                            'status' => $variate['status'] ?? 'ACTIVE',
-                            'price'  => $variate['price'] ?? 0,
-                            'size'   => $variate['size'] ?? null,
-                            'description' => [
-                                'en' => $variate['description_en'] ?? null,
-                                'km' => $variate['description_km'] ?? null,
-                            ],
-                            'note' => [
-                                'en' => $variate['note_en'] ?? null,
-                                'km' => $variate['note_km'] ?? null,
-                            ],
-                            'is_available' => filter_var($variate['is_available'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                            'is_note'      => filter_var($variate['is_note'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                            'user_id'      => Auth::id(),
-                        ]
-                    );
+                $product->update([
+                    'code'        => $request->code,
+                    'title'       => [
+                        'en' => $request->title_en,
+                        'km' => $request->title_km,
+                    ],
+                    'status'      => $request->status,
+                    'type'        => $request->display_type,
+                    'description' => [
+                        'en' => $request->description_en,
+                        'km' => $request->description_km,
+                    ],
+                    'image'       => $image,
+                ]);
 
-                    /* ================= VARIATE IMAGES ================= */
+                $product->categories()->sync($request->category_ids ?? []);
 
-                    $keepImages = $variate['tmp_files'] ?? [];
+                /* ===== DELETE OLD VARIATIONS ===== */
 
-                    // delete removed images
-                    Gallery::where('foreign_model', ProductVariation::class)
-                        ->where('foreign_id', $variation->id)
-                        ->whereNotIn('image', $keepImages)
-                        ->delete();
+                ProductVariation::where('product_id', $product->id)->delete();
 
-                    // upload new images
-                    if ($request->hasFile("product_variations.$index.images")) {
-                        foreach ($request->file("product_variations.$index.images") as $file) {
+                /* ===== RECREATE VARIATIONS ===== */
 
-                            $path = UploadFile::uploadFile('/product/variation', $file, null);
+                $this->createVariations($product, $request);
 
-                            Gallery::create([
-                                'foreign_id'    => $variation->id,
-                                'foreign_model' => ProductVariation::class,
-                                'image'         => $path,
-                                'title'         => null,
-                                'description'   => null,
-                                'user_id'       => Auth::id(),
-                            ]);
-                        }
-                    }
-                }
+                $this->cleanupOrphanVariationImages($product);
             }
 
             DB::commit();
@@ -164,6 +142,81 @@ class ProductController extends Controller
         }
     }
 
+    private function createVariations(Product $product, Request $request): void
+    {
+        if (!is_array($request->product_variations)) {
+            return;
+        }
+
+        foreach ($request->product_variations as $index => $variate) {
+
+            $variation = ProductVariation::create([
+                'product_id' => $product->id,
+                'title' => [
+                    'en' => $variate['title_en'] ?? null,
+                    'km' => $variate['title_km'] ?? null,
+                ],
+                'status' => $variate['status'] ?? 'ACTIVE',
+                'price'  => $variate['price'] ?? 0,
+                'size'   => $variate['size'] ?? null,
+                'description' => [
+                    'en' => $variate['description_en'] ?? null,
+                    'km' => $variate['description_km'] ?? null,
+                ],
+                'note' => [
+                    'en' => $variate['note_en'] ?? null,
+                    'km' => $variate['note_km'] ?? null,
+                ],
+                'is_available' => filter_var($variate['is_available'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'is_note'      => filter_var($variate['is_note'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'user_id'      => Auth::id(),
+            ]);
+
+            /* ===== REATTACH OLD IMAGES ===== */
+
+            if (!empty($variate['tmp_files']) && is_array($variate['tmp_files'])) {
+                Gallery::whereIn('image', $variate['tmp_files'])
+                    ->update([
+                        'foreign_id'    => $variation->id,
+                        'foreign_model' => ProductVariation::class,
+                    ]);
+            }
+
+            /* ===== UPLOAD NEW IMAGES ===== */
+
+            if ($request->hasFile("product_variations.$index.images")) {
+                foreach ($request->file("product_variations.$index.images") as $file) {
+
+                    $path = UploadFile::uploadFile('/product/variation', $file, null);
+
+                    Gallery::create([
+                        'foreign_id'    => $variation->id,
+                        'foreign_model' => ProductVariation::class,
+                        'image'         => $path,
+                        'user_id'       => Auth::id(),
+                    ]);
+                }
+            }
+        }
+    }
+
+    private function cleanupOrphanVariationImages(): void
+    {
+        $orphans = Gallery::where('foreign_model', ProductVariation::class)
+            ->whereNotIn('foreign_id', function ($query) {
+                $query->select('id')
+                    ->from('product_variations');
+            })
+            ->get();
+
+        foreach ($orphans as $gallery) {
+            // delete physical file
+            UploadFile::deleteFile('/product/variation', $gallery->image);
+            // delete database record
+            $gallery->delete();
+        }
+    }
+
 
     public function detail()
     {
@@ -171,23 +224,51 @@ class ProductController extends Controller
             $data = Product::withRelation()->findOrFail(request('id'));
             return $this->responseSuccess($data);
         } catch (Exception $e) {
-            dd($e);
             return $this->responseError();
         }
     }
 
-    // public function updateStatus()
-    // {
-    //     return (new ItemService)->updateStatus(request('id'), request('store'));
-    // }
+    public function updateStatus()
+    {
+        DB::beginTransaction();
+        try {
+            $data = Product::findOrFail(request('id'));
+            $data->update([
+                'status' => request('status')
+            ]);
+            DB::commit();
+            return $this->responseSuccess(null, __('form.message.update.success'));
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError();
+        }
+    }
 
-    // public function delete()
-    // {
-    //     return (new ItemService)->delete(request('id'));
-    // }
+    public function delete()
+    {
+        DB::beginTransaction();
+        try {
+            $data = Product::findOrFail(request('id'));
+            $data->delete();
+            DB::commit();
+            return $this->responseSuccess(null, __('form.message.delete.success'));
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError();
+        }
+    }
 
-    // public function restore()
-    // {
-    //     return (new ItemService)->restore(request('id'));
-    // }
+    public function restore()
+    {
+        DB::beginTransaction();
+        try {
+            $data = Product::withTrashed()->findOrFail(request('id'));
+            $data->restore();
+            DB::commit();
+            return $this->responseSuccess(null, __('form.message.restore.success'));
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError();
+        }
+    }
 }

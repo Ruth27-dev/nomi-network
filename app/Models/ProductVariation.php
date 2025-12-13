@@ -27,6 +27,7 @@ class ProductVariation extends Model
         'description'   => 'array',
         'note'   => 'array',
     ];
+    protected $appends = ['image_url'];
 
     public function getImageUrlAttribute()
     {
