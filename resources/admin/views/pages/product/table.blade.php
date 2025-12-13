@@ -87,7 +87,7 @@
                                     }" x-on:keydown.escape.prevent.stop="close($refs.button)"
                                         x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
                                         x-id="['dropdown-button']" class="relative dropdown">
-                                        @canany(['item-update', 'item-update-status', 'item-delete', 'item-restore'])
+                                        @canany(['product-update', 'product-delete', 'product-restore'])
                                             <div x-ref="button" x-on:click="toggle()" :aria-expanded="open"
                                                 :aria-controls="$id('dropdown-button')" type="button" class="action-btn">
                                                 <i data-feather="more-vertical" class="cursor-pointer"></i>
@@ -96,7 +96,7 @@
                                         <ul x-ref="panel" x-show="open" x-transition.origin.top.right
                                             x-on:click.outside="close($refs.button)" :id="$id('dropdown-button')"
                                             style="display: none;" class="absolute right-0 dropdown-menu">
-                                            @can('item-create')
+                                            @can('product-create')
                                                 <li x-show="!item.deleted_at">
                                                     <a class="dropdown-item" @click="openStoreCopyItemDialog(item?.id)">
                                                         <span
@@ -114,14 +114,15 @@
                                                     </a>
                                                 </li>
                                             @endcan
-                                            @can('item-update-status')
+                                            @can('product-update')
                                                 <template x-if="!item.deleted_at && item.status == 'INACTIVE'">
                                                     <li>
                                                         <a class="dropdown-item"
                                                             @click="onUpdateStatus(item?.id, 'ACTIVE')">
                                                             <span
                                                                 class="material-icons text-green-500 cursor-pointer">change_circle</span>
-                                                            <span class="text-sm text-gray-600 ml-2">@lang('table.option.enable')</span>
+                                                            <span
+                                                                class="text-sm text-gray-600 ml-2">@lang('table.option.enable')</span>
                                                         </a>
                                                     </li>
                                                 </template>
@@ -131,33 +132,43 @@
                                                             @click="onUpdateStatus(item?.id, 'INACTIVE')">
                                                             <span
                                                                 class="material-icons text-orange-500 cursor-pointer">close</span>
-                                                            <span class="text-sm text-gray-600 ml-2">@lang('table.option.disable')</span>
+                                                            <span
+                                                                class="text-sm text-gray-600 ml-2">@lang('table.option.disable')</span>
                                                         </a>
                                                     </li>
                                                 </template>
                                             @endcan
-                                            @can('item-delete')
+                                            @can('product-delete')
                                                 <template x-if="!item.deleted_at">
                                                     <li>
                                                         <a class="dropdown-item" @click="onDelete(item?.id)">
                                                             <span
                                                                 class="material-icons text-red-500 cursor-pointer">delete</span>
-                                                            <span class="text-sm text-gray-600 ml-2">@lang('table.option.delete')</span>
+                                                            <span
+                                                                class="text-sm text-gray-600 ml-2">@lang('table.option.delete')</span>
                                                         </a>
                                                     </li>
                                                 </template>
                                             @endcan
-                                            @can('item-restore')
+                                            @can('product-restore')
                                                 <template x-if="item.deleted_at">
                                                     <li>
                                                         <a class="dropdown-item" @click="onRestore(item?.id)">
                                                             <span
                                                                 class="material-icons text-green-500 cursor-pointer">replay</span>
-                                                            <span class="text-sm text-gray-600 ml-2">@lang('table.option.restore')</span>
+                                                            <span
+                                                                class="text-sm text-gray-600 ml-2">@lang('table.option.restore')</span>
                                                         </a>
                                                     </li>
                                                 </template>
                                             @endcan
+                                            <li>
+                                                <a class="dropdown-item" @click="openViewVariationDialog(item?.id)">
+                                                    <span
+                                                        class="material-icons text-blue-500 cursor-pointer">visibility</span>
+                                                    <span class="text-sm text-gray-600 ml-2">@lang('table.option.view_variation')</span>
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>

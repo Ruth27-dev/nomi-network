@@ -23,7 +23,7 @@
                                         name="category_id" x-model="formFilter.category_id">
                                         <option value="">...</option>
                                         @foreach ($categories as $category)
-                                            <option x-show="(formFilter.branch_id && formFilter.branch_id == `{{ $category->branch_id }}`)" value="{{ $category->id }}">
+                                            <option value="{{ $category->id }}">
                                                 {{ $category->title['en'] }}
                                             </option>
                                         @endforeach

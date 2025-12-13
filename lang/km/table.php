@@ -2,6 +2,7 @@
 
 return [
     'field' => [
+        "size"                       => "ទំហំ",
         "code"                       => "កូដ",
         'plate_number'               => 'លេខចាន',
         'customer'                   => 'អតិថិជន',
@@ -392,6 +393,7 @@ return [
         "view_receipt"                  => "មើលបង្កាន់ដៃ",
         "view_bill"                     => "មើលវិក័យប័ត្រ",
         "view_refund"                   => "មើលការសងប្រាក់វិញ",
+         "view_variation"               => "មើលប្រភេទផលិតផល",
     ],
     "vat_type"  => [
         "normal"                => "ធម្មតា",

@@ -2,8 +2,8 @@
 @section('layout')
     <div class="content-wrapper" x-data="productPage">
         @include('admin::shared.header', [
-            'title' =>  __('form.name.product'),
-            'header_name' =>  __('form.name.product'),
+            'title' => __('form.name.product'),
+            'header_name' => __('form.name.product'),
         ])
         <div class="content-body">
             <div class="content-tab">
@@ -26,13 +26,14 @@
                             </button>
                         </div>
                     </div>
-                    @can('item-create')
+                    @can('product-create')
                         <button class="btn-create" @click="openStoreItemDialog()">
                             <i data-feather="plus"></i>
                             <span class="uppercase">@lang('form.header.button.create')</span>
                         </button>
                     @endcan
-                    <button @click="viewTrash()" :class="formFilter.trash ? '!bg-rose-500 !text-white' : '!bg-white !text-rose-500'">
+                    <button @click="viewTrash()"
+                        :class="formFilter.trash ? '!bg-rose-500 !text-white' : '!bg-white !text-rose-500'">
                         <i class="material-icons">delete</i>
                         <span>@lang('form.header.button.trash')</span>
                     </button>
@@ -45,7 +46,7 @@
         </div>
         @include('admin::pages.product.store')
         @include('admin::pages.product.copy')
-        @include('admin::pages.product.view-detail')
+        @include('admin::pages.product.view-variation')
         @include('admin::pages.product.form-search')
     </div>
 @stop
@@ -59,10 +60,8 @@
                 feather.replace();
             },
             formFilter: new FormGroup({
-                search: [`{{request('search')}}`, []],
-                trash: [`{{request('trash')}}`, []],
-                shop_id: [`{{ request('shop_id') }}`, []],
-                branch_id: [`{{ request('branch_id') }}`, []],
+                search: [`{{ request('search') }}`, []],
+                trash: [`{{ request('trash') }}`, []],
                 category_id: [`{{ request('category_id') }}`, []],
             }),
             onFilter() {
@@ -91,7 +90,8 @@
                 }, ], {
                     on: {
                         ready: (fancybox) => {
-                            document.querySelector('.fancybox__container').style.zIndex = this.$store.libs.getLastIndex() + 1;
+                            document.querySelector('.fancybox__container').style.zIndex = this
+                                .$store.libs.getLastIndex() + 1;
                         },
                     }
                 });
@@ -132,6 +132,24 @@
                     }
                 });
             },
+            openViewVariationDialog(id) {
+                this.$dialog('viewVariationDialog').open({
+                    data: {
+                        id: id,
+                    },
+                    config: {
+                        width: '85%',
+                        position: 'right',
+                        backdrop: false,
+                        blur: 3,
+                    },
+                    afterClose: (res) => {
+                        if (res) {
+                            this.table.reload();
+                        }
+                    }
+                });
+            },
             onUpdateStatus(id, status) {
                 this.$store.confirmDialog.open({
                     data: {
@@ -156,8 +174,7 @@
                                         progressBar: true,
                                         timeOut: 5000
                                     });
-                                }
-                                else{
+                                } else {
                                     toastr.error(res.data.message, {
                                         progressBar: true,
                                         timeOut: 5000
@@ -194,8 +211,7 @@
                                         progressBar: true,
                                         timeOut: 5000
                                     });
-                                }
-                                else{
+                                } else {
                                     toastr.error(res.data.message, {
                                         progressBar: true,
                                         timeOut: 5000
@@ -211,7 +227,7 @@
             onRestore(id) {
                 this.$store.confirmDialog.open({
                     data: {
-                       title: "@lang('dialog.title')",
+                        title: "@lang('dialog.title')",
                         message: `@lang('dialog.msg.restore')`,
                         btnClose: "@lang('dialog.button.close')",
                         btnSave: "@lang('dialog.button.restore')",
@@ -231,8 +247,7 @@
                                         progressBar: true,
                                         timeOut: 5000
                                     });
-                                }
-                                else{
+                                } else {
                                     toastr.error(res.data.message, {
                                         progressBar: true,
                                         timeOut: 5000

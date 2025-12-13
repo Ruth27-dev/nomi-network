@@ -412,6 +412,7 @@ return [
         "minute"                     => "mn",
         "payment"                    => "Payment",
         "product_variate"            => "Product Variate",
+       
     ],
     'option' => [
         //
@@ -509,6 +510,7 @@ return [
         "view_receipt"                            => "View Receipt",
         "view_bill"                               => "View Bill",
         "view_refund"                             => "View Refund",
+        "view_variation"                          => "View Product Variation"
 
     ],
     "vat_type"  => [
