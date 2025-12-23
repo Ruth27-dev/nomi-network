@@ -9,7 +9,7 @@
             <div class="content-tab">
                 <div class="content-tab-wrapper">
                     <span class="title !text-gray-600">
-                        All Items : <span x-text="table?.paginate?.totalItems"></span>
+                        @lang('form.total') <span x-text="table?.paginate?.totalItems"></span>
                     </span>
                 </div>
                 <div class="content-action-button">
