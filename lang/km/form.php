@@ -11,6 +11,7 @@ return [
     "total_all"             => "សរុប",
 
     "name"      => [
+        "product_variation"         => "ប្រភេទផលិតផល",
         "refund"                    => "សងប្រាក់វិញ",
         // LH
         'unit'        => "ការគ្រប់គ្រងឯកតា",
@@ -150,6 +151,7 @@ return [
     ],
 
     "title" => [
+        "product_variation"         => "ប្រភេទផលិតផល",
         "refund"                    => "សងប្រាក់វិញ",
         'set_permission_to_role' => "កំណត់ការអនុញ្ញាតសម្រាប់តួនាទី",
         "sale"  => [

@@ -177,9 +177,11 @@ return [
         "bill"                      => "Bill",
         "group_product"             => "Group Product",
         "refund"                    => "Refund",
+        "product_variation"         => "Product Variations",
     ],
 
     "title" => [
+        "product_variation"         => "Product Variations",
         "refund"                    => "Refund",
         'delivery'              => "Delivery",
         'chef_group'            => "Chef Group",

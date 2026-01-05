@@ -2,8 +2,8 @@
 @section('layout')
     <div class="content-wrapper" x-data="productVariationPage">
         @include('admin::shared.header', [
-            'title' => 'Product Variations',
-            'header_name' => 'Product Variations',
+            'title' => __('form.name.product_variation'),
+            'header_name' => __('form.name.product_variation'),
         ])
         <div class="content-body">
             <div class="content-tab">
