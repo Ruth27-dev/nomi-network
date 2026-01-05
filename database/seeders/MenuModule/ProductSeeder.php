@@ -18,7 +18,7 @@ class ProductSeeder extends Seeder
             'name' => json_encode(['en' => 'Products', 'km' => 'ផលិតផល']),
             'icon'  => 'inventory',
             'active' => 'admin/product/*',
-            'ordering' => 9,
+            'ordering' => 1,
             'permission' => array('category-view','product-view'),
         ]);
 
@@ -42,6 +42,17 @@ class ProductSeeder extends Seeder
             'path'          => 'admin/product/product/list',
             'active'        => 'admin/product/product/list*',
             'ordering'      => 2,
+            'permission'    => array('product-view'),
+        ]);
+        Menu::create([
+            'parent_id' => $product->id,
+            'name'      => json_encode([
+                'en'    => "Product Variations",
+                'km'    => "Product Variations",
+            ]),
+            'path'          => 'admin/product/variation/list',
+            'active'        => 'admin/product/variation/list*',
+            'ordering'      => 3,
             'permission'    => array('product-view'),
         ]);
     }

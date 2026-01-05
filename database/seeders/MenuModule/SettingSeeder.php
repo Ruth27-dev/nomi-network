@@ -18,8 +18,8 @@ class   SettingSeeder extends Seeder
             'name' => json_encode(['en' => 'Setting', 'km' => 'ការកំណត់']),
             'icon'  => 'settings',
             'active' => 'admin/setting/*',
-            'ordering' => 9,
-            'permission' => array('company-view'),
+            'ordering' => 3,
+            'permission' => array('company-view','bank-account-view'),
         ]);
 
         Menu::create([
@@ -33,8 +33,16 @@ class   SettingSeeder extends Seeder
             'ordering' => 1,
             'permission' => array('company-view'),
         ]);
-       
-      
-      
+        Menu::create([
+            'parent_id' => $setting->id,
+            'name' => json_encode([
+                'en' => 'Bank Account',
+                'km' => 'គណនីធនាគារ',
+            ]),
+            'path' => 'admin/setting/bank-account/list',
+            'active' => 'admin/setting/bank-account/*',
+            'ordering' => 7,
+            'permission' => array('bank-account-view'),
+        ]);
     }
 }

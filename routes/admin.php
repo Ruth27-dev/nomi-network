@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin as Admin;
+use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Requests\Admin as AdminRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -26,11 +28,13 @@ Route::middleware(['locale'])->group(function () {
         // Fetch data
         Route::controller(Admin\FetchDataController::class)->prefix('fetch')->name('fetch-')->group(function () {
             Route::get('category-data', 'fetchCategoryData')->name('category-data');
+            Route::get('product-data', 'fetchProductData')->name('product-data');
         });
         // Validation
         Route::prefix('validation')->name('validation-')->group(function () {
             Route::post('category', [AdminRequest\CategoryRequest::class, 'validate'])->name('category');
             Route::post('product', [AdminRequest\ProductRequest::class, 'validate'])->name('product');
+            Route::post('product-variation', [AdminRequest\ProductVariationRequest::class, 'validate'])->name('product-variation');
         });
 
         Route::prefix('user')->group(function () {
@@ -84,6 +88,15 @@ Route::middleware(['locale'])->group(function () {
                 Route::delete('destroy', 'destroy')->name('destroy');
                 Route::get('sequence', 'sequence')->name('sequence');
             });
+
+            Route::controller(ProductVariationController::class)->prefix('variation')->name('product-variation-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
+                Route::delete('delete', 'delete')->name('delete');
+            });
         });
 
 
@@ -93,6 +106,18 @@ Route::middleware(['locale'])->group(function () {
             Route::controller(Admin\LOV\CompanyController::class)->prefix('company')->name('company-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
+            });
+
+            // bank account
+            Route::controller(BankAccountController::class)->prefix('bank-account')->name('bank-account-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
             });
         });
     });

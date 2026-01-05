@@ -167,8 +167,8 @@ class ProductController extends Controller
                     'en' => $variate['note_en'] ?? null,
                     'km' => $variate['note_km'] ?? null,
                 ],
-                'is_available' => filter_var($variate['is_available'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                'is_note'      => filter_var($variate['is_note'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'is_available' => true,
+                'is_note'      => true,
                 'user_id'      => Auth::id(),
             ]);
 
