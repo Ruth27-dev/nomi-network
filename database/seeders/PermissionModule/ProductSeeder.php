@@ -104,6 +104,42 @@ class ProductSeeder extends Seeder
                 'module_id'     => $products->id,
             ],
         ]);
+
+        $productVariation = ModulePermission::create([
+            'parent_id'     => $product->id,
+            'display_name'  => json_encode([
+                'en' => 'Product Variations',
+                'km' => 'Product Variations',
+            ]),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'product-variation-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $productVariation->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'product-variation-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $productVariation->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'product-variation-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $productVariation->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'product-variation-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $productVariation->id,
+            ],
+        ]);
     }
 
     public $index = 0;

@@ -48,12 +48,12 @@ class ProductSeeder extends Seeder
             'parent_id' => $product->id,
             'name'      => json_encode([
                 'en'    => "Product Variations",
-                'km'    => "Product Variations",
+                'km'    => "ប្រភេទផលិតផល",
             ]),
             'path'          => 'admin/product/variation/list',
             'active'        => 'admin/product/variation/list*',
             'ordering'      => 3,
-            'permission'    => array('product-view'),
+            'permission'    => array('product-variation-view'),
         ]);
     }
 }

@@ -17,10 +17,10 @@ class ProductVariationController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->middleware('permission:product-view', ['only' => ['index', 'detail', 'data']]);
-        $this->middleware('permission:product-create', ['only' => ['save']]);
-        $this->middleware('permission:product-update', ['only' => ['save', 'updateStatus']]);
-        $this->middleware('permission:product-delete', ['only' => ['delete']]);
+        $this->middleware('permission:product-variation-view', ['only' => ['index', 'detail', 'data']]);
+        $this->middleware('permission:product-variation-create', ['only' => ['save']]);
+        $this->middleware('permission:product-variation-update', ['only' => ['save', 'updateStatus']]);
+        $this->middleware('permission:product-variation-delete', ['only' => ['delete']]);
     }
 
     public function index()
