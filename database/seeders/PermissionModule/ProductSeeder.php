@@ -18,7 +18,7 @@ class ProductSeeder extends Seeder
                 'en' => 'Product',
                 'km' => 'ផលិតផល',
             ]),
-            'sort_no'       => 9,
+            'sort_no'       => 1,
         ]);
 
         $category = ModulePermission::create([

@@ -16,7 +16,7 @@ class SettingSeeder extends Seeder
     {
         $setting = ModulePermission::create([
             'display_name'  => json_encode(config('permission_module.menu.setting')),
-            'sort_no'       => 11,
+            'sort_no'       => 3,
         ]);
 
         $company = ModulePermission::create([

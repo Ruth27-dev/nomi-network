@@ -23,7 +23,7 @@ class PermissionSeeder extends Seeder
         Permission::truncate();
         Schema::enableForeignKeyConstraints();
         $this->call(UserPermissionSeeder::class);
-        $this->call(SettingSeeder::class);
         $this->call(ProductSeeder::class);
+        $this->call(SettingSeeder::class);
     }
 }

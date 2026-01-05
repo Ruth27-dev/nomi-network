@@ -20,7 +20,7 @@ class UserPermissionSeeder extends Seeder
                 'en' => 'User Management',
                 'km' => 'ការគ្រប់គ្រងអ្នកប្រើប្រាស់',
             ]),
-            'sort_no'       => 8,
+            'sort_no'       => 2,
         ]);
 
         $userAdmin = ModulePermission::create([
