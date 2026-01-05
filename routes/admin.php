@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin as Admin;
 use App\Http\Controllers\Admin\BankAccountController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariationController;
@@ -110,6 +111,18 @@ Route::middleware(['locale'])->group(function () {
 
             // bank account
             Route::controller(BankAccountController::class)->prefix('bank-account')->name('bank-account-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
+            });
+
+            // banner
+            Route::controller(BannerController::class)->prefix('banner')->name('banner-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
                 Route::post('save', 'save')->name('save');

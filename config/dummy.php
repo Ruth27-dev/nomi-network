@@ -195,4 +195,13 @@ return [
             'text'          => 'Female',
         ],
     ],
+    'page'        => [
+        'home_page'   => [
+            'key'   => 'home_page',
+            'name'  => [
+                'en'    => 'Home Page',
+                'km'    => 'ទំព័រដើម',
+            ]
+        ],
+    ],
 ];

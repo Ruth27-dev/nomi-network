@@ -1,6 +1,24 @@
 <?php
 
 return [
+    'menu' => [
+        'setting' => [
+            'en' => 'Setting',
+            'km' => 'Setting',
+        ],
+        'company' => [
+            'en' => 'Company',
+            'km' => 'Company',
+        ],
+        'bank_account' => [
+            'en' => 'Bank Account',
+            'km' => 'Bank Account',
+        ],
+        'banner' => [
+            'en' => 'Banner',
+            'km' => 'Banner',
+        ],
+    ],
     'action' => [
         'view' => [
             'en' => 'View Data Listing',
