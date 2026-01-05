@@ -116,8 +116,7 @@
                 this.dialogData = this.$dialog('storeBankAccountDialog').data;
                 if (this.dialogData.id) {
                     this.form.patchValue(this.dialogData ?? {});
-                    this.qr_code_url = this?.dialogData?.qr_code ? this.dialogData?.qr_code :
-                        null;
+                    this.qr_code_url = this?.dialogData?.qr_code_url ? this.dialogData?.qr_code_url : null;
                     this.form.branch_id = this.dialogData?.branch?.id;
                     this.form.branch_title = getItemByLang(JSON.stringify(this.dialogData?.branch
                         ?.title), langLocale, arrayLangLocale);

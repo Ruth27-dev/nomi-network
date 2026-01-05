@@ -49,8 +49,6 @@
             table: new Table("{{ route('admin-setting-bank-account-data') }}"),
             init() {
                 this.table.init();
-                console.log(this.table);
-                
                 feather.replace();
             },
             formFilter: new FormGroup({

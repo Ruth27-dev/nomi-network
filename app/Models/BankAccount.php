@@ -26,6 +26,6 @@ class BankAccount extends Model
 
     public function getQrCodeUrlAttribute()
     {
-        return $this->qr_code  ? asset('storage/uploads/bank-account/' . $this->qr_code) : asset("images/logo.jpg");
+        return $this->qr_code ? asset('storage/bank-account/' . $this->qr_code) : asset("images/logo.jpg");
     }
 }
