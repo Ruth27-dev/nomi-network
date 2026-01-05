@@ -34,46 +34,31 @@ class UserPermissionSeeder extends Seeder
 
         Permission::insert([
             [
-                'display_name'  => json_encode([
-                    'en' => 'View Data Listing',
-                    'km' => 'មើលបញ្ជីទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.view')),
                 'name'          => 'user-admin-view',
                 'guard_name'    => 'admin',
                 'module_id'     => $userAdmin->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Create Data',
-                    'km' => 'បង្កើតទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.create')),
                 'name'          => 'user-admin-create',
                 'guard_name'    => 'admin',
                 'module_id'     => $userAdmin->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Edit Data',
-                    'km' => 'កែប្រែទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.update')),
                 'name'          => 'user-admin-update',
                 'guard_name'    => 'admin',
                 'module_id'     => $userAdmin->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Move data to Trash',
-                    'km' => 'ផ្ទេរទិន្នន័យទៅធុងសំរាម',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.delete')),
                 'name'          => 'user-delete',
                 'guard_name'    => 'admin',
                 'module_id'     => $userAdmin->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Restore Data',
-                    'km' => 'ស្ដារទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.restore')),
                 'name'          => 'user-restore',
                 'guard_name'    => 'admin',
                 'module_id'     => $userAdmin->id,
@@ -91,28 +76,19 @@ class UserPermissionSeeder extends Seeder
 
         Permission::insert([
             [
-                'display_name'  => json_encode([
-                    'en' => 'View Data Listing',
-                    'km' => 'មើលបញ្ជីទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.view')),
                 'name'          => 'role-view',
                 'guard_name'    => 'admin',
                 'module_id'     => $role->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Create Data',
-                    'km' => 'បង្កើតទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.create')),
                 'name'          => 'role-create',
                 'guard_name'    => 'admin',
                 'module_id'     => $role->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Edit Data',
-                    'km' => 'កែប្រែទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.update')),
                 'name'          => 'role-update',
                 'guard_name'    => 'admin',
                 'module_id'     => $role->id,

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\ModulePermission;
 use App\Models\Permission;
-use Database\Seeders\MenuModule\ProductSeeder;
+use Database\Seeders\PermissionModule\ProductSeeder;
 use Database\Seeders\PermissionModule\SettingSeeder;
 use Database\Seeders\PermissionModule\UserPermissionSeeder;
 use Illuminate\Database\Seeder;
@@ -22,8 +22,8 @@ class PermissionSeeder extends Seeder
         ModulePermission::truncate();
         Permission::truncate();
         Schema::enableForeignKeyConstraints();
-        $this->call(UserPermissionSeeder::class);
         $this->call(ProductSeeder::class);
+        $this->call(UserPermissionSeeder::class);
         $this->call(SettingSeeder::class);
     }
 }

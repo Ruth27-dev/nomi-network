@@ -15,13 +15,19 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $setting = ModulePermission::create([
-            'display_name'  => json_encode(config('permission_module.menu.setting')),
+            'display_name'  => json_encode([
+                'en' => 'Setting',
+                'km' => 'ការកំណត់',
+            ]),
             'sort_no'       => 3,
         ]);
 
         $company = ModulePermission::create([
             'parent_id'     =>  $setting->id,
-            'display_name'  => json_encode(config('permission_module.menu.company')),
+            'display_name'  => json_encode([
+                'en' => 'Company',
+                'km' => 'ក្រុមហ៊ុន',
+            ]),
             'sort_no'       => $this->increaseIndex(),
         ]);
 
@@ -44,7 +50,10 @@ class SettingSeeder extends Seeder
 
         $bankAccount = ModulePermission::create([
             'parent_id'     =>  $setting->id,
-            'display_name'  => json_encode(config('permission_module.menu.bank_account')),
+            'display_name'  => json_encode([
+                'en' => 'Bank Account',
+                'km' => 'គណនីធនាគារ',
+            ]),
             'sort_no'       => $this->increaseIndex(),
         ]);
 

@@ -32,46 +32,31 @@ class ProductSeeder extends Seeder
 
         Permission::insert([
             [
-                'display_name'  => json_encode([
-                    'en' => 'View Data Listing',
-                    'km' => 'មើលបញ្ជីទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.view')),
                 'name'          => 'category-view',
                 'guard_name'    => 'admin',
                 'module_id'     => $category->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Create Data',
-                    'km' => 'បង្កើតទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.create')),
                 'name'          => 'category-create',
                 'guard_name'    => 'admin',
                 'module_id'     => $category->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Edit Data',
-                    'km' => 'កែប្រែទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.update')),
                 'name'          => 'category-update',
                 'guard_name'    => 'admin',
                 'module_id'     => $category->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Move Data To Trash',
-                    'km' => 'ដាក់ទិន្នន័យ​ក្នុង​ធុងសំរាម',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.delete')),
                 'name'          => 'category-delete',
                 'guard_name'    => 'admin',
                 'module_id'     => $category->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Restore Data',
-                    'km' => 'ស្ដារទិន្នន័យឡើងវិញ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.restore')),
                 'name'          => 'category-restore',
                 'guard_name'    => 'admin',
                 'module_id'     => $category->id,
@@ -89,46 +74,31 @@ class ProductSeeder extends Seeder
 
         Permission::insert([
             [
-                'display_name'  => json_encode([
-                    'en' => 'View Data Listing',
-                    'km' => 'មើលបញ្ជីទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.view')),
                 'name'          => 'product-view',
                 'guard_name'    => 'admin',
                 'module_id'     => $products->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Create Data',
-                    'km' => 'បង្កើតទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.create')),
                 'name'          => 'product-create',
                 'guard_name'    => 'admin',
                 'module_id'     => $products->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Edit Data',
-                    'km' => 'កែប្រែទិន្នន័យ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.update')),
                 'name'          => 'product-update',
                 'guard_name'    => 'admin',
                 'module_id'     => $products->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Move Data To Trash',
-                    'km' => 'ដាក់ទិន្នន័យ​ក្នុង​ធុងសំរាម',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.delete')),
                 'name'          => 'product-delete',
                 'guard_name'    => 'admin',
                 'module_id'     => $products->id,
             ],
             [
-                'display_name'  => json_encode([
-                    'en' => 'Restore Data',
-                    'km' => 'ស្ដារទិន្នន័យឡើងវិញ',
-                ]),
+                'display_name'  => json_encode(config('permission_module.action.restore')),
                 'name'          => 'product-restore',
                 'guard_name'    => 'admin',
                 'module_id'     => $products->id,
