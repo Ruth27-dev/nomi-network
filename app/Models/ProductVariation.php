@@ -49,4 +49,9 @@ class ProductVariation extends Model
         return $this->hasMany(Gallery::class, 'foreign_id')
             ->where('foreign_model', self::class);
     }
+
+    public function discounts()
+    {
+        return $this->belongsToMany(Discount::class, 'product_variation_discount', 'product_variation_id', 'discount_id');
+    }
 }

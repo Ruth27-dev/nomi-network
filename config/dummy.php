@@ -195,6 +195,18 @@ return [
             'text'          => 'Female',
         ],
     ],
+    'discount'  => [
+        'type'  => [
+            'discount'  => 'DISCOUNT',
+            'coupon'    => 'COUPON',
+            'percentage' => 'PERCENTAGE',
+            'amount'    => 'AMOUNT',
+        ],
+        'condition' => [
+            'min'   => 'MIN',
+            'max'   => 'MAX',
+        ]
+    ],
     'page'        => [
         'home_page'   => [
             'key'   => 'home_page',

@@ -140,6 +140,54 @@ class ProductSeeder extends Seeder
                 'module_id'     => $productVariation->id,
             ],
         ]);
+
+        $productDiscount = ModulePermission::create([
+            'parent_id'     => $product->id,
+            'display_name'  => json_encode([
+                'en' => 'Product Discounts',
+                'km' => 'Product Discounts',
+            ]),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'product-discount-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $productDiscount->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'product-discount-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $productDiscount->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'product-discount-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $productDiscount->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update-status')),
+                'name'          => 'product-discount-update-status',
+                'guard_name'    => 'admin',
+                'module_id'     => $productDiscount->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'product-discount-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $productDiscount->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'product-discount-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $productDiscount->id,
+            ],
+        ]);
     }
 
     public $index = 0;

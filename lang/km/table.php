@@ -2,6 +2,7 @@
 
 return [
     'field' => [
+        "product"                    => "ផលិតផល",
         "size"                       => "ទំហំ",
         "code"                       => "កូដ",
         'plate_number'               => 'លេខចាន',
@@ -15,6 +16,10 @@ return [
         'created_at'                 => 'កាលបរិច្ឆេទបង្កើត',
         'category'                   => 'ប្រភេទ',
         'discount'                   => 'Discount',
+        'discount_amount'            => 'Discount Amount',
+        'discount_type'              => 'Discount Type',
+        'start_date'                 => 'Start Date',
+        'end_date'                   => 'End Date',
         'duration'                   => 'Duration',
         'expire_date'                => 'Expire Date',
         'email'                      => 'អុីមែល',

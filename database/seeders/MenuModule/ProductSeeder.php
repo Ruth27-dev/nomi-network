@@ -19,7 +19,7 @@ class ProductSeeder extends Seeder
             'icon'  => 'inventory',
             'active' => 'admin/product/*',
             'ordering' => 1,
-            'permission' => array('category-view','product-view'),
+            'permission' => array('category-view','product-view','product-variation-view','product-discount-view'),
         ]);
 
         Menu::create([
@@ -54,6 +54,17 @@ class ProductSeeder extends Seeder
             'active'        => 'admin/product/variation/list*',
             'ordering'      => 3,
             'permission'    => array('product-variation-view'),
+        ]);
+        Menu::create([
+            'parent_id' => $product->id,
+            'name'      => json_encode([
+                'en'    => "Discounts",
+                'km'    => "Discounts",
+            ]),
+            'path'          => 'admin/product/discount/list',
+            'active'        => 'admin/product/discount/list*',
+            'ordering'      => 4,
+            'permission'    => array('product-discount-view'),
         ]);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductDiscountController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Requests\Admin as AdminRequest;
 use Illuminate\Support\Facades\Route;
@@ -30,12 +31,14 @@ Route::middleware(['locale'])->group(function () {
         Route::controller(Admin\FetchDataController::class)->prefix('fetch')->name('fetch-')->group(function () {
             Route::get('category-data', 'fetchCategoryData')->name('category-data');
             Route::get('product-data', 'fetchProductData')->name('product-data');
+            Route::get('product-variation-data', 'fetchProductVariationData')->name('product-variation-data');
         });
         // Validation
         Route::prefix('validation')->name('validation-')->group(function () {
             Route::post('category', [AdminRequest\CategoryRequest::class, 'validate'])->name('category');
             Route::post('product', [AdminRequest\ProductRequest::class, 'validate'])->name('product');
             Route::post('product-variation', [AdminRequest\ProductVariationRequest::class, 'validate'])->name('product-variation');
+            Route::post('product-discount', [AdminRequest\DiscountRequest::class, 'validate'])->name('product-discount');
         });
 
         Route::prefix('user')->group(function () {
@@ -97,6 +100,17 @@ Route::middleware(['locale'])->group(function () {
                 Route::get('detail', 'detail')->name('detail');
                 Route::post('status', 'updateStatus')->name('status');
                 Route::delete('delete', 'delete')->name('delete');
+            });
+
+            Route::controller(ProductDiscountController::class)->prefix('discount')->name('product-discount-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
+                Route::delete('delete', 'delete')->name('delete');
+                Route::put('restore', 'restore')->name('restore');
+                Route::delete('destroy', 'destroy')->name('destroy');
             });
         });
 

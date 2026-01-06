@@ -11,6 +11,14 @@ return [
     "total_all"             => "សរុប",
 
     "name"      => [
+        "condition_and_rule"        => "លក្ខខណ្ឌ និង ច្បាប់",
+        "discount"                  => "Discount",
+        "coupon"                    => "Coupon",
+        "amount"                    => "Amount",
+        "percentage"                => "Percentage",
+        "product_discount"          => "Product Discount",
+        "flat_discount"             => "Flat Discount",
+        "unit_discount"             => "Unit Discount",
         "product_variation"         => "ប្រភេទផលិតផល",
         "refund"                    => "សងប្រាក់វិញ",
         // LH
@@ -355,6 +363,19 @@ return [
 
     "body" => [
         "label" => [
+            "remark_en"             => "ចំណាំ​​ (អង់គ្លេស)",
+            "remark_km"             => "ចំណាំ​​ (ខ្មែរ)",
+            "discount_amount"       => "ចំនួនទឹកប្រាក់បញ្ចុះតម្លៃ",
+            "discount_type"         => "ប្រភេទបញ្ចុះតម្លៃ",
+            "start_date"            => "កាលបរិច្ឆេទចាប់ផ្តើម",
+            "end_date"              => "កាលបរិច្ឆេទបញ្ចប់",
+            "usage_limited"         => "ចំនួនកំណត់ប្រើប្រាស់",
+            "usage_per_customer"    => "អតិថិជនម្នាក់ប្រើប្រាស់បាន",
+            "min_amount"            => "ចំនួនទឹកប្រាក់ទាបបំផុត",
+            "max_amount"            => "ចំនួនទឹកប្រាក់ទខ្ពស់បំផុត",
+            "code"                  => "កូដ",
+            "products"              => "ផលិតផល",
+            "product_discount_type" => "ប្រភេទបញ្ចុះតម្លៃផលិតផល",
             'en'                   => '(អង់គ្លេស)',
             'km'                   => '(ខ្មែរ)',
             'zh'                   => '(ចិន)',
@@ -739,6 +760,8 @@ return [
             "code"                       => "កូដ",
         ],
         "placeholder" => [
+            'select_products'               => 'Select Products',
+            'date'                          => 'DD/MM/YYYY',
             "currency" => "សូមជ្រើសរើសរូបិយប័ណ្ណ",
             "default_retail" => "សូមបញ្ចូលការលក់រាយលំនាំដើម",
             "default_wholesale" => "សូមបញ្ចូលការលក់ដុំលំនាំដើម",
