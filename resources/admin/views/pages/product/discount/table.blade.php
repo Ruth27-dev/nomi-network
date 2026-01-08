@@ -21,7 +21,7 @@
                                 <div class="w-20/100 text-sm font-bold text-gray-500 flex items-center">
                                     <span>@lang('table.field.title')</span>
                                 </div>
-                                <div class="w-15/100 text-sm font-bold text-gray-500 flex items-center">
+                                <div class="w-15/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span>@lang('table.field.discount_amount')</span>
                                 </div>
                                 <div class="w-10/100 text-sm font-bold text-gray-500 grid place-items-center">
@@ -58,7 +58,7 @@
                                 <div class="w-20/100 text-gray-500 flex items-center">
                                     <span class="text-sm" x-text="item?.title?.[langLocale] ?? item?.title?.en ?? '-'"></span>
                                 </div>
-                                <div class="w-15/100 text-gray-500 flex items-center justify-end">
+                                <div class="w-15/100 text-gray-500 grid place-items-center">
                                     <span class="text-sm"
                                         x-text="item?.discount_amount ? parseFloat(item?.discount_amount).toFixed(2) + ' ' + (item?.discount_type == appConfig.discount.type.percentage ? '%' : '$') : '-'"></span>
                                 </div>

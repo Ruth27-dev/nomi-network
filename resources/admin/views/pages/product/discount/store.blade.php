@@ -7,7 +7,7 @@
                 <span @click="close()"><i data-feather="x"></i></span>
             </div>
             <div class="form-body flex-auto overflow-y-auto pr-3">
-                <div class="row-2">
+                <div class="row">
                     <div class="form-row">
                         <label for="type">@lang('form.body.label.type')<span>*</span> </label>
                         <select id="type" x-model="form.type" :disabled="form.disabled">
@@ -16,10 +16,12 @@
                         </select>
                         <span class="error" x-show="validate?.type" x-text="validate?.type"></span>
                     </div>
+                </div>
+                <div class="row-2">
                     <div class="form-row" x-show="form.type == appConfig.discount.type.coupon">
                         <label>@lang('form.body.label.code')<span>*</span></label>
-                        <input type="text" placeholder="OPW&822H" x-model="form.code"
-                            :disabled="form.disabled" autocomplete="off">
+                        <input type="text" placeholder="OPW&822H" x-model="form.code" :disabled="form.disabled"
+                            autocomplete="off">
                         <span class="error" x-show="validate?.code" x-text="validate?.code"></span>
                     </div>
                     <div class="form-row">
@@ -48,9 +50,10 @@
                 <div class="row-2">
                     <div class="form-row">
                         <label>@lang('form.body.label.discount_amount') <span>*</span></label>
-                        <input type="text" placeholder="2"
-                            x-model="form.discount_amount" :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.discount_amount" x-text="validate?.discount_amount"></span>
+                        <input type="text" placeholder="2" x-model="form.discount_amount" :disabled="form.disabled"
+                            autocomplete="off">
+                        <span class="error" x-show="validate?.discount_amount"
+                            x-text="validate?.discount_amount"></span>
                     </div>
                     <div class="form-row">
                         <label for="discount_type">@lang('form.body.label.discount_type')<span>*</span> </label>
@@ -62,15 +65,13 @@
                     </div>
                     <div class="form-row">
                         <label>@lang('form.body.label.remark_en')</label>
-                        <textarea type="text" placeholder="..."
-                            x-model="form.remark_en" :disabled="form.disabled" autocomplete="off">
+                        <textarea type="text" placeholder="..." x-model="form.remark_en" :disabled="form.disabled" autocomplete="off">
                         </textarea>
                         <span class="error" x-show="validate?.remark_en" x-text="validate?.remark_en"></span>
                     </div>
                     <div class="form-row">
                         <label>@lang('form.body.label.remark_km')</label>
-                        <textarea type="text" placeholder="..."
-                            x-model="form.remark_km" :disabled="form.disabled" autocomplete="off">
+                        <textarea type="text" placeholder="..." x-model="form.remark_km" :disabled="form.disabled" autocomplete="off">
                         </textarea>
                         <span class="error" x-show="validate?.remark_km" x-text="validate?.remark_km"></span>
                     </div>
@@ -96,26 +97,28 @@
                     <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.usage_limited')</label>
-                            <input type="text" placeholder="5"
-                                x-model="form.usage_limit" :disabled="form.disabled" autocomplete="off">
-                            <span class="error" x-show="validate?.usage_limit" x-text="validate?.usage_limit"></span>
+                            <input type="text" placeholder="5" x-model="form.usage_limit"
+                                :disabled="form.disabled" autocomplete="off">
+                            <span class="error" x-show="validate?.usage_limit"
+                                x-text="validate?.usage_limit"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.usage_per_customer')</label>
-                            <input type="text" placeholder="1"
-                                x-model="form.usage_per_customer" :disabled="form.disabled" autocomplete="off">
-                            <span class="error" x-show="validate?.usage_per_customer" x-text="validate?.usage_per_customer"></span>
+                            <input type="text" placeholder="1" x-model="form.usage_per_customer"
+                                :disabled="form.disabled" autocomplete="off">
+                            <span class="error" x-show="validate?.usage_per_customer"
+                                x-text="validate?.usage_per_customer"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.min_amount')</label>
-                            <input type="text" placeholder="15"
-                                x-model="form.min_amount" :disabled="form.disabled" autocomplete="off">
+                            <input type="text" placeholder="15" x-model="form.min_amount"
+                                :disabled="form.disabled" autocomplete="off">
                             <span class="error" x-show="validate?.min_amount" x-text="validate?.min_amount"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.max_amount')</label>
-                            <input type="text" placeholder="50"
-                                x-model="form.max_amount" :disabled="form.disabled" autocomplete="off">
+                            <input type="text" placeholder="50" x-model="form.max_amount"
+                                :disabled="form.disabled" autocomplete="off">
                             <span class="error" x-show="validate?.max_amount" x-text="validate?.max_amount"></span>
                         </div>
                     </div>
@@ -124,7 +127,8 @@
                             <label>@lang('form.body.label.products')</label>
                             <input @click="selectProductVariation()" type="text" placeholder="@lang('form.body.placeholder.select_products')"
                                 x-model="form.product_title" :disabled="form.disabled" autocomplete="off" readonly>
-                            <span class="error" x-show="validate?.product_ids" x-text="validate?.product_ids"></span>
+                            <span class="error" x-show="validate?.product_ids"
+                                x-text="validate?.product_ids"></span>
                         </div>
                         <div class="form-row w-[30%]">
                             <label for="product_discount_type">@lang('form.body.label.product_discount_type')<span>*</span> </label>
@@ -133,16 +137,20 @@
                                 <option value="0">@lang('form.name.unit_discount')</option>
                                 <option value="1">@lang('form.name.flat_discount')</option>
                             </select>
-                            <span class="error" x-show="validate?.is_flat_discount" x-text="validate?.is_flat_discount"></span>
+                            <span class="error" x-show="validate?.is_flat_discount"
+                                x-text="validate?.is_flat_discount"></span>
                         </div>
                     </div>
                     <div class="row" x-show="form.product_ids">
                         <table class="border-collapse border border-[#d8dce5] w-full">
                             <thead>
                                 <tr class="h-[35px]">
-                                    <th class="border border-[#d8dce5] text-sm text-[#5a5e66] font-[600]">@lang('table.field.product')</th>
-                                    <th class="border border-[#d8dce5] text-sm text-[#5a5e66] font-[600]">@lang('table.field.title')</th>
-                                    <th class="border border-[#d8dce5] text-sm text-[#5a5e66] font-[600]">@lang('table.field.price')</th>
+                                    <th class="border border-[#d8dce5] text-sm text-[#5a5e66] font-[600]">
+                                        @lang('table.field.product')</th>
+                                    <th class="border border-[#d8dce5] text-sm text-[#5a5e66] font-[600]">
+                                        @lang('table.field.title')</th>
+                                    <th class="border border-[#d8dce5] text-sm text-[#5a5e66] font-[600]">
+                                        @lang('table.field.price')</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -262,7 +270,7 @@
                     console.log(e);
                 });
             },
-            setValue(data){
+            setValue(data) {
                 this.form.type = data?.type;
                 this.form.code = data?.code;
                 this.form.status = data?.status;
@@ -279,18 +287,19 @@
                 this.form.usage_per_customer = data?.usage_per_customer;
                 this.form.is_flat_discount = data?.is_flat_discount ?? 0;
 
-                if(data?.conditions?.length > 0){
+                if (data?.conditions?.length > 0) {
                     let min = data?.conditions.find(item => item.type == 'MIN');
                     let max = data?.conditions.find(item => item.type == 'MAX');
                     this.form.min_amount = min?.amount ?? '';
                     this.form.max_amount = max?.amount ?? '';
                 }
 
-                if(data?.products?.length > 0){
+                if (data?.products?.length > 0) {
                     this.selected_products = data?.products.map((item) => {
                         return {
                             _id: item.id,
-                            _product_title: item?.product?.title?.[langLocale] ?? item?.product?.title?.en ?? 'Untitled',
+                            _product_title: item?.product?.title?.[langLocale] ?? item?.product?.title
+                                ?.en ?? 'Untitled',
                             _variation_title: item?.title?.[langLocale] ?? item?.title?.en ?? '',
                             _price: item?.price ?? 0,
                             _size: item?.size ?? '',
@@ -298,7 +307,8 @@
                         }
                     });
                     this.form.product_ids = this.selected_products.map(item => item._id);
-                    this.form.product_title = this.selected_products.map(item => item._variation_title).join(', ');
+                    this.form.product_title = this.selected_products.map(item => item._variation_title).join(
+                        ', ');
                 }
 
                 this.form.tmp_file = data?.image;
@@ -380,9 +390,11 @@
                                 const data = response?.data?.map(item => {
                                     return {
                                         _id: item.id,
-                                        _product_title: item?.product?.title?.[langLocale] ?? item?.product?.title?.en ?? 'Untitled',
-                                        _variation_title: item?.title?.[langLocale] ?? item?.title?.en ?? '',
-                                        _price: item?.price ?? 0,
+                                        _title: item?.product?.title?.[langLocale] ??
+                                            item?.product?.title?.en ?? 'Untitled',
+                                        _description: item?.description?.[langLocale] ??
+                                            item?.description?.en ?? '',
+                                        _price: item?.price + " $" ?? 0 + " $",
                                         _size: item?.size ?? '',
                                         _item: item,
                                     }
@@ -404,9 +416,16 @@
                                         item => {
                                             return {
                                                 _id: item.id,
-                                                _product_title: item?.product?.title?.[langLocale] ?? item?.product?.title?.en ?? 'Untitled',
-                                                _variation_title: item?.title?.[langLocale] ?? item?.title?.en ?? '',
-                                                _price: item?.price ?? 0,
+                                                _title: item?.product?.title?.[
+                                                        langLocale
+                                                    ] ?? item?.product?.title?.en ??
+                                                    'Untitled',
+                                                _description: item?.description?.[
+                                                        langLocale
+                                                    ] ?? item?.description?.en ??
+                                                    '',
+                                                _price: item?.price + " $" ?? 0 +
+                                                    " $",
                                                 _size: item?.size ?? '',
                                                 _item: item,
                                             }
@@ -419,8 +438,9 @@
                         if (res) {
                             this.selected_products = res;
                             this.form.product_ids = res.map(item => item._id);
-                            this.form.product_title = res.map(item => item._variation_title).join(', ');
-                        }else{
+                            this.form.product_title = res.map(item => item._variation_title).join(
+                                ', ');
+                        } else {
                             this.selected_products = [];
                             this.form.product_ids = [];
                             this.form.product_title = null;
@@ -428,7 +448,7 @@
                     }
                 });
             },
-            close(){
+            close() {
                 const start_date = $('#start_date').data('daterangepicker');
                 const end_date = $('#end_date').data('daterangepicker');
                 if (start_date) {
@@ -470,7 +490,7 @@
             async onSave() {
                 await this.onValidate((res) => {
                     this.validate = res.response?.data?.errors;
-                    if(res.status == 422){
+                    if (res.status == 422) {
                         toastr.info(res.response.data.message, {
                             progressBar: true,
                             timeOut: 5000
@@ -508,7 +528,8 @@
                                 }).then((res) => {
                                     if (res.data.error == false) {
                                         this.form.reset();
-                                        this.$dialog('storeProductDiscountDialog').close(true);
+                                        this.$dialog('storeProductDiscountDialog')
+                                            .close(true);
                                     }
                                     toastr.success(res.data.message, {
                                         progressBar: true,
