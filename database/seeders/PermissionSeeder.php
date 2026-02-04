@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\ModulePermission;
 use App\Models\Permission;
+use Database\Seeders\PermissionModule\PageSeeder;
 use Database\Seeders\PermissionModule\ProductSeeder;
 use Database\Seeders\PermissionModule\SettingSeeder;
 use Database\Seeders\PermissionModule\UserPermissionSeeder;
@@ -25,5 +26,6 @@ class PermissionSeeder extends Seeder
         $this->call(ProductSeeder::class);
         $this->call(UserPermissionSeeder::class);
         $this->call(SettingSeeder::class);
+        $this->call(PageSeeder::class);
     }
 }

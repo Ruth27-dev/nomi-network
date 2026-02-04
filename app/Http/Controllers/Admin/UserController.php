@@ -212,7 +212,6 @@ class UserController extends Controller
         try {
             $data = User::findOrFail($userId);
             $roles = $roleData;
-            $original_data = $data->getOriginal();
             $data->syncRoles($roles);
             return $this->responseSuccess();
         } catch (Exception $e) {

@@ -68,11 +68,9 @@ class ListOfValueService
 
             if ($id) {
                 $data = ListOfValue::find($id);
-                $original_data = $data->getOriginal();
                 $data->update($items);
             } else {
                 $data = ListOfValue::create($items);
-                $original_data = $data->getOriginal();
             }
 
             DB::commit();
@@ -100,7 +98,6 @@ class ListOfValueService
     {
         try {
             $data = ListOfValue::findOrFail($id);
-            $original_data = $data->getOriginal();
             $data->update([
                 'status' => $status
             ]);
@@ -114,7 +111,6 @@ class ListOfValueService
     {
         try {
             $data = ListOfValue::findOrFail($id);
-            $original_data = $data->getOriginal();
             $data->delete();
             return $this->responseSuccess(null, __('form.message.delete.success'));
         } catch (\Exception $e) {
@@ -126,7 +122,6 @@ class ListOfValueService
     {
         try {
             $data = ListOfValue::withTrashed()->findOrFail($id);
-            $original_data = $data->getOriginal();
             $data->restore();
             return $this->responseSuccess(null, __('form.message.restore.success'));
         } catch (\Exception $e) {

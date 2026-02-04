@@ -72,14 +72,12 @@ class BankAccountController extends Controller
 
             if (!$request->id) {
                 $data = BankAccount::create($input);
-                $original_data = $data->getOriginal();
             } else {
                 $data = BankAccount::find($request->id);
                 if ($request->file('qr_code') || !$request->tmp_file) {
                     UploadFile::deleteFile('/bank-account', $data->qr_code);
                 }
                 $input['qr_code'] = $qr_code ?? $request->tmp_file;
-                $original_data = $data->getOriginal();
                 $data->update($input);
             }
 
