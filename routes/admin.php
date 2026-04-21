@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
 use App\Http\Controllers\Admin\Pages\ContactUsController;
 use App\Http\Controllers\Admin\Pages\FrequentlyAskedQuestionController;
 use App\Http\Controllers\Admin\Pages\OurMissionController;
+use App\Http\Controllers\Admin\Pages\OurProgramController;
 use App\Http\Controllers\Admin\Pages\OurStoryController;
 use App\Http\Controllers\Admin\Pages\OurTeamController;
 use App\Http\Controllers\Admin\Pages\PrivacyPolicyController;
@@ -202,6 +203,12 @@ Route::middleware(['locale'])->group(function () {
 
             // why choose us
             Route::controller(WhyChooseUsController::class)->prefix('why-choose-us')->name('why-choose-us-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::post('save', 'save')->name('save');
+            });
+
+            // our program
+            Route::controller(OurProgramController::class)->prefix('our-program')->name('our-program-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
             });

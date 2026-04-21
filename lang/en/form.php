@@ -166,6 +166,7 @@ return [
         "color"                     => "Color",
         "contact_us"                => "Contact Us",
         "why_choose_us"             => "Why Choose Us",
+        "our_program"               => "Our Programs",
         "frequently_asked_question" => "Frequently Asked Questions",
         'our_story'                 => "Our Story",
         'delivery_option'           => "Delivery Option",

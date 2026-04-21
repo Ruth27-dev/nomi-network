@@ -115,6 +115,9 @@ return [
         'why_choose_us' => [
             'key'   => 'why_choose_us',
         ],
+        'our_program' => [
+            'key'   => 'our_program',
+        ],
         'achievement_summary' => [
             'key'   => 'achievement_summary',
         ],

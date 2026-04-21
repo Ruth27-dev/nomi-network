@@ -143,6 +143,7 @@ return [
         "color"                     => "ពណ៌",
         "contact_us"                => "ទំនាក់ទំនង",
         "why_choose_us"             => "ហេតុអ្វីជ្រើសរើសយើង",
+        "our_program"               => "កម្មវិធីរបស់យើង",
         "frequently_asked_question" => "សំណួរដែលសួរញឹកញាប់",
         'our_story'                 => "ប្រវត្តិ​របស់យើង",
         'delivery_option'           => "ជម្រើសដឹកជញ្ជូន",

@@ -42,6 +42,10 @@ return [
             'en' => 'Why Choose Us',
             'km' => 'ហេតុអ្វីជ្រើសរើសយើង',
         ],
+        'our_program' => [
+            'en' => 'Our Programs',
+            'km' => 'កម្មវិធីរបស់យើង',
+        ],
         'our_mission' => [
             'en' => 'Our Mission',
             'km' => 'បេសកកម្មរបស់យើង',
