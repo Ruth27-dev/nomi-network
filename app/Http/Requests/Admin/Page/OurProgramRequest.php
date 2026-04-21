@@ -24,7 +24,7 @@ class OurProgramRequest extends FormRequest
             'status'            => 'required',
 
 
-            'dataDetail'                       => 'required',
+            'dataDetail'                       => 'nullable|array',
             'dataDetail.*.title_km'            => 'required',
             'dataDetail.*.title_en'            => 'required',
             'dataDetail.*.description_km'      => 'required',

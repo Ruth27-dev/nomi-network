@@ -85,6 +85,8 @@ class OurProgramController extends Controller
             }
 
             DB::commit();
+            $data->refresh();
+
             return response()->json([
                 'status' => 'success',
                 'message' => $request->id
@@ -92,6 +94,7 @@ class OurProgramController extends Controller
                     : __('form.message.create.success'),
                 'error' => false,
                 'id' => $data->id,
+                'data' => $data,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
