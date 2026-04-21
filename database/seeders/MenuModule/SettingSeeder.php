@@ -19,7 +19,7 @@ class   SettingSeeder extends Seeder
             'icon'  => 'settings',
             'active' => 'admin/setting/*',
             'ordering' => 3,
-            'permission' => array('company-view', 'bank-account-view', 'banner-view'),
+            'permission' => array('company-view', 'bank-account-view'),
         ]);
 
         Menu::create([
@@ -41,19 +41,8 @@ class   SettingSeeder extends Seeder
             ]),
             'path' => 'admin/setting/bank-account/list',
             'active' => 'admin/setting/bank-account/*',
-            'ordering' => 7,
+            'ordering' => 2,
             'permission' => array('bank-account-view'),
-        ]);
-        Menu::create([
-            'parent_id' => $setting->id,
-            'name' => json_encode([
-                'en' => 'Banner',
-                'km' => 'Banner',
-            ]),
-            'path' => 'admin/setting/banner/list',
-            'active' => 'admin/setting/banner/*',
-            'ordering' => 8,
-            'permission' => array('banner-view'),
         ]);
     }
 }

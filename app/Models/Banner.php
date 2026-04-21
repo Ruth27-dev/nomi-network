@@ -17,12 +17,14 @@ class Banner extends Model
         'ordering',
         'status',
         'url',
+        'description',
         'image',
         'user_id',
     ];
 
     protected $casts = [
-        'title' => 'array',
+        'title'       => 'array',
+        'description' => 'array',
     ];
 
     protected $appends = ['image_url'];

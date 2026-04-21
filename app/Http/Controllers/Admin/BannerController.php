@@ -17,9 +17,9 @@ class BannerController extends Controller
     {
         parent::__construct();
         $this->middleware('permission:banner-view', ['only' => ['index', 'data']]);
-        $this->middleware('permission:banner-create', ['only' => ['save']]);
-        $this->middleware('permission:banner-update', ['only' => ['save', 'onUpdateStatus']]);
-        $this->middleware('permission:banner-delete', ['only' => ['onDelete']]);
+        $this->middleware('permission:banner-create|banner-update', ['only' => ['save']]);
+        $this->middleware('permission:banner-update', ['only' => ['onUpdateStatus']]);
+        $this->middleware('permission:banner-delete', ['only' => ['onDelete', 'onDestroy']]);
         $this->middleware('permission:banner-restore', ['only' => ['onRestore']]);
     }
 
@@ -36,6 +36,8 @@ class BannerController extends Controller
                 $q->where(function ($query) use ($search) {
                     $query->where('title->en', 'like', $search)
                         ->orWhere('title->km', 'like', $search)
+                        ->orWhere('description->en', 'like', $search)
+                        ->orWhere('description->km', 'like', $search)
                         ->orWhere('banner_page', 'like', $search)
                         ->orWhere('url', 'like', $search);
                 });
@@ -50,6 +52,9 @@ class BannerController extends Controller
 
     public function save(BannerRequest $request)
     {
+        $permission = $request->id ? 'banner-update' : 'banner-create';
+        abort_unless(Auth::guard('admin')->user()?->can($permission), 403);
+
         DB::beginTransaction();
         try {
             $image = UploadFile::uploadFile('/banner', $request->file('image'));
@@ -57,6 +62,10 @@ class BannerController extends Controller
                 'title' => [
                     'en' => $request->title_en,
                     'km' => $request->title_km,
+                ],
+                'description' => [
+                    'en' => $request->description_en,
+                    'km' => $request->description_km,
                 ],
                 'banner_page' => $request->banner_page,
                 'ordering' => $request->ordering,

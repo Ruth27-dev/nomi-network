@@ -22,7 +22,7 @@
                                     <span>@lang('table.field.page')</span>
                                 </div>
                                 <div class="w-20/100 text-sm font-bold text-gray-500 flex items-center">
-                                    <span>@lang('table.field.link')</span>
+                                    <span>@lang('table.field.description')</span>
                                 </div>
                                 <div class="w-10/100 text-sm font-bold text-gray-500 flex items-center">
                                     <span> @lang('table.field.ordering')</span>
@@ -59,7 +59,8 @@
                                     <span class="text-sm text-center" x-text="item.banner_page ?? '-'"></span>
                                 </div>
                                 <div class="w-20/100 text-gray-500 flex items-center">
-                                    <span class="text-sm text-center truncate" x-text="item.url ?? '-'"></span>
+                                    <span class="text-sm text-center truncate"
+                                        x-text="typeof item.description === 'object' ? (item.description?.[langLocale] ?? item.description?.en ?? '-') : (item.description ?? '-')"></span>
                                 </div>
                                 <div class="w-10/100 text-gray-500 flex items-center">
                                     <span class="text-sm text-center" x-text="item.ordering ?? '-'"></span>

@@ -23,6 +23,8 @@ class BannerRequest extends FormRequest
     {
         return [
             'title_en'    => 'required',
+            'description_en' => 'nullable',
+            'description_km' => 'nullable',
             'banner_page' => 'required',
             'ordering'    => 'required|integer',
             'status'      => 'required',

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->bigInteger('ordering')->nullable();
             $table->string('status')->nullable()->comment('ACTIVE, INACTIVE');
             $table->text('url')->nullable();
+            $table->json('description')->nullable()->comment('multi language');
             $table->string('image', 255)->nullable();
             $table->bigInteger('user_id')->nullable()->comment('last performed');
             $table->timestamps();

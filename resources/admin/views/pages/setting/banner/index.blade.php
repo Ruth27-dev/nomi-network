@@ -43,7 +43,7 @@
 @section('script')
     <script type="module">
         Alpine.data('bannerPage', () => ({
-            table: new Table("{{ route('admin-setting-banner-data') }}"),
+            table: new Table("{{ route('admin-page-banner-data') }}"),
             init() {
                 this.table.init();
                 feather.replace();
@@ -106,7 +106,7 @@
                     afterClosed: (result) => {
                         if (result) {
                             Axios({
-                                url: `{{ route('admin-setting-banner-status') }}`,
+                                url: `{{ route('admin-page-banner-status') }}`,
                                 method: 'POST',
                                 data: {
                                     id: data.id,
@@ -139,7 +139,7 @@
                     afterClosed: (result) => {
                         if (result) {
                             Axios({
-                                url: `{{ route('admin-setting-banner-delete') }}`,
+                                url: `{{ route('admin-page-banner-delete') }}`,
                                 method: 'DELETE',
                                 data: {
                                     id: data.id
@@ -171,7 +171,7 @@
                     afterClosed: (result) => {
                         if (result) {
                             Axios({
-                                url: `{{ route('admin-setting-banner-restore') }}`,
+                                url: `{{ route('admin-page-banner-restore') }}`,
                                 method: 'PUT',
                                 data: {
                                     id: data.id

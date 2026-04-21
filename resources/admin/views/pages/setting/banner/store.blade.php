@@ -47,8 +47,8 @@
                 <div class="row-2">
                     <div class="form-row">
                         <label>@lang('form.body.label.ordering')<span>*</span></label>
-                        <input id="ordering" placeholder="@lang('form.body.placeholder.ordering')" type="number"
-                            x-model="form.ordering" :disabled="form.disabled" autocomplete="off">
+                        <input id="ordering" placeholder="@lang('form.body.placeholder.ordering')" type="number" x-model="form.ordering"
+                            :disabled="form.disabled" autocomplete="off">
                         <span class="error" x-show="validate?.ordering" x-text="validate?.ordering"></span>
                     </div>
                     <div class="form-row">
@@ -61,9 +61,23 @@
                         <span class="error" x-show="validate?.status" x-text="validate?.status"></span>
                     </div>
                 </div>
+                <div class="row-2">
+                    <div class="form-row">
+                        <label>@lang('form.body.label.description_en')</label>
+                        <textarea type="text" placeholder="@lang('form.body.placeholder.description_en')" x-model="form.description_en"
+                            :disabled="form.disabled" autocomplete="off" rows="5"></textarea>
+                        <span class="error" x-show="validate?.description_en" x-text="validate?.description_en"></span>
+                    </div>
+                    <div class="form-row">
+                        <label>@lang('form.body.label.description_km')</label>
+                        <textarea type="text" placeholder="@lang('form.body.placeholder.description_km')" x-model="form.description_km"
+                            :disabled="form.disabled" autocomplete="off" rows="5"></textarea>
+                        <span class="error" x-show="validate?.description_km" x-text="validate?.description_km"></span>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="form-row">
-                        <label>@lang('form.body.label.image')</label>
+                        <label>@lang('form.body.label.image')<span>*</span></label>
                         <input type="file" :disabled="form.disabled" accept="image/*" id="image"
                             class="!p-[12px]" @change="onPreviewImage($el)">
                         <input type="hidden" x-model="form.tmp_file">
@@ -110,12 +124,14 @@
             form: new FormGroup({
                 title_en: [null, ['required']],
                 title_km: [null, []],
-                banner_page: [null, ['required']],
+                banner_page: [@json(config('dummy.page.home_page.key')), ['required']],
                 ordering: [null, ['required']],
                 status: ['ACTIVE', ['required']],
                 url: [null, []],
                 image: [null, []],
                 tmp_file: [null, []],
+                description_en: [null, []],
+                description_km: [null, []],
             }),
             image_url: null,
             dialogData: null,
@@ -127,6 +143,10 @@
                     this.form.patchValue(this.dialogData ?? {});
                     this.form.title_en = this.dialogData?.title?.en ?? null;
                     this.form.title_km = this.dialogData?.title?.km ?? null;
+                    this.form.description_en = typeof this.dialogData?.description === 'object' ?
+                        (this.dialogData?.description?.en ?? null) : (this.dialogData?.description ?? null);
+                    this.form.description_km = typeof this.dialogData?.description === 'object' ?
+                        (this.dialogData?.description?.km ?? null) : null;
                     this.form.banner_page = this.dialogData?.banner_page ?? null;
                     this.form.ordering = this.dialogData?.ordering ?? null;
                     this.form.status = this.dialogData?.status ?? 'ACTIVE';
@@ -142,7 +162,7 @@
             },
             async getMaxOrdering(callback) {
                 await Axios({
-                    url: `{{ route('admin-setting-banner-max-ordering') }}`,
+                    url: `{{ route('admin-page-banner-max-ordering') }}`,
                     method: 'GET',
                     params: {}
                 }).then((res) => {
@@ -189,7 +209,7 @@
                             this.form.image = file.files[0];
                             const data = this.form.value();
                             Axios({
-                                url: `{{ route('admin-setting-banner-save') }}`,
+                                url: `{{ route('admin-page-banner-save') }}`,
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'multipart/form-data',

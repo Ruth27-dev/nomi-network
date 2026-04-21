@@ -157,6 +157,18 @@ Route::middleware(['locale'])->group(function () {
         });
 
         Route::prefix('page')->name('page-')->group(function () {
+            // banner
+            Route::controller(BannerController::class)->prefix('banner')->name('banner-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
+            });
+
             // privacy policy
             Route::controller(PrivacyPolicyController::class)->prefix('privacy-policy')->name('privacy-policy-')->group(function () {
                 Route::get('list', 'index')->name('list');

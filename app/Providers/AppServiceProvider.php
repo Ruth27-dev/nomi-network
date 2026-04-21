@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
         View::addNamespace('admin', resource_path('admin/views'));
-        if (Schema::hasTable('menus') && Request::is('admin/*')) {
+        if (!app()->runningInConsole() && Request::is('admin/*') && Schema::hasTable('menus')) {
             $menu = Menu::with('children')->whereNull('disabled_at')->whereNull('parent_id')->orderBy('ordering')->get();
             view()->share('menu', $menu);
         }

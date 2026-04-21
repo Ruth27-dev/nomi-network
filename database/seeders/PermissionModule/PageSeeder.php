@@ -20,6 +20,45 @@ class PageSeeder extends Seeder
             'sort_no'       => 12,
         ]);
 
+        $banner = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.banner')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'banner-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $banner->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'banner-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $banner->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'banner-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $banner->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'banner-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $banner->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'banner-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $banner->id,
+            ],
+        ]);
+
         $privacyPolicy = ModulePermission::create([
             'parent_id'     =>   $page->id,
             'display_name'  => json_encode(config('permission_module.menu.privacy_policy')),

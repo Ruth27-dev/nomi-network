@@ -18,6 +18,42 @@ return [
             'en' => 'Banner',
             'km' => 'Banner',
         ],
+        'page_management' => [
+            'en' => 'Page Management',
+            'km' => 'ការគ្រប់គ្រងទំព័រ',
+        ],
+        'privacy_policy' => [
+            'en' => 'Privacy Policy',
+            'km' => 'គោលការណ៍ឯក ជនភាព',
+        ],
+        'contact_us' => [
+            'en' => 'Contact Us',
+            'km' => 'ទំនាក់ទំនង',
+        ],
+        'about_us' => [
+            'en' => 'About Us',
+            'km' => 'អំពីពួកយើង',
+        ],
+        'why_choose_us' => [
+            'en' => 'Why Choose Us',
+            'km' => 'ហេតុអ្វីជ្រើសរើសយើង',
+        ],
+        'our_mission' => [
+            'en' => 'Our Mission',
+            'km' => 'បេសកកម្មរបស់យើង',
+        ],
+        'our_story' => [
+            'en' => 'Our Story',
+            'km' => 'ប្រវត្តិ​របស់យើង',
+        ],
+        'our_team' => [
+            'en' => 'Our Team',
+            'km' => 'ក្រុមរបស់យើង',
+        ],
+        'frequently_asked_question' => [
+            'en' => 'Frequently Asked Question',
+            'km' => 'សំណួរដែលសួរញឹកញាប់',
+        ],
     ],
     'action' => [
         'view' => [
