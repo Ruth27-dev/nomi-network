@@ -115,6 +115,9 @@ return [
         'why_choose_us' => [
             'key'   => 'why_choose_us',
         ],
+        'achievement_summary' => [
+            'key'   => 'achievement_summary',
+        ],
         'frequently_asked_question' => [
             'key'   => 'frequently_asked_question',
         ],

@@ -59,6 +59,45 @@ class PageSeeder extends Seeder
             ],
         ]);
 
+        $achievementSummary = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.achievement_summary')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'achievement-summary-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $achievementSummary->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'achievement-summary-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $achievementSummary->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'achievement-summary-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $achievementSummary->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'achievement-summary-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $achievementSummary->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'achievement-summary-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $achievementSummary->id,
+            ],
+        ]);
+
         $privacyPolicy = ModulePermission::create([
             'parent_id'     =>   $page->id,
             'display_name'  => json_encode(config('permission_module.menu.privacy_policy')),

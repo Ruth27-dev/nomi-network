@@ -117,6 +117,7 @@ return [
         'device'                     => 'Device',
         'label'                      => 'Label',
         'number'                     => 'Room No',
+        'achievement_number'         => 'Number',
         'room_type'                  => 'Room Type',
         'monday'                     => 'Mon',
         'tuesday'                    => 'Tue',

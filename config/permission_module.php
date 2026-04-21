@@ -4,19 +4,23 @@ return [
     'menu' => [
         'setting' => [
             'en' => 'Setting',
-            'km' => 'Setting',
+            'km' => 'ការកំណត់',
         ],
         'company' => [
             'en' => 'Company',
-            'km' => 'Company',
+            'km' => 'ក្រុមហ៊ុន',
         ],
         'bank_account' => [
             'en' => 'Bank Account',
-            'km' => 'Bank Account',
+            'km' => 'គណនីធនាគារ',
         ],
         'banner' => [
             'en' => 'Banner',
-            'km' => 'Banner',
+            'km' => 'បដា',
+        ],
+        'achievement_summary' => [
+            'en' => 'Achievement Summary',
+            'km' => 'សេចក្តីសង្ខេបសមិទ្ធផល',
         ],
         'page_management' => [
             'en' => 'Page Management',

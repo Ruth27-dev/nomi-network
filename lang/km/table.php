@@ -67,6 +67,7 @@ return [
         'device'                     => 'Device',
         'label'                      => 'Label',
         'number'                     => 'លេខបន្ទប់',
+        'achievement_number'         => 'ចំនួន',
         'room_type'                  => 'ប្រភេទបន្ទប់',
         'monday'                     => 'ច័ន្ទ',
         'tuesday'                    => 'អង្គារ',
