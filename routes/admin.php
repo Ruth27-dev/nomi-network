@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\Pages\AboutUsController;
 use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
 use App\Http\Controllers\Admin\Pages\ContactUsController;
 use App\Http\Controllers\Admin\Pages\FrequentlyAskedQuestionController;
+use App\Http\Controllers\Admin\Pages\MissionVisionController;
+use App\Http\Controllers\Admin\Pages\OurCoreValueController;
 use App\Http\Controllers\Admin\Pages\OurMissionController;
 use App\Http\Controllers\Admin\Pages\OurProgramController;
 use App\Http\Controllers\Admin\Pages\OurStoryController;
@@ -220,6 +222,24 @@ Route::middleware(['locale'])->group(function () {
             Route::controller(UpcomingEventController::class)->prefix('upcoming-event')->name('upcoming-event-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
+            });
+
+            // Our Core Values
+            Route::controller(OurCoreValueController::class)->prefix('our-core-value')->name('our-core-value-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::post('save', 'save')->name('save');
+            });
+
+            // Mission & Vision
+            Route::controller(MissionVisionController::class)->prefix('mission-vision')->name('mission-vision-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
             });
 
             // Social Media

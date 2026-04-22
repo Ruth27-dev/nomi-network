@@ -121,6 +121,12 @@ return [
         'upcoming_event' => [
             'key'   => 'upcoming_event',
         ],
+        'our_core_value' => [
+            'key'   => 'our_core_value',
+        ],
+        'mission_vision' => [
+            'key'   => 'mission_vision',
+        ],
         'achievement_summary' => [
             'key'   => 'achievement_summary',
         ],

@@ -140,6 +140,27 @@ class PageSeeder extends Seeder
             ],
         ]);
 
+        $ourCoreValue = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.our_core_value')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'our-core-value-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $ourCoreValue->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'our-core-value-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $ourCoreValue->id,
+            ],
+        ]);
+
         $socialMedia = ModulePermission::create([
             'parent_id'     =>   $page->id,
             'display_name'  => json_encode(config('permission_module.menu.social_media')),
@@ -197,6 +218,45 @@ class PageSeeder extends Seeder
                 'name'          => 'our-story-update',
                 'guard_name'    => 'admin',
                 'module_id'     => $ourStory->id,
+            ],
+        ]);
+
+                $missionVision = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.mission_vision')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'mission-vision-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $missionVision->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'mission-vision-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $missionVision->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'mission-vision-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $missionVision->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'mission-vision-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $missionVision->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'mission-vision-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $missionVision->id,
             ],
         ]);
 

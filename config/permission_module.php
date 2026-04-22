@@ -54,6 +54,14 @@ return [
             'en' => 'Upcoming Events',
             'km' => 'ព្រឹត្តិការណ៍ខាងមុខ',
         ],
+        'our_core_value' => [
+            'en' => 'Our Core Values',
+            'km' => 'គុណតម្លៃស្នូលរបស់យើង',
+        ],
+        'mission_vision' => [
+            'en' => 'Mission & Vision',
+            'km' => 'បេសកកម្ម និងចក្ខុវិស័យ',
+        ],
         'our_mission' => [
             'en' => 'Our Mission',
             'km' => 'បេសកកម្មរបស់យើង',
