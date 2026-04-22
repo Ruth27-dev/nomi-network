@@ -118,6 +118,9 @@ return [
         'our_program' => [
             'key'   => 'our_program',
         ],
+        'upcoming_event' => [
+            'key'   => 'upcoming_event',
+        ],
         'achievement_summary' => [
             'key'   => 'achievement_summary',
         ],

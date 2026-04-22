@@ -3,10 +3,10 @@
     <link rel="stylesheet" href="{{ asset('plugin/css/form.css') }}">
 @endsection
 @section('layout')
-    <div class="form-admin" x-data="OurProgram">
+    <div class="form-admin" x-data="upcomingEvent">
         @include('admin::shared.header', [
-            'title' => __('form.name.our_program'),
-            'header_name' => __('form.name.our_program'),
+            'title' => __('form.name.upcoming_event'),
+            'header_name' => __('form.name.upcoming_event'),
         ])
         <form id="form" class="form-wrapper">
             <div class="form-header"></div>
@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="form-button mb-3">
-                    @can('our-program-update')
+                    @can('upcoming-event-update')
                         <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
                             class="!rounded-[50px]">
                             <span class="material-icons mr-1">save</span>
@@ -52,7 +52,7 @@
                 <fieldset class="border-[#d8dce5] border rounded p-3 mb-3">
                     <legend>@lang('table.option.detail')</legend>
                     <div class="form-button mb-3">
-                        @can('our-program-update')
+                        @can('upcoming-event-update')
                             <button type="button" color="primary" class="!rounded-[50px]"
                                 @click="openCreateDetailDialog()">
                                 <span class="material-icons mr-1">add</span>
@@ -74,17 +74,20 @@
                                     <th class="text-left text-sm text-gray-600" style="padding: 12px;">
                                         @lang('form.body.label.title_km')
                                     </th>
+                                    <th class="text-left text-sm text-gray-600" style="width: 140px; padding: 12px;">
+                                        @lang('table.field.date')
+                                    </th>
                                     <th class="text-left text-sm text-gray-600" style="padding: 12px;">
-                                        @lang('table.field.description')
+                                        @lang('form.body.label.location_en')
+                                    </th>
+                                    <th class="text-left text-sm text-gray-600" style="padding: 12px;">
+                                        @lang('form.body.label.location_km')
                                     </th>
                                     <th class="text-left text-sm text-gray-600" style="width: 110px; padding: 12px;">
                                         @lang('table.field.ordering')
                                     </th>
                                     <th class="text-left text-sm text-gray-600" style="width: 100px; padding: 12px;">
                                         @lang('form.body.label.image')
-                                    </th>
-                                    <th class="text-left text-sm text-gray-600" style="width: 100px; padding: 12px;">
-                                        @lang('form.body.label.icon')
                                     </th>
                                     <th class="text-center text-sm text-gray-600" style="width: 100px; padding: 12px;">
                                         @lang('table.field.action')
@@ -94,7 +97,7 @@
                             <tbody>
                                 <template x-if="dataDetail.length === 0">
                                     <tr>
-                                        <td colspan="8" class="text-center text-sm text-gray-400"
+                                        <td colspan="9" class="text-center text-sm text-gray-400"
                                             style="padding: 28px;">
                                             @lang('dialog.empty.title')
                                         </td>
@@ -107,9 +110,12 @@
                                             x-text="item.title_en || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.title_km || '-'"></td>
-                                        <td class="text-sm text-gray-600" style="padding: 12px;">
-                                            <span x-text="item.description_en || '-'"></span>
-                                        </td>
+                                        <td class="text-sm text-gray-600" style="padding: 12px;"
+                                            x-text="formatDisplayDate(item.date)"></td>
+                                        <td class="text-sm text-gray-600" style="padding: 12px;"
+                                            x-text="item.location_en || '-'"></td>
+                                        <td class="text-sm text-gray-600" style="padding: 12px;"
+                                            x-text="item.location_km || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
                                         <td style="padding: 12px;">
@@ -125,19 +131,7 @@
                                             </template>
                                         </td>
                                         <td style="padding: 12px;">
-                                            <template x-if="item.icon_url">
-                                                <button type="button" class="h-[50px] w-[50px] rounded-md overflow-hidden"
-                                                    @click="onViewIcon(item.icon_url)">
-                                                    <img class="w-full h-full object-contain" :src="item.icon_url"
-                                                        alt="">
-                                                </button>
-                                            </template>
-                                            <template x-if="!item.icon_url">
-                                                <span class="text-sm text-gray-400">-</span>
-                                            </template>
-                                        </td>
-                                        <td style="padding: 12px;">
-                                            @can('our-program-update')
+                                            @can('upcoming-event-update')
                                                 <div class="flex justify-center gap-2">
                                                     <button type="button"
                                                         class="h-[35px] w-[35px] rounded-md border border-gray-200 grid place-items-center"
@@ -162,7 +156,7 @@
             <div class="form-footer"></div>
         </form>
 
-        <div x-show="detailDialogOpen" x-transition.opacity
+        <div id="upcoming_event_detail_dialog" x-show="detailDialogOpen" x-transition.opacity
             style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(17, 24, 39, 0.45); padding: 56px 16px 24px; overflow-y: auto;"
             @click.self="closeDetailDialog()" @keydown.escape.window="closeDetailDialog()">
             <div class="form-wrapper"
@@ -191,19 +185,27 @@
                     </div>
                     <div class="row-2">
                         <div class="form-row">
-                            <label>@lang('form.body.label.description_en') <span>*</span></label>
-                            <textarea rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
-                            <span class="error" x-show="detailValidate?.description_en"
-                                x-text="detailValidate?.description_en"></span>
+                            <label>@lang('form.body.label.location_en') <span>*</span></label>
+                            <input type="text" x-model="detailForm.location_en"
+                                placeholder="@lang('form.body.placeholder.location_en')" autocomplete="off">
+                            <span class="error" x-show="detailValidate?.location_en"
+                                x-text="detailValidate?.location_en"></span>
                         </div>
                         <div class="form-row">
-                            <label>@lang('form.body.label.description_km') <span>*</span></label>
-                            <textarea rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
-                            <span class="error" x-show="detailValidate?.description_km"
-                                x-text="detailValidate?.description_km"></span>
+                            <label>@lang('form.body.label.location_km') <span>*</span></label>
+                            <input type="text" x-model="detailForm.location_km"
+                                placeholder="@lang('form.body.placeholder.location_km')" autocomplete="off">
+                            <span class="error" x-show="detailValidate?.location_km"
+                                x-text="detailValidate?.location_km"></span>
                         </div>
                     </div>
                     <div class="row-3">
+                        <div class="form-row">
+                            <label>@lang('form.body.label.date') <span>*</span></label>
+                            <input id="event_date" x-ref="eventDateInput" type="text" x-model="detailForm.date"
+                                placeholder="@lang('form.body.placeholder.date')" autocomplete="off" readonly>
+                            <span class="error" x-show="detailValidate?.date" x-text="detailValidate?.date"></span>
+                        </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.ordering') <span>*</span></label>
                             <input type="number" x-model="detailForm.ordering"
@@ -237,36 +239,9 @@
                                 </div>
                             </template>
                         </div>
-                        <div class="form-row">
-                            <label>@lang('form.body.label.icon')</label>
-                            <input type="file" accept="image/*" class="!p-[12px]" x-ref="detailIconInput"
-                                @change="onPreviewDetailIcon($event)">
-                            <template x-if="detailForm.icon_url">
-                                <div
-                                    class="h-[110px] rounded-md border border-gray-100 overflow-hidden relative grid place-items-center group mt-2">
-                                    <img class="w-full h-full object-contain" :src="detailForm.icon_url" alt="">
-                                    <div class="absolute flex gap-2 opacity-0 group-hover:opacity-100 duration-[0.2s]">
-                                        <button type="button"
-                                            class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                            @click="onViewIcon(detailForm.icon_url)">
-                                            <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                visibility_on
-                                            </span>
-                                        </button>
-                                        <button type="button"
-                                            class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                            @click="onRemoveDetailIcon()">
-                                            <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                delete
-                                            </span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
                     </div>
                 </div>
-                    <div class="form-footer"
+                <div class="form-footer"
                     style="height: auto; padding: 12px 20px; border-top: 1px solid #edf0f5; background: #f9fafb;">
                     <div class="form-button" style="padding-top: 0;">
                         <button type="button" @click="closeDetailDialog()" :disabled="detailLoading">
@@ -285,9 +260,9 @@
 @stop
 @section('script')
     <script type="module">
-        Alpine.data('OurProgram', () => ({
+        Alpine.data('upcomingEvent', () => ({
             form: new FormGroup({
-                page: ['our_program', ['required']],
+                page: ['upcoming_event', ['required']],
                 title_en: [null, ['required']],
                 title_km: [null, ['required']],
                 short_detail_en: [null, ['required']],
@@ -332,33 +307,28 @@
                 return {
                     title_en: null,
                     title_km: null,
-                    description_en: null,
-                    description_km: null,
+                    date: null,
+                    location_en: null,
+                    location_km: null,
                     ordering: null,
                     image: null,
                     image_url: null,
                     tmp_image: null,
-                    icon: null,
-                    icon_url: null,
-                    tmp_icon: null,
                 };
             },
             normalizeDetail(item = {}) {
                 const image = item.image || item.tmp_image || null;
-                const icon = item.icon || item.tmp_icon || null;
 
                 return {
                     title_en: item.title_en ?? null,
                     title_km: item.title_km ?? null,
-                    description_en: item.description_en ?? null,
-                    description_km: item.description_km ?? null,
+                    date: this.formatInputDate(item.date),
+                    location_en: item.location_en ?? null,
+                    location_km: item.location_km ?? null,
                     ordering: item.ordering ?? null,
                     image: item.image instanceof File ? item.image : null,
                     tmp_image: image instanceof File ? null : image,
                     image_url: item.image_url || this.resolveFileUrl(image),
-                    icon: item.icon instanceof File ? item.icon : null,
-                    tmp_icon: icon instanceof File ? null : icon,
-                    icon_url: item.icon_url || this.resolveFileUrl(icon),
                 };
             },
             resolveFileUrl(file) {
@@ -367,6 +337,19 @@
                 if (file.startsWith('http') || file.startsWith('blob:')) return file;
 
                 return this.baseUrl + file;
+            },
+            parseDate(date) {
+                if (!date) return null;
+
+                const parsedDate = moment(date, [dateRangePickerInputFormat(), 'YYYY-MM-DD', moment.ISO_8601], true);
+                return parsedDate.isValid() ? parsedDate : null;
+            },
+            formatInputDate(date) {
+                const parsedDate = this.parseDate(date);
+                return parsedDate ? parsedDate.format(dateRangePickerInputFormat()) : (date ?? null);
+            },
+            formatDisplayDate(date) {
+                return this.formatInputDate(date) || '-';
             },
             cloneDetail(item) {
                 return {
@@ -383,9 +366,6 @@
                     if (this.$refs.detailImageInput) {
                         this.$refs.detailImageInput.value = '';
                     }
-                    if (this.$refs.detailIconInput) {
-                        this.$refs.detailIconInput.value = '';
-                    }
                     feather.replace();
                 });
             },
@@ -397,19 +377,74 @@
                     ordering: this.getNextOrdering(),
                 };
                 this.detailDialogOpen = true;
-                this.resetDetailFileInputs();
+                this.resetDetailInputs();
             },
             openEditDetailDialog(index) {
                 this.detailEditIndex = index;
                 this.detailValidate = null;
                 this.detailForm = this.cloneDetail(this.dataDetail[index]);
                 this.detailDialogOpen = true;
-                this.resetDetailFileInputs();
+                this.resetDetailInputs();
             },
             closeDetailDialog() {
                 if (this.detailLoading) return;
                 this.detailDialogOpen = false;
                 this.detailValidate = null;
+                this.destroyDetailDatePicker();
+            },
+            resetDetailInputs() {
+                this.resetDetailFileInputs();
+                this.initDetailDatePicker();
+            },
+            destroyDetailDatePicker() {
+                const datePicker = $('#event_date').data('daterangepicker');
+                if (datePicker) {
+                    datePicker.remove();
+                }
+                $('#event_date').off('apply.daterangepicker cancel.daterangepicker');
+            },
+            initDetailDatePicker() {
+                this.$nextTick(() => {
+                    const dateRangeFormat = dateRangePickerInputFormat();
+                    const input = $('#event_date');
+
+                    this.destroyDetailDatePicker();
+                    input.daterangepicker({
+                        showDropdowns: true,
+                        singleDatePicker: true,
+                        autoUpdateInput: false,
+                        minYear: parseInt(moment().format('YYYY'), 10) - 1,
+                        maxYear: parseInt(moment().format('YYYY'), 10) + 10,
+                        autoApply: true,
+                        opens: "center",
+                        parentEl: '#upcoming_event_detail_dialog',
+                        locale: {
+                            format: dateRangeFormat,
+                            cancelLabel: 'Clear',
+                        }
+                    });
+
+                    input.on('apply.daterangepicker', (ev, picker) => {
+                        const formattedDate = picker.startDate.format(dateRangeFormat);
+                        input.val(formattedDate);
+                        this.detailForm.date = formattedDate;
+                    });
+
+                    input.on('cancel.daterangepicker', () => {
+                        input.val('');
+                        this.detailForm.date = null;
+                    });
+
+                    const initialDate = this.parseDate(this.detailForm.date);
+                    if (initialDate) {
+                        input.data('daterangepicker').setStartDate(initialDate);
+                        input.data('daterangepicker').setEndDate(initialDate);
+                        input.val(initialDate.format(dateRangeFormat));
+                        this.detailForm.date = initialDate.format(dateRangeFormat);
+                    } else {
+                        input.val('');
+                    }
+                });
             },
             validateDetailForm() {
                 const required = 'This field is required.';
@@ -417,8 +452,9 @@
 
                 if (!this.detailForm.title_en) errors.title_en = required;
                 if (!this.detailForm.title_km) errors.title_km = required;
-                if (!this.detailForm.description_en) errors.description_en = required;
-                if (!this.detailForm.description_km) errors.description_km = required;
+                if (!this.detailForm.date) errors.date = required;
+                if (!this.detailForm.location_en) errors.location_en = required;
+                if (!this.detailForm.location_km) errors.location_km = required;
                 if (this.detailForm.ordering === null || this.detailForm.ordering === '') {
                     errors.ordering = required;
                 }
@@ -440,11 +476,12 @@
                     this.dataDetail.splice(detailIndex, 1, detail);
                 }
 
-                const saved = await this.submitProgram(true, detailIndex);
+                const saved = await this.submitUpcomingEvent(true, detailIndex);
 
                 if (saved) {
                     this.detailDialogOpen = false;
                     this.detailValidate = null;
+                    this.destroyDetailDatePicker();
                 } else {
                     this.dataDetail = originalDataDetail;
                 }
@@ -478,35 +515,7 @@
                     this.$refs.detailImageInput.value = '';
                 }
             },
-            onPreviewDetailIcon(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                this.detailForm.icon = file;
-                this.detailForm.tmp_icon = null;
-                this.detailForm.icon_url = URL.createObjectURL(file);
-            },
-            onRemoveDetailIcon() {
-                this.detailForm.icon = null;
-                this.detailForm.icon_url = null;
-                this.detailForm.tmp_icon = null;
-                if (this.$refs.detailIconInput) {
-                    this.$refs.detailIconInput.value = '';
-                }
-            },
             onViewImage(path) {
-                Fancybox.show([{
-                    src: path,
-                    type: "image",
-                }, ], {
-                    on: {
-                        ready: (fancybox) => {
-                            document.querySelector('.fancybox__container').style.zIndex = this
-                                .$store.libs.getLastIndex() + 1;
-                        },
-                    }
-                });
-            },
-            onViewIcon(path) {
                 Fancybox.show([{
                     src: path,
                     type: "image",
@@ -534,20 +543,15 @@
                 this.dataDetail.forEach((item, index) => {
                     formData.append(`dataDetail[${index}][title_en]`, item.title_en ?? '');
                     formData.append(`dataDetail[${index}][title_km]`, item.title_km ?? '');
-                    formData.append(`dataDetail[${index}][description_en]`, item.description_en ?? '');
-                    formData.append(`dataDetail[${index}][description_km]`, item.description_km ?? '');
+                    formData.append(`dataDetail[${index}][date]`, item.date ?? '');
+                    formData.append(`dataDetail[${index}][location_en]`, item.location_en ?? '');
+                    formData.append(`dataDetail[${index}][location_km]`, item.location_km ?? '');
                     formData.append(`dataDetail[${index}][ordering]`, item.ordering ?? '');
                     if (item.image instanceof File) {
                         formData.append(`dataDetail[${index}][image]`, item.image);
                     }
                     if (item.tmp_image) {
                         formData.append(`dataDetail[${index}][tmp_image]`, item.tmp_image);
-                    }
-                    if (item.icon instanceof File) {
-                        formData.append(`dataDetail[${index}][icon]`, item.icon);
-                    }
-                    if (item.tmp_icon) {
-                        formData.append(`dataDetail[${index}][tmp_icon]`, item.tmp_icon);
                     }
                 });
 
@@ -556,7 +560,7 @@
             getDetailServerErrors(errors, index) {
                 if (index === null || !errors) return {};
 
-                return ['title_en', 'title_km', 'description_en', 'description_km', 'ordering', 'image', 'icon']
+                return ['title_en', 'title_km', 'date', 'location_en', 'location_km', 'ordering', 'image']
                     .reduce((carry, field) => {
                         const key = `dataDetail.${index}.${field}`;
                         if (errors[key]) {
@@ -566,7 +570,7 @@
                         return carry;
                     }, {});
             },
-            async submitProgram(useDetailLoading = false, detailIndex = null) {
+            async submitUpcomingEvent(useDetailLoading = false, detailIndex = null) {
                 if (useDetailLoading) {
                     this.detailLoading = true;
                 } else {
@@ -575,7 +579,7 @@
                 }
 
                 try {
-                    const res = await Axios.post(`{{ route('admin-page-our-program-save') }}`, this.buildFormData(), {
+                    const res = await Axios.post(`{{ route('admin-page-upcoming-event-save') }}`, this.buildFormData(), {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
@@ -624,7 +628,7 @@
                     afterClosed: async (result) => {
                         if (!result) return;
 
-                        await this.submitProgram();
+                        await this.submitUpcomingEvent();
                     }
                 });
             }

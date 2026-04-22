@@ -27,13 +27,6 @@ class OurStoryRequest extends FormRequest
             'content_km'        => 'required',
             'content_en'        => 'required',
             'status'            => 'required',
-
-            'dataDetail'                       => 'required',
-            'dataDetail.*.title_km'            => 'required',
-            'dataDetail.*.title_en'            => 'required',
-            'dataDetail.*.description_km'      => 'required',
-            'dataDetail.*.description_en'      => 'required',
-            'dataDetail.*.ordering'            => 'required',
         ];
     }
 
@@ -45,12 +38,6 @@ class OurStoryRequest extends FormRequest
             'content_km.required'   => __('validate.attributes.content_km'),
             'content_en.required'   => __('validate.attributes.content_en'),
             'status.required'       => __('validate.attributes.status'),
-
-            'dataDetail.*.title_km.required'            => __('validate.attributes.title_km'),
-            'dataDetail.*.title_en.required'            => __('validate.attributes.title_en'),
-            'dataDetail.*.description_km.required'      => __('validate.attributes.description_km'),
-            'dataDetail.*.description_en.required'      => __('validate.attributes.description_en'),
-            'dataDetail.*.ordering.required'            => __('validate.attributes.ordering'),
         ];
     }
 }

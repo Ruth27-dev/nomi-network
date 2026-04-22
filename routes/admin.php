@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\Pages\OurProgramController;
 use App\Http\Controllers\Admin\Pages\OurStoryController;
 use App\Http\Controllers\Admin\Pages\OurTeamController;
 use App\Http\Controllers\Admin\Pages\PrivacyPolicyController;
+use App\Http\Controllers\Admin\Pages\UpcomingEventController;
 use App\Http\Controllers\Admin\Pages\WhyChooseUsController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductDiscountController;
@@ -209,6 +210,12 @@ Route::middleware(['locale'])->group(function () {
 
             // our program
             Route::controller(OurProgramController::class)->prefix('our-program')->name('our-program-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::post('save', 'save')->name('save');
+            });
+
+            // upcoming event
+            Route::controller(UpcomingEventController::class)->prefix('upcoming-event')->name('upcoming-event-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
             });

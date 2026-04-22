@@ -47,23 +47,6 @@ class OurStoryController extends Controller
                 'content' => [
                     'en' => $request->content_en,
                     'km' => $request->content_km,
-                    'dataDetail' => collect($request->dataDetail)->map(function ($item, $index) use ($request) {
-                        $detail = [
-                            'title_en' => $item['title_en'] ?? null,
-                            'title_km' => $item['title_km'] ?? null,
-                            'description_en' => $item['description_en'] ?? null,
-                            'description_km' => $item['description_km'] ?? null,
-                            'ordering' => $item['ordering'] ?? null,
-                            'icon' => $item['tmp_icon'] ?? null,
-                        ];
-
-                        if ($request->hasFile("dataDetail.$index.icon")) {
-                            $detail['icon'] = UploadFile::uploadFile('/list-of-value', $request->file("dataDetail.$index.icon"));
-                        }
-
-                        return $detail;
-                    }),
-
                 ],
                 'status'        => $request->status,
                 'user_id' => Auth::user()->id,
