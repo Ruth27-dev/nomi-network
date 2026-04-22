@@ -19,7 +19,7 @@ class PageSeeder extends Seeder
             'icon'  => 'folder',
             'active' => 'admin/page/*',
             'ordering' => 10,
-            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'about-us-view', 'our-story-view'),
+            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'production-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'about-us-view', 'our-story-view'),
         ]);
 
         Menu::create([
@@ -68,6 +68,18 @@ class PageSeeder extends Seeder
             'active' => 'admin/page/upcoming-event/*',
             'ordering' => 4,
             'permission' => array('upcoming-event-view'),
+        ]);
+
+        Menu::create([
+            'parent_id' => $page->id,
+            'name' => json_encode([
+                'en' => 'Production',
+                'km' => 'ផលិតកម្ម',
+            ]),
+            'path' => 'admin/page/production/list',
+            'active' => 'admin/page/production/*',
+            'ordering' => 15,
+            'permission' => array('production-view'),
         ]);
 
         Menu::create([

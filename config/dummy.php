@@ -115,6 +115,9 @@ return [
         'our_program' => [
             'key'   => 'our_program',
         ],
+        'production' => [
+            'key'   => 'production',
+        ],
         'upcoming_event' => [
             'key'   => 'upcoming_event',
         ],

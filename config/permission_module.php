@@ -46,6 +46,10 @@ return [
             'en' => 'Our Programs',
             'km' => 'កម្មវិធីរបស់យើង',
         ],
+        'production' => [
+            'en' => 'Production',
+            'km' => 'ផលិតកម្ម',
+        ],
         'upcoming_event' => [
             'en' => 'Upcoming Events',
             'km' => 'ព្រឹត្តិការណ៍ខាងមុខ',
