@@ -19,7 +19,7 @@ class PageSeeder extends Seeder
             'icon'  => 'folder',
             'active' => 'admin/page/*',
             'ordering' => 10,
-            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'upcoming-event-view', 'our-core-value-view', 'mission-vision-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'why-choose-us-view', 'our-mission-view', 'frequently-asked-question-view', 'about-us-view', 'our-team-view', 'our-story-view'),
+            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'why-choose-us-view', 'our-mission-view', 'frequently-asked-question-view', 'about-us-view', 'our-team-view', 'our-story-view'),
         ]);
 
         Menu::create([
@@ -78,7 +78,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/our-core-value/list',
             'active' => 'admin/page/our-core-value/*',
-            'ordering' => 6,
+            'ordering' => 8,
             'permission' => array('our-core-value-view'),
         ]);
 
@@ -90,7 +90,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/our-story/list',
             'active' => 'admin/page/our-story/*',
-            'ordering' => 8,
+            'ordering' => 6,
             'permission' => array('our-story-view'),
         ]);
 
@@ -102,8 +102,20 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/mission-vision/list',
             'active' => 'admin/page/mission-vision/*',
-            'ordering' => 5,
+            'ordering' => 7,
             'permission' => array('mission-vision-view'),
+        ]);
+
+        Menu::create([
+            'parent_id' => $page->id,
+            'name' => json_encode([
+                'en' => 'Careers',
+                'km' => 'អាជីព',
+            ]),
+            'path' => 'admin/page/career/list',
+            'active' => 'admin/page/career/*',
+            'ordering' => 9,
+            'permission' => array('career-view'),
         ]);
 
         Menu::create([
@@ -114,7 +126,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/social-media/list',
             'active' => 'admin/page/social-media/*',
-            'ordering' => 7,
+            'ordering' => 5,
             'permission' => array('social-media-view'),
         ]);
 
@@ -126,7 +138,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/privacy-policy/list',
             'active' => 'admin/page/privacy-policy/*',
-            'ordering' => 9,
+            'ordering' => 10,
             'permission' => array('privacy-policy-view'),
         ]);
 
@@ -138,7 +150,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/contact-us/list',
             'active' => 'admin/page/contact-us/*',
-            'ordering' => 10,
+            'ordering' => 11,
             'permission' => array('contact-us-view'),
         ]);
 
@@ -150,7 +162,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/about-us/list',
             'active' => 'admin/page/about-us/*',
-            'ordering' => 11,
+            'ordering' => 12,
             'permission' => array('about-us-view'),
         ]);
 
@@ -163,7 +175,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/why-choose-us/list',
             'active' => 'admin/page/why-choose-us/*',
-            'ordering' => 12,
+            'ordering' => 13,
             'permission' => array('why-choose-us-view'),
         ]);
 
@@ -175,7 +187,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/our-mission/list',
             'active' => 'admin/page/our-mission/*',
-            'ordering' => 13,
+            'ordering' => 14,
             'permission' => array('our-mission-view'),
         ]);
 
@@ -187,7 +199,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/our-team/list',
             'active' => 'admin/page/our-team/*',
-            'ordering' => 14,
+            'ordering' => 15,
             'permission' => array('our-team-view'),
         ]);
 
@@ -199,8 +211,32 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/frequently-asked-question/list',
             'active' => 'admin/page/frequently-asked-question/*',
-            'ordering' => 15,
+            'ordering' => 16,
             'permission' => array('frequently-asked-question-view'),
+        ]);
+
+        Menu::create([
+            'parent_id' => $page->id,
+            'name' => json_encode([
+                'en' => 'Reports & Documents Category',
+                'km' => 'ប្រភេទរបាយការណ៍ និងឯកសារ',
+            ]),
+            'path' => 'admin/page/report-document-category/list',
+            'active' => 'admin/page/report-document-category/*',
+            'ordering' => 17,
+            'permission' => array('report-document-category-view'),
+        ]);
+
+        Menu::create([
+            'parent_id' => $page->id,
+            'name' => json_encode([
+                'en' => 'Reports & Documents',
+                'km' => 'របាយការណ៍ និងឯកសារ',
+            ]),
+            'path' => 'admin/page/report-document/list',
+            'active' => 'admin/page/report-document/*',
+            'ordering' => 18,
+            'permission' => array('report-document-view'),
         ]);
     }
 }

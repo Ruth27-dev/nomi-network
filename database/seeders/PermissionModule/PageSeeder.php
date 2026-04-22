@@ -161,6 +161,123 @@ class PageSeeder extends Seeder
             ],
         ]);
 
+        $career = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.career')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'career-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $career->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'career-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $career->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'career-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $career->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'career-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $career->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'career-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $career->id,
+            ],
+        ]);
+
+        $reportDocumentCategory = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.report_document_category')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'report-document-category-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocumentCategory->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'report-document-category-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocumentCategory->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'report-document-category-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocumentCategory->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'report-document-category-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocumentCategory->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'report-document-category-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocumentCategory->id,
+            ],
+        ]);
+
+        $reportDocument = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.report_document')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'report-document-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocument->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'report-document-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocument->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'report-document-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocument->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'report-document-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocument->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'report-document-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $reportDocument->id,
+            ],
+        ]);
+
         $socialMedia = ModulePermission::create([
             'parent_id'     =>   $page->id,
             'display_name'  => json_encode(config('permission_module.menu.social_media')),

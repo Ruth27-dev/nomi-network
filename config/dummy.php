@@ -124,6 +124,15 @@ return [
         'our_core_value' => [
             'key'   => 'our_core_value',
         ],
+        'career' => [
+            'key'   => 'career',
+        ],
+        'report_document_category' => [
+            'key'   => 'report_document_category',
+        ],
+        'report_document' => [
+            'key'   => 'report_document',
+        ],
         'mission_vision' => [
             'key'   => 'mission_vision',
         ],

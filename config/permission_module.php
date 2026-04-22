@@ -58,6 +58,18 @@ return [
             'en' => 'Our Core Values',
             'km' => 'គុណតម្លៃស្នូលរបស់យើង',
         ],
+        'career' => [
+            'en' => 'Careers',
+            'km' => 'អាជីព',
+        ],
+        'report_document_category' => [
+            'en' => 'Reports & Documents Category',
+            'km' => 'ប្រភេទរបាយការណ៍ និងឯកសារ',
+        ],
+        'report_document' => [
+            'en' => 'Reports & Documents',
+            'km' => 'របាយការណ៍ និងឯកសារ',
+        ],
         'mission_vision' => [
             'en' => 'Mission & Vision',
             'km' => 'បេសកកម្ម និងចក្ខុវិស័យ',

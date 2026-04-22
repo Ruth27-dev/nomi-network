@@ -8,10 +8,13 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\LOV\SocialMediaController;
 use App\Http\Controllers\Admin\Pages\AboutUsController;
 use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
+use App\Http\Controllers\Admin\Pages\CareerController;
 use App\Http\Controllers\Admin\Pages\ContactUsController;
 use App\Http\Controllers\Admin\Pages\FrequentlyAskedQuestionController;
 use App\Http\Controllers\Admin\Pages\MissionVisionController;
 use App\Http\Controllers\Admin\Pages\OurCoreValueController;
+use App\Http\Controllers\Admin\Pages\ReportDocumentCategoryController;
+use App\Http\Controllers\Admin\Pages\ReportDocumentController;
 use App\Http\Controllers\Admin\Pages\OurMissionController;
 use App\Http\Controllers\Admin\Pages\OurProgramController;
 use App\Http\Controllers\Admin\Pages\OurStoryController;
@@ -228,6 +231,42 @@ Route::middleware(['locale'])->group(function () {
             Route::controller(OurCoreValueController::class)->prefix('our-core-value')->name('our-core-value-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
+            });
+
+            // Career
+            Route::controller(CareerController::class)->prefix('career')->name('career-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
+            });
+
+            // Reports & Documents Category
+            Route::controller(ReportDocumentCategoryController::class)->prefix('report-document-category')->name('report-document-category-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
+            });
+
+            // Reports & Documents
+            Route::controller(ReportDocumentController::class)->prefix('report-document')->name('report-document-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
             });
 
             // Mission & Vision
