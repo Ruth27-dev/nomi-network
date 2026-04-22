@@ -42,10 +42,6 @@ return [
             'en' => 'About Us',
             'km' => 'អំពីពួកយើង',
         ],
-        'why_choose_us' => [
-            'en' => 'Why Choose Us',
-            'km' => 'ហេតុអ្វីជ្រើសរើសយើង',
-        ],
         'our_program' => [
             'en' => 'Our Programs',
             'km' => 'កម្មវិធីរបស់យើង',
@@ -74,21 +70,9 @@ return [
             'en' => 'Mission & Vision',
             'km' => 'បេសកកម្ម និងចក្ខុវិស័យ',
         ],
-        'our_mission' => [
-            'en' => 'Our Mission',
-            'km' => 'បេសកកម្មរបស់យើង',
-        ],
         'our_story' => [
             'en' => 'Our Story',
             'km' => 'ប្រវត្តិ​របស់យើង',
-        ],
-        'our_team' => [
-            'en' => 'Our Team',
-            'km' => 'ក្រុមរបស់យើង',
-        ],
-        'frequently_asked_question' => [
-            'en' => 'Frequently Asked Question',
-            'km' => 'សំណួរដែលសួរញឹកញាប់',
         ],
     ],
     'action' => [

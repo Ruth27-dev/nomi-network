@@ -19,7 +19,7 @@ class PageSeeder extends Seeder
             'icon'  => 'folder',
             'active' => 'admin/page/*',
             'ordering' => 10,
-            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'why-choose-us-view', 'our-mission-view', 'frequently-asked-question-view', 'about-us-view', 'our-team-view', 'our-story-view'),
+            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'about-us-view', 'our-story-view'),
         ]);
 
         Menu::create([
@@ -170,60 +170,12 @@ class PageSeeder extends Seeder
         Menu::create([
             'parent_id' => $page->id,
             'name' => json_encode([
-                'en' => 'Why Choose Us',
-                'km' => 'ហេតុអ្វីជ្រើសរើសយើង',
-            ]),
-            'path' => 'admin/page/why-choose-us/list',
-            'active' => 'admin/page/why-choose-us/*',
-            'ordering' => 13,
-            'permission' => array('why-choose-us-view'),
-        ]);
-
-        Menu::create([
-            'parent_id' => $page->id,
-            'name' => json_encode([
-                'en' => 'Our Mission',
-                'km' => 'បេសកកម្មរបស់យើង',
-            ]),
-            'path' => 'admin/page/our-mission/list',
-            'active' => 'admin/page/our-mission/*',
-            'ordering' => 14,
-            'permission' => array('our-mission-view'),
-        ]);
-
-        Menu::create([
-            'parent_id' => $page->id,
-            'name' => json_encode([
-                'en' => 'Our Team',
-                'km' => 'ក្រុមរបស់យើង',
-            ]),
-            'path' => 'admin/page/our-team/list',
-            'active' => 'admin/page/our-team/*',
-            'ordering' => 15,
-            'permission' => array('our-team-view'),
-        ]);
-
-        Menu::create([
-            'parent_id' => $page->id,
-            'name' => json_encode([
-                'en' => 'Frequently Asked Question',
-                'km' => 'សំណួរដែលសួរញឹកញាប់',
-            ]),
-            'path' => 'admin/page/frequently-asked-question/list',
-            'active' => 'admin/page/frequently-asked-question/*',
-            'ordering' => 16,
-            'permission' => array('frequently-asked-question-view'),
-        ]);
-
-        Menu::create([
-            'parent_id' => $page->id,
-            'name' => json_encode([
                 'en' => 'Reports & Documents Category',
                 'km' => 'ប្រភេទរបាយការណ៍ និងឯកសារ',
             ]),
             'path' => 'admin/page/report-document-category/list',
             'active' => 'admin/page/report-document-category/*',
-            'ordering' => 17,
+            'ordering' => 13,
             'permission' => array('report-document-category-view'),
         ]);
 
@@ -235,7 +187,7 @@ class PageSeeder extends Seeder
             ]),
             'path' => 'admin/page/report-document/list',
             'active' => 'admin/page/report-document/*',
-            'ordering' => 18,
+            'ordering' => 14,
             'permission' => array('report-document-view'),
         ]);
     }

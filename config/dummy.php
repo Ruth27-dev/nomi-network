@@ -112,9 +112,6 @@ return [
         'color' => [
             'key'   => 'color',
         ],
-        'why_choose_us' => [
-            'key'   => 'why_choose_us',
-        ],
         'our_program' => [
             'key'   => 'our_program',
         ],
@@ -139,9 +136,6 @@ return [
         'achievement_summary' => [
             'key'   => 'achievement_summary',
         ],
-        'frequently_asked_question' => [
-            'key'   => 'frequently_asked_question',
-        ],
         'social_media' => [
             'key'   => 'social_media',
         ],
@@ -150,9 +144,6 @@ return [
         ],
         'our_story' => [
             'key'   => 'our_story',
-        ],
-        'our_team' => [
-            'key'   => 'our_team',
         ],
         'delivery_option' => [
             'key'   => 'delivery_option',

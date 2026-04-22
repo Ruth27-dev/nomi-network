@@ -10,18 +10,14 @@ use App\Http\Controllers\Admin\Pages\AboutUsController;
 use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
 use App\Http\Controllers\Admin\Pages\CareerController;
 use App\Http\Controllers\Admin\Pages\ContactUsController;
-use App\Http\Controllers\Admin\Pages\FrequentlyAskedQuestionController;
 use App\Http\Controllers\Admin\Pages\MissionVisionController;
 use App\Http\Controllers\Admin\Pages\OurCoreValueController;
 use App\Http\Controllers\Admin\Pages\ReportDocumentCategoryController;
 use App\Http\Controllers\Admin\Pages\ReportDocumentController;
-use App\Http\Controllers\Admin\Pages\OurMissionController;
 use App\Http\Controllers\Admin\Pages\OurProgramController;
 use App\Http\Controllers\Admin\Pages\OurStoryController;
-use App\Http\Controllers\Admin\Pages\OurTeamController;
 use App\Http\Controllers\Admin\Pages\PrivacyPolicyController;
 use App\Http\Controllers\Admin\Pages\UpcomingEventController;
-use App\Http\Controllers\Admin\Pages\WhyChooseUsController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductDiscountController;
 use App\Http\Controllers\Admin\ProductVariationController;
@@ -208,13 +204,6 @@ Route::middleware(['locale'])->group(function () {
                 Route::post('save', 'save')->name('save');
             });
 
-
-            // why choose us
-            Route::controller(WhyChooseUsController::class)->prefix('why-choose-us')->name('why-choose-us-')->group(function () {
-                Route::get('list', 'index')->name('list');
-                Route::post('save', 'save')->name('save');
-            });
-
             // our program
             Route::controller(OurProgramController::class)->prefix('our-program')->name('our-program-')->group(function () {
                 Route::get('list', 'index')->name('list');
@@ -292,27 +281,8 @@ Route::middleware(['locale'])->group(function () {
                 Route::delete('destroy', 'onDestroy')->name('destroy');
                 Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
             });
-
-            // our mission
-            Route::controller(OurMissionController::class)->prefix('our-mission')->name('our-mission-')->group(function () {
-                Route::get('list', 'index')->name('list');
-                Route::post('save', 'save')->name('save');
-            });
-
             // our story
             Route::controller(OurStoryController::class)->prefix('our-story')->name('our-story-')->group(function () {
-                Route::get('list', 'index')->name('list');
-                Route::post('save', 'save')->name('save');
-            });
-
-            // our team
-            Route::controller(OurTeamController::class)->prefix('our-team')->name('our-team-')->group(function () {
-                Route::get('list', 'index')->name('list');
-                Route::post('save', 'save')->name('save');
-            });
-
-            // Frequently Asked Question
-            Route::controller(FrequentlyAskedQuestionController::class)->prefix('frequently-asked-question')->name('frequently-asked-question-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
             });
