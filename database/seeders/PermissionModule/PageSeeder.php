@@ -140,6 +140,66 @@ class PageSeeder extends Seeder
             ],
         ]);
 
+        $socialMedia = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.social_media')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'social-media-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $socialMedia->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'social-media-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $socialMedia->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'social-media-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $socialMedia->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'social-media-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $socialMedia->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'social-media-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $socialMedia->id,
+            ],
+        ]);
+
+        $ourStory = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.our_story')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'our-story-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $ourStory->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'our-story-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $ourStory->id,
+            ],
+        ]);
+
         $privacyPolicy = ModulePermission::create([
             'parent_id'     =>   $page->id,
             'display_name'  => json_encode(config('permission_module.menu.privacy_policy')),
@@ -244,27 +304,6 @@ class PageSeeder extends Seeder
             ],
         ]);
 
-
-        $ourStory = ModulePermission::create([
-            'parent_id'     =>   $page->id,
-            'display_name'  => json_encode(config('permission_module.menu.our_story')),
-            'sort_no'       => $this->increaseIndex(),
-        ]);
-
-        Permission::insert([
-            [
-                'display_name'  => json_encode(config('permission_module.action.view')),
-                'name'          => 'our-story-view',
-                'guard_name'    => 'admin',
-                'module_id'     => $ourStory->id,
-            ],
-            [
-                'display_name'  => json_encode(config('permission_module.action.update')),
-                'name'          => 'our-story-update',
-                'guard_name'    => 'admin',
-                'module_id'     => $ourStory->id,
-            ],
-        ]);
 
         $ourTeam = ModulePermission::create([
             'parent_id'     =>   $page->id,

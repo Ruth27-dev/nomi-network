@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin as Admin;
 use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\LOV\SocialMediaController;
 use App\Http\Controllers\Admin\Pages\AboutUsController;
 use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
 use App\Http\Controllers\Admin\Pages\ContactUsController;
@@ -157,6 +158,7 @@ Route::middleware(['locale'])->group(function () {
                 Route::delete('destroy', 'onDestroy')->name('destroy');
                 Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
             });
+
         });
 
         Route::prefix('page')->name('page-')->group(function () {
@@ -218,6 +220,18 @@ Route::middleware(['locale'])->group(function () {
             Route::controller(UpcomingEventController::class)->prefix('upcoming-event')->name('upcoming-event-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
+            });
+
+            // Social Media
+            Route::controller(SocialMediaController::class)->prefix('social-media')->name('social-media-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
             });
 
             // our mission

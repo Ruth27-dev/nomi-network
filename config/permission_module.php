@@ -14,6 +14,10 @@ return [
             'en' => 'Bank Account',
             'km' => 'គណនីធនាគារ',
         ],
+        'social_media' => [
+            'en' => 'Social Media',
+            'km' => 'ប្រព័ន្ធផ្សព្វផ្សាយសង្គម',
+        ],
         'banner' => [
             'en' => 'Banner',
             'km' => 'បដា',
