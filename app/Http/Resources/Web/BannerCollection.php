@@ -19,6 +19,7 @@ class BannerCollection extends ResourceCollection
                 return [
                     'id' => $item->id,
                     'title' => $item->title,
+                    'description' => $item->description,
                     'banner_page' => $item->banner_page,
                     'image' => $item->image,
                     'image_url'=> $item->image ? $item->image_url : asset("images/no.jpg"),

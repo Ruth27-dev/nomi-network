@@ -18,8 +18,8 @@ class ProductSeeder extends Seeder
             'name' => json_encode(['en' => 'Products', 'km' => 'ផលិតផល']),
             'icon'  => 'inventory',
             'active' => 'admin/product/*',
-            'ordering' => 9,
-            'permission' => array('category-view'),
+            'ordering' => 1,
+            'permission' => array('category-view','product-view','product-variation-view','product-discount-view'),
         ]);
 
         Menu::create([
@@ -32,6 +32,39 @@ class ProductSeeder extends Seeder
             'active'        => 'admin/product/category/list*',
             'ordering'      => 2,
             'permission'    => array('category-view'),
+        ]);
+        Menu::create([
+            'parent_id' => $product->id,
+            'name'      => json_encode([
+                'en'    => "Products",
+                'km'    => "ផលិតផល",
+            ]),
+            'path'          => 'admin/product/product/list',
+            'active'        => 'admin/product/product/list*',
+            'ordering'      => 2,
+            'permission'    => array('product-view'),
+        ]);
+        Menu::create([
+            'parent_id' => $product->id,
+            'name'      => json_encode([
+                'en'    => "Product Variations",
+                'km'    => "ប្រភេទផលិតផល",
+            ]),
+            'path'          => 'admin/product/variation/list',
+            'active'        => 'admin/product/variation/list*',
+            'ordering'      => 3,
+            'permission'    => array('product-variation-view'),
+        ]);
+        Menu::create([
+            'parent_id' => $product->id,
+            'name'      => json_encode([
+                'en'    => "Discounts",
+                'km'    => "Discounts",
+            ]),
+            'path'          => 'admin/product/discount/list',
+            'active'        => 'admin/product/discount/list*',
+            'ordering'      => 4,
+            'permission'    => array('product-discount-view'),
         ]);
     }
 }

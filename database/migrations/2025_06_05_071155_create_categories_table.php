@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('branch_id')->nullable()->comment('branch id');
             $table->bigInteger('parent_id')->nullable()->comment('category id');
             $table->string('code', 255)->nullable();
             $table->json('title')->nullable()->comment('multi language');

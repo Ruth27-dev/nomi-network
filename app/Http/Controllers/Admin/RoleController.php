@@ -111,7 +111,6 @@ class RoleController extends Controller
     {
         try {
             $data = Role::find($request->id);
-            $original_data = $data->getOriginal();
             $data->update(['status' => $request->status]);
             return response()->json([
                 'status' => 'success',
@@ -250,7 +249,6 @@ class RoleController extends Controller
         try {
             DB::beginTransaction();
             $data = ModelsRole::with('permissions')->findOrFail($request->role_id);
-            $original_data = $data->getOriginal();
             $permissions = $request->permissions;
             $data->syncPermissions($permissions);
             DB::commit();

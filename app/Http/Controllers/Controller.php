@@ -15,8 +15,10 @@ abstract class Controller extends BaseController
         $this->active           = config('dummy.status.active.key');
         $this->inactive         = config('dummy.status.inactive.key');
         $this->isRoleSuperAdmin = config('dummy.user.role.super_admin');
-        $this->company          = ListOfValue::where('type', 'company')->first();
-        view()->share(['company' => $this->company]);
+        if (!app()->runningInConsole()) {
+            $this->company = ListOfValue::where('type', 'company')->first();
+            view()->share(['company' => $this->company]);
+        }
     }
 
     public function onCheckConditionSearch($value)

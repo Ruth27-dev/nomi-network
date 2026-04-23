@@ -14,7 +14,8 @@ use App\Models\Item;
 use App\Models\ItemVariate;
 use App\Models\ListOfValue;
 use App\Models\Order;
-use App\Models\ProductVariate;
+use App\Models\Product;
+use App\Models\ProductVariation;
 use App\Models\Receipt;
 use App\Models\Shop;
 use App\Models\User;
@@ -37,6 +38,54 @@ class FetchDataController extends Controller
                         $q->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
                         $q->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
                         $q->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                    });
+                })
+                ->limit($pag)
+                ->get();
+            return $data;
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function fetchProductData()
+    {
+        try {
+            $pag = request('pag') ?? 50;
+            $data = Product::query()
+                ->where('status', $this->active)
+                ->when(request('search'), function ($q) {
+                    $q->where(function ($q) {
+                        $q->where('code', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('title->en', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                    });
+                })
+                ->limit($pag)
+                ->get();
+            return $data;
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function fetchProductVariationData()
+    {
+        try {
+            $pag = request('pag') ?? 50;
+            $data = ProductVariation::query()
+                ->with('product')
+                ->where('status', $this->active)
+                ->when(request('search'), function ($q) {
+                    $q->where(function ($query) {
+                        $query->where('title->en', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhereHas('product', function ($product) {
+                            $product->where('title->en', 'LIKE', '%' . request('search') . '%');
+                            $product->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
+                        });
                     });
                 })
                 ->limit($pag)

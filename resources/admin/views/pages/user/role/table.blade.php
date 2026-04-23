@@ -99,7 +99,7 @@
                                                     <li>
                                                         <a class="dropdown-item" @click="onUpdateStatus(item, inactive)">
                                                             <span class="material-icons text-orange-500 cursor-pointer">close</span>
-                                                            <span class="text-sm text-gray-600 ml-2">@lang('table.option.enable')</span>
+                                                            <span class="text-sm text-gray-600 ml-2">@lang('table.option.disable')</span>
                                                         </a>
                                                     </li>
                                                 </template>

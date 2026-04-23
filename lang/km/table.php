@@ -2,6 +2,9 @@
 
 return [
     'field' => [
+        "product"                    => "ផលិតផល",
+        "size"                       => "ទំហំ",
+        "code"                       => "កូដ",
         'plate_number'               => 'លេខចាន',
         'customer'                   => 'អតិថិជន',
         "sub_total"                  => "តម្លៃសរុប",
@@ -13,6 +16,10 @@ return [
         'created_at'                 => 'កាលបរិច្ឆេទបង្កើត',
         'category'                   => 'ប្រភេទ',
         'discount'                   => 'Discount',
+        'discount_amount'            => 'Discount Amount',
+        'discount_type'              => 'Discount Type',
+        'start_date'                 => 'Start Date',
+        'end_date'                   => 'End Date',
         'duration'                   => 'Duration',
         'expire_date'                => 'Expire Date',
         'email'                      => 'អុីមែល',
@@ -40,6 +47,7 @@ return [
         'title'                      => 'ចំណងជើង',
         "title_km"                   => "ចំណងជើង (ខ្មែរ)",
         "title_en"                   => "ចំណងជើង (អង់គ្លេស)",
+        "is_upcoming_event"          => "ជា​ព្រឹត្តិការណ៍​ជិតមកដល់",
         'tax'                        => 'Tax',
         'unit'                       => 'Unit',
         'username'                   => 'ឈ្មោះអ្នកប្រើប្រាស់',
@@ -60,6 +68,7 @@ return [
         'device'                     => 'Device',
         'label'                      => 'Label',
         'number'                     => 'លេខបន្ទប់',
+        'achievement_number'         => 'ចំនួន',
         'room_type'                  => 'ប្រភេទបន្ទប់',
         'monday'                     => 'ច័ន្ទ',
         'tuesday'                    => 'អង្គារ',
@@ -391,6 +400,7 @@ return [
         "view_receipt"                  => "មើលបង្កាន់ដៃ",
         "view_bill"                     => "មើលវិក័យប័ត្រ",
         "view_refund"                   => "មើលការសងប្រាក់វិញ",
+         "view_variation"               => "មើលប្រភេទផលិតផល",
     ],
     "vat_type"  => [
         "normal"                => "ធម្មតា",

@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'name' => json_encode(['en' => 'User Management', 'km' => 'ការគ្រប់គ្រងអ្នកប្រើប្រាស់']),
             'icon'  => 'persons',
             'active' => 'admin/user/*',
-            'ordering' => 5,
+            'ordering' => 2,
             'permission' => array('user-view', 'role-view'),
         ]);
 

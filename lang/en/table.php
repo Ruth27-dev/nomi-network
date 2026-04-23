@@ -96,6 +96,7 @@ return [
         'title'                      => 'Title',
         'title_en'                   => 'Title (English)',
         'title_km'                   => 'Title (Khmer)',
+        'is_upcoming_event'          => 'Is Upcoming Event',
         'tax'                        => 'Tax',
         'unit'                       => 'Unit',
         'username'                   => 'Username',
@@ -117,6 +118,7 @@ return [
         'device'                     => 'Device',
         'label'                      => 'Label',
         'number'                     => 'Room No',
+        'achievement_number'         => 'Number',
         'room_type'                  => 'Room Type',
         'monday'                     => 'Mon',
         'tuesday'                    => 'Tue',
@@ -411,6 +413,8 @@ return [
         "cooking_duration"           => "Cooking Duration",
         "minute"                     => "mn",
         "payment"                    => "Payment",
+        "product_variate"            => "Product Variate",
+       
     ],
     'option' => [
         //
@@ -508,6 +512,7 @@ return [
         "view_receipt"                            => "View Receipt",
         "view_bill"                               => "View Bill",
         "view_refund"                             => "View Refund",
+        "view_variation"                          => "View Product Variation"
 
     ],
     "vat_type"  => [

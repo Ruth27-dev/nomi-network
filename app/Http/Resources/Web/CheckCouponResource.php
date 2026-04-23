@@ -33,9 +33,11 @@ class CheckCouponResource extends JsonResource
             }),
             'products'          => $this->products->map(function($product){
                 return [
-                    'id'    => $product->id,
-                    'title' => $product->itemVariate->title,
-                    'price' => $product->price,
+                    'id'            => $product->id,
+                    'title'         => $product->title,
+                    'product_title' => $product->product?->title,
+                    'price'         => $product->price,
+                    'size'          => $product->size,
                 ];
             }),
         ];

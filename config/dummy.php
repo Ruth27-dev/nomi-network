@@ -112,11 +112,32 @@ return [
         'color' => [
             'key'   => 'color',
         ],
-        'why_choose_us' => [
-            'key'   => 'why_choose_us',
+        'our_program' => [
+            'key'   => 'our_program',
         ],
-        'frequently_asked_question' => [
-            'key'   => 'frequently_asked_question',
+        'production' => [
+            'key'   => 'production',
+        ],
+        'upcoming_event' => [
+            'key'   => 'upcoming_event',
+        ],
+        'our_core_value' => [
+            'key'   => 'our_core_value',
+        ],
+        'career' => [
+            'key'   => 'career',
+        ],
+        'report_document_category' => [
+            'key'   => 'report_document_category',
+        ],
+        'report_document' => [
+            'key'   => 'report_document',
+        ],
+        'mission_vision' => [
+            'key'   => 'mission_vision',
+        ],
+        'achievement_summary' => [
+            'key'   => 'achievement_summary',
         ],
         'social_media' => [
             'key'   => 'social_media',
@@ -126,9 +147,6 @@ return [
         ],
         'our_story' => [
             'key'   => 'our_story',
-        ],
-        'our_team' => [
-            'key'   => 'our_team',
         ],
         'delivery_option' => [
             'key'   => 'delivery_option',
@@ -193,6 +211,27 @@ return [
         'female' => [
             'key'           => 2,
             'text'          => 'Female',
+        ],
+    ],
+    'discount'  => [
+        'type'  => [
+            'discount'  => 'DISCOUNT',
+            'coupon'    => 'COUPON',
+            'percentage' => 'PERCENTAGE',
+            'amount'    => 'AMOUNT',
+        ],
+        'condition' => [
+            'min'   => 'MIN',
+            'max'   => 'MAX',
+        ]
+    ],
+    'page'        => [
+        'home_page'   => [
+            'key'   => 'home_page',
+            'name'  => [
+                'en'    => 'Home Page',
+                'km'    => 'ទំព័រដើម',
+            ]
         ],
     ],
 ];
