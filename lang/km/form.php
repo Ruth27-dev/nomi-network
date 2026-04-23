@@ -723,6 +723,7 @@ return [
             "location"                 => "ទីតាំង",
             "location_en"              => "ទីតាំង (អង់គ្លេស)",
             "location_km"              => "ទីតាំង (ខ្មែរ)",
+            "is_upcoming_event"        => "ជា​ព្រឹត្តិការណ៍​ជិតមកដល់",
             "close_date"               => "ថ្ងៃផុតកំណត់",
             "location_map"             => "ទីតាំង (ផែនទី)",
             "add_map"                  => "បន្ថែមផែនទី",

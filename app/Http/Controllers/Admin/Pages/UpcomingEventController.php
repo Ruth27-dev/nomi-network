@@ -55,6 +55,7 @@ class UpcomingEventController extends Controller
                                 : null,
                             'location_en' => $item['location_en'] ?? null,
                             'location_km' => $item['location_km'] ?? null,
+                            'is_upcoming_event' => filter_var($item['is_upcoming_event'] ?? false, FILTER_VALIDATE_BOOLEAN),
                             'ordering' => $item['ordering'] ?? null,
                             'image' => $item['tmp_image'] ?? null,
                         ];

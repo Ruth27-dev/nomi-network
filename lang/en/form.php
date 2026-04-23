@@ -904,6 +904,7 @@ return [
             "location"                   => "Location",
             "location_en"                => "Location (English)",
             "location_km"                => "Location (Khmer)",
+            "is_upcoming_event"          => "Is Upcoming Event",
             "close_date"                 => "Close Date",
             "location_map"               => "Location (Map)",
             "add_map"                    => "Add Map",

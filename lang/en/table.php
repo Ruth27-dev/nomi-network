@@ -96,6 +96,7 @@ return [
         'title'                      => 'Title',
         'title_en'                   => 'Title (English)',
         'title_km'                   => 'Title (Khmer)',
+        'is_upcoming_event'          => 'Is Upcoming Event',
         'tax'                        => 'Tax',
         'unit'                       => 'Unit',
         'username'                   => 'Username',

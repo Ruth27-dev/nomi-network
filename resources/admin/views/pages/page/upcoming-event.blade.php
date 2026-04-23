@@ -86,6 +86,9 @@
                                     <th class="text-left text-sm text-gray-600" style="width: 110px; padding: 12px;">
                                         @lang('table.field.ordering')
                                     </th>
+                                    <th class="text-left text-sm text-gray-600" style="width: 150px; padding: 12px;">
+                                        @lang('table.field.is_upcoming_event')
+                                    </th>
                                     <th class="text-left text-sm text-gray-600" style="width: 100px; padding: 12px;">
                                         @lang('form.body.label.image')
                                     </th>
@@ -97,7 +100,7 @@
                             <tbody>
                                 <template x-if="dataDetail.length === 0">
                                     <tr>
-                                        <td colspan="9" class="text-center text-sm text-gray-400"
+                                        <td colspan="10" class="text-center text-sm text-gray-400"
                                             style="padding: 28px;">
                                             @lang('dialog.empty.title')
                                         </td>
@@ -118,6 +121,8 @@
                                             x-text="item.location_km || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
+                                        <td class="text-sm text-gray-600" style="padding: 12px;"
+                                            x-text="item.is_upcoming_event ? '@lang('form.select.change_room.yes')' : '@lang('form.select.change_room.no')'"></td>
                                         <td style="padding: 12px;">
                                             <template x-if="item.image_url">
                                                 <button type="button" class="h-[50px] w-[50px] rounded-md overflow-hidden"
@@ -212,6 +217,15 @@
                                 placeholder="@lang('form.body.placeholder.ordering')" autocomplete="off">
                             <span class="error" x-show="detailValidate?.ordering" x-text="detailValidate?.ordering"></span>
                         </div>
+                        <div class="form-row">
+                            <label>@lang('form.body.label.is_upcoming_event')</label>
+                            <select x-model.number="detailForm.is_upcoming_event">
+                                <option value="1">@lang('form.select.change_room.yes')</option>
+                                <option value="0">@lang('form.select.change_room.no')</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.image')</label>
                             <input type="file" accept="image/*" class="!p-[12px]" x-ref="detailImageInput"
@@ -310,11 +324,19 @@
                     date: null,
                     location_en: null,
                     location_km: null,
+                    is_upcoming_event: false,
                     ordering: null,
                     image: null,
                     image_url: null,
                     tmp_image: null,
                 };
+            },
+            toBoolean(value) {
+                if (typeof value === 'boolean') return value;
+                if (typeof value === 'number') return value === 1;
+                if (typeof value === 'string') return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
+
+                return false;
             },
             normalizeDetail(item = {}) {
                 const image = item.image || item.tmp_image || null;
@@ -325,6 +347,7 @@
                     date: this.formatInputDate(item.date),
                     location_en: item.location_en ?? null,
                     location_km: item.location_km ?? null,
+                    is_upcoming_event: this.toBoolean(item.is_upcoming_event),
                     ordering: item.ordering ?? null,
                     image: item.image instanceof File ? item.image : null,
                     tmp_image: image instanceof File ? null : image,
@@ -546,6 +569,7 @@
                     formData.append(`dataDetail[${index}][date]`, item.date ?? '');
                     formData.append(`dataDetail[${index}][location_en]`, item.location_en ?? '');
                     formData.append(`dataDetail[${index}][location_km]`, item.location_km ?? '');
+                    formData.append(`dataDetail[${index}][is_upcoming_event]`, item.is_upcoming_event ? 1 : 0);
                     formData.append(`dataDetail[${index}][ordering]`, item.ordering ?? '');
                     if (item.image instanceof File) {
                         formData.append(`dataDetail[${index}][image]`, item.image);
@@ -560,7 +584,7 @@
             getDetailServerErrors(errors, index) {
                 if (index === null || !errors) return {};
 
-                return ['title_en', 'title_km', 'date', 'location_en', 'location_km', 'ordering', 'image']
+                return ['title_en', 'title_km', 'date', 'location_en', 'location_km', 'is_upcoming_event', 'ordering', 'image']
                     .reduce((carry, field) => {
                         const key = `dataDetail.${index}.${field}`;
                         if (errors[key]) {
