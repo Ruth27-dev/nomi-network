@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Page\ContactUsRequest;
 use App\Models\Page;
 use App\Models\UploadFile;
-use App\Services\ActivityLogService;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -77,6 +75,8 @@ class ContactUsController extends Controller
             }
 
             DB::commit();
+            $data->refresh();
+
             return response()->json([
                 'status' => 'success',
                 'message' => $request->id
@@ -84,6 +84,7 @@ class ContactUsController extends Controller
                     : __('form.message.create.success'),
                 'error' => false,
                 'id' => $data->id,
+                'data' => $data,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

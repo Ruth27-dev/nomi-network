@@ -170,6 +170,8 @@ return [
         "exchange_rate"             => "Exchange Rate",
         "color"                     => "Color",
         "contact_us"                => "Contact Us",
+        "contact_info"              => "Contact Info",
+        "find_us"                   => "Find Us",
         "why_choose_us"             => "Why Choose Us",
         "our_program"               => "Our Programs",
         "production"                => "Production",

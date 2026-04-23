@@ -26,15 +26,17 @@ class ContactUsRequest extends FormRequest
             'title_en'          => 'required',
             'short_detail_km'   => 'required',
             'short_detail_en'   => 'required',
+            'embed_map'         => 'required',
             'status'            => 'required',
 
 
-            'dataDetail'                       => 'required',
+            'dataDetail'                       => 'nullable|array',
             'dataDetail.*.title_km'            => 'required',
             'dataDetail.*.title_en'            => 'required',
             'dataDetail.*.description_km'      => 'required',
             'dataDetail.*.description_en'      => 'required',
             'dataDetail.*.ordering'            => 'required',
+            'dataDetail.*.icon'                => 'nullable|image',
 
 
         ];
@@ -47,6 +49,7 @@ class ContactUsRequest extends FormRequest
             'title_en.required'                         => __('validate.attributes.title_en'),
             'short_detail_km.required'                  => __('validate.attributes.content_km'),
             'short_detail_en.required'                  => __('validate.attributes.content_en'),
+            'embed_map.required'                         => __('validate.attributes.embed_map'),
             'status.required'                           => __('validate.attributes.status'),
 
             'dataDetail.*.title_km.required'            => __('validate.attributes.title_km'),

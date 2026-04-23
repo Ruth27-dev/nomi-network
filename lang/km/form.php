@@ -147,6 +147,8 @@ return [
         "exchange_rate"             => "អត្រាប្តូរប្រាក់",
         "color"                     => "ពណ៌",
         "contact_us"                => "ទំនាក់ទំនង",
+        "contact_info"              => "ព័ត៌មានទំនាក់ទំនង",
+        "find_us"                   => "ស្វែងរកយើង",
         "why_choose_us"             => "ហេតុអ្វីជ្រើសរើសយើង",
         "our_program"               => "កម្មវិធីរបស់យើង",
         "production"                => "ផលិតកម្ម",

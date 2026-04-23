@@ -26,7 +26,7 @@ class ContactUsResource extends JsonResource
                     return [
                         'icon' => $item['icon'] ?? null,
                         'icon_url' => isset($item['icon'])
-                            ? $item['icon']
+                            ? $this->resolveIconUrl($item['icon'])
                             : asset('images/no.jpg'),
                         'ordering' => $item['ordering'] ?? null,
                         'title_en' => $item['title_en'] ?? null,
@@ -38,5 +38,18 @@ class ContactUsResource extends JsonResource
                 ->values()
                 ->toArray(),
         ];
+    }
+
+    private function resolveIconUrl(?string $icon): string
+    {
+        if (!$icon) {
+            return asset('images/no.jpg');
+        }
+
+        if (filter_var($icon, FILTER_VALIDATE_URL)) {
+            return $icon;
+        }
+
+        return asset('storage/list-of-value/' . $icon);
     }
 }
