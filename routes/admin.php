@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\ProductDiscountController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Requests\Admin as AdminRequest;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get("/change-locale/{locale}", [Admin\ChangeLocaleController::class, 'changeLocale'])->name('change-locale');
@@ -40,6 +41,42 @@ Route::middleware(['locale'])->group(function () {
     });
 
     Route::middleware(['admin.guard', 'auth:admin'])->group(function () {
+
+        Route::get('/run-sidebar-permission-seed', function () {
+            abort_unless(
+                auth()->guard('admin')->user()?->role === config('dummy.user.role.super_admin'),
+                403
+            );
+
+            Artisan::call('db:seed', [
+                '--class' => 'SidebarSeeder',
+                '--force' => true,
+            ]);
+            $sidebarSeederOutput = Artisan::output();
+
+            Artisan::call('db:seed', [
+                '--class' => 'PermissionSeeder',
+                '--force' => true,
+            ]);
+            $permissionSeederOutput = Artisan::output();
+
+            Artisan::call('optimize:clear');
+            $optimizeClearOutput = Artisan::output();
+
+            Artisan::call('storage:link');
+            $storageLinkOutput = Artisan::output();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Commands executed successfully.',
+                'commands' => [
+                    'db:seed --class=SidebarSeeder' => $sidebarSeederOutput,
+                    'db:seed --class=PermissionSeeder' => $permissionSeederOutput,
+                    'storage:link' => $storageLinkOutput,
+                    'optimize:clear' => $optimizeClearOutput,
+                ],
+            ]);
+        })->name('run-sidebar-permission-seed');
 
 
         // Fetch data
