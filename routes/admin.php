@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\Pages\UpcomingEventController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductDiscountController;
 use App\Http\Controllers\Admin\ProductVariationController;
+use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Requests\Admin as AdminRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -151,6 +152,18 @@ Route::middleware(['locale'])->group(function () {
 
             // banner
             Route::controller(BannerController::class)->prefix('banner')->name('banner-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::post('status', 'onUpdateStatus')->name('status');
+                Route::delete('delete', 'onDelete')->name('delete');
+                Route::put('restore', 'onRestore')->name('restore');
+                Route::delete('destroy', 'onDestroy')->name('destroy');
+                Route::get('max-ordering', 'getMaxOrdering')->name('max-ordering');
+            });
+
+            // shipping method
+            Route::controller(ShippingMethodController::class)->prefix('shipping-method')->name('shipping-method-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
                 Route::post('save', 'save')->name('save');

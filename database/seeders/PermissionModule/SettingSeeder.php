@@ -48,6 +48,45 @@ class SettingSeeder extends Seeder
 
 
 
+        $shippingMethod = ModulePermission::create([
+            'parent_id'     =>  $setting->id,
+            'display_name'  => json_encode(config('permission_module.menu.shipping_method')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'shipping-method-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $shippingMethod->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'shipping-method-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $shippingMethod->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'shipping-method-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $shippingMethod->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'shipping-method-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $shippingMethod->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.restore')),
+                'name'          => 'shipping-method-restore',
+                'guard_name'    => 'admin',
+                'module_id'     => $shippingMethod->id,
+            ],
+        ]);
+
         $bankAccount = ModulePermission::create([
             'parent_id'     =>  $setting->id,
             'display_name'  => json_encode([

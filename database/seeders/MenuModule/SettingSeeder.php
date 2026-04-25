@@ -19,7 +19,7 @@ class   SettingSeeder extends Seeder
             'icon'  => 'settings',
             'active' => 'admin/setting/*',
             'ordering' => 3,
-            'permission' => array('company-view', 'bank-account-view'),
+            'permission' => array('company-view', 'bank-account-view', 'shipping-method-view'),
         ]);
 
         Menu::create([
@@ -43,6 +43,14 @@ class   SettingSeeder extends Seeder
             'active' => 'admin/setting/bank-account/*',
             'ordering' => 2,
             'permission' => array('bank-account-view'),
+        ]);
+        Menu::create([
+            'parent_id' => $setting->id,
+            'name' => json_encode(config('permission_module.menu.shipping_method')),
+            'path' => 'admin/setting/shipping-method/list',
+            'active' => 'admin/setting/shipping-method/*',
+            'ordering' => 3,
+            'permission' => array('shipping-method-view'),
         ]);
     }
 }

@@ -18,6 +18,7 @@ use App\Http\Resources\Web\ListOfValue\PrivacyPolicyResource;
 use App\Http\Resources\Web\ListOfValue\ProductionResource;
 use App\Http\Resources\Web\ListOfValue\ReportDocumentCategoryCollection;
 use App\Http\Resources\Web\ListOfValue\ReportDocumentCollection;
+use App\Http\Resources\Web\ListOfValue\ShippingMethodCollection;
 use App\Http\Resources\Web\ListOfValue\SocialMediaCollection;
 use App\Http\Resources\Web\ListOfValue\UpcomingEventResource;
 use App\Models\BankAccount;
@@ -34,6 +35,7 @@ class ListOfValueController extends Controller
     protected string $careerType;
     protected string $reportDocumentCategoryType;
     protected string $reportDocumentType;
+    protected string $shippingMethodType;
 
     public function __construct()
     {
@@ -43,6 +45,7 @@ class ListOfValueController extends Controller
         $this->careerType = config('dummy.module.career.key');
         $this->reportDocumentCategoryType = config('dummy.module.report_document_category.key');
         $this->reportDocumentType = config('dummy.module.report_document.key');
+        $this->shippingMethodType = config('dummy.module.shipping_method.key');
     }
 
     public function banner()
@@ -359,6 +362,26 @@ class ListOfValueController extends Controller
             }
 
             return $this->responseSuccess(new BankAccountCollection($data));
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function shippingMethod()
+    {
+        try {
+            $data = ListOfValue::query()
+                ->where('type', $this->shippingMethodType)
+                ->where('status', $this->active)
+                ->orderBy('sequence')
+                ->orderByDesc('id')
+                ->get();
+
+            if ($data->isEmpty()) {
+                return response()->json(['message' => 'Data not found'], 200);
+            }
+
+            return $this->responseSuccess(new ShippingMethodCollection($data));
         } catch (Exception $e) {
             return $this->responseError();
         }

@@ -36,5 +36,6 @@ Route::prefix('web')->group(function () {
         Route::post('/production', [Web\ListOfValueController::class, 'production']);
         Route::post('/company', [Web\ListOfValueController::class, 'company']);
         Route::post('/bank-account', [Web\ListOfValueController::class, 'bankAccount']);
+        Route::post('/shipping-method', [Web\ListOfValueController::class, 'shippingMethod']);
     });
 });

@@ -94,6 +94,9 @@ return [
         'bank_account' => [
             'key'   => 'bank_account',
         ],
+        'shipping_method' => [
+            'key'   => 'shipping_method',
+        ],
         'payment_type' => [
             'key'   => 'payment_type',
         ],

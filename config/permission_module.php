@@ -14,6 +14,10 @@ return [
             'en' => 'Bank Account',
             'km' => 'គណនីធនាគារ',
         ],
+        'shipping_method' => [
+            'en' => 'Shipping Method',
+            'km' => 'វិធីសាស្ត្រដឹកជញ្ជូន',
+        ],
         'social_media' => [
             'en' => 'Social Media',
             'km' => 'ប្រព័ន្ធផ្សព្វផ្សាយសង្គម',
