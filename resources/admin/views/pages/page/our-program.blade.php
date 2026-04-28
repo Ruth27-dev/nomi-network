@@ -11,43 +11,45 @@
         <form id="form" class="form-wrapper">
             <div class="form-header"></div>
             <div class="form-body">
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.title_en')<span>*</span></label>
-                        <input type="text" placeholder="@lang('form.body.placeholder.title_en')" min="8"
-                            id="title_en" x-model="form.title_en" autocomplete="off">
-                        <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
+                <fieldset class="border-[#d8dce5] border rounded p-3 mb-3">
+                    <legend>Header</legend>
+                    <div class="row-2">
+                        <div class="form-row">
+                            <label>@lang('form.body.label.title_en')<span>*</span></label>
+                            <input type="text" placeholder="@lang('form.body.placeholder.title_en')" min="8"
+                                id="title_en" x-model="form.title_en" autocomplete="off">
+                            <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
+                        </div>
+                        <div class="form-row">
+                            <label>@lang('form.body.label.title_km')<span>*</span></label>
+                            <input type="text" placeholder="@lang('form.body.placeholder.title_km')" min="8"
+                                id="title_km" x-model="form.title_km" autocomplete="off">
+                            <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
+                        </div>
                     </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.title_km')<span>*</span></label>
-                        <input type="text" placeholder="@lang('form.body.placeholder.title_km')" min="8"
-                            id="title_km" x-model="form.title_km" autocomplete="off">
-                        <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
+                    <div class="row-2">
+                        <div class="form-row">
+                            <label>@lang('form.body.label.description_en')<span>*</span> </label>
+                            <textarea x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                            <span class="error" x-show="validate?.short_detail_en" x-text="validate?.short_detail_en"></span>
+                        </div>
+                        <div class="form-row">
+                            <label>@lang('form.body.label.description_km')<span>*</span> </label>
+                            <textarea x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                            <span class="error" x-show="validate?.short_detail_km" x-text="validate?.short_detail_km"></span>
+                        </div>
                     </div>
-                </div>
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.description_en')<span>*</span> </label>
-                        <textarea x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
-                        <span class="error" x-show="validate?.short_detail_en" x-text="validate?.short_detail_en"></span>
+                    <div class="form-button mt-3">
+                        @can('our-program-update')
+                            <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
+                                class="!rounded-[50px]">
+                                <span class="material-icons mr-1">save</span>
+                                <span>Save</span>
+                                <div class="loader" style="display: none" x-show="loading"></div>
+                            </button>
+                        @endcan
                     </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.description_km')<span>*</span> </label>
-                        <textarea x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
-                        <span class="error" x-show="validate?.short_detail_km" x-text="validate?.short_detail_km"></span>
-                    </div>
-                </div>
-
-                <div class="form-button mb-3">
-                    @can('our-program-update')
-                        <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
-                            class="!rounded-[50px]">
-                            <span class="material-icons mr-1">save</span>
-                            <span>Save</span>
-                            <div class="loader" style="display: none" x-show="loading"></div>
-                        </button>
-                    @endcan
-                </div>
+                </fieldset>
 
                 <fieldset class="border-[#d8dce5] border rounded p-3 mb-3">
                     <legend>@lang('table.option.detail')</legend>
@@ -316,6 +318,7 @@
                     this.form.title_km = data?.title?.km;
                     this.form.short_detail_en = data?.short_detail?.en;
                     this.form.short_detail_km = data?.short_detail?.km;
+                    this.form.status = data?.status ?? 'ACTIVE';
 
                     const detailList = data?.content?.dataDetail || [];
                     this.dataDetail = detailList.map(item => this.normalizeDetail(item));
@@ -325,6 +328,7 @@
                 if (!data) return;
 
                 this.id = data.id ?? this.id;
+                this.form.status = data?.status ?? this.form.status;
                 const detailList = data?.content?.dataDetail || [];
                 this.dataDetail = detailList.map(item => this.normalizeDetail(item));
             },
@@ -412,7 +416,7 @@
                 this.detailValidate = null;
             },
             validateDetailForm() {
-                const required = 'This field is required.';
+                const required = '{{ __('validate.attributes.required') }}';
                 const errors = {};
 
                 if (!this.detailForm.title_en) errors.title_en = required;
@@ -457,9 +461,16 @@
                         btnClose: "@lang('dialog.button.close')",
                         btnSave: "@lang('dialog.button.delete')",
                     },
-                    afterClosed: (result) => {
-                        if (!result) return;
+                    afterClosed: async (result) => {
+                        if (!result || this.loading) return;
+
+                        const previousData = this.dataDetail.map(item => this.cloneDetail(item));
                         this.dataDetail.splice(index, 1);
+
+                        const saved = await this.submitProgram();
+                        if (!saved) {
+                            this.dataDetail = previousData;
+                        }
                     }
                 });
             },
@@ -623,7 +634,6 @@
                     },
                     afterClosed: async (result) => {
                         if (!result) return;
-
                         await this.submitProgram();
                     }
                 });

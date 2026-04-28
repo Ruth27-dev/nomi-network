@@ -45,18 +45,18 @@ class ContactUsRequest extends FormRequest
     public function messages()
     {
         return [
-            'title_km.required'                         => __('validate.attributes.title_km'),
-            'title_en.required'                         => __('validate.attributes.title_en'),
-            'short_detail_km.required'                  => __('validate.attributes.content_km'),
-            'short_detail_en.required'                  => __('validate.attributes.content_en'),
-            'embed_map.required'                         => __('validate.attributes.embed_map'),
-            'status.required'                           => __('validate.attributes.status'),
+            'title_km.required'                         =>  __('validate.attributes.required'),
+            'title_en.required'                         =>  __('validate.attributes.required'),
+            'short_detail_km.required'                  =>  __('validate.attributes.required'),
+            'short_detail_en.required'                  =>  __('validate.attributes.required'),
+            'embed_map.required'                        =>  __('validate.attributes.required'),
+            'status.required'                           =>  __('validate.attributes.required'),
 
-            'dataDetail.*.title_km.required'            => __('validate.attributes.title_km'),
-            'dataDetail.*.title_en.required'            => __('validate.attributes.title_en'),
-            'dataDetail.*.description_km.required'      => __('validate.attributes.description_km'),
-            'dataDetail.*.description_en.required'      => __('validate.attributes.description_en'),
-            'dataDetail.*.ordering.required'            => __('validate.attributes.ordering'),
+            'dataDetail.*.title_km.required'            =>  __('validate.attributes.required'),
+            'dataDetail.*.title_en.required'            =>  __('validate.attributes.required'),
+            'dataDetail.*.description_km.required'      =>  __('validate.attributes.required'),
+            'dataDetail.*.description_en.required'      =>  __('validate.attributes.required'),
+            'dataDetail.*.ordering.required'            =>  __('validate.attributes.required'),
         ];
     }
 }

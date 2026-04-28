@@ -178,18 +178,6 @@
                         </table>
                     </div>
                 </fieldset>
-
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.status')<span>*</span> </label>
-                        <select x-model="form.status">
-                            @foreach (config('dummy.status') as $status)
-                                <option value="{{ $status['key'] }}">{{ $status['text'] }}</option>
-                            @endforeach
-                        </select>
-                        <span class="error" x-show="validate?.status" x-text="validate?.status"></span>
-                    </div>
-                </div>
             </div>
             <div class="form-footer"></div>
         </form>
@@ -455,7 +443,7 @@
                 });
             },
             validateDetailForm() {
-                const required = 'This field is required.';
+                const required = '{{ __('validate.attributes.required') }}';
                 const errors = {};
                 if (!this.detailForm.description_en) errors.description_en = required;
                 if (!this.detailForm.description_km) errors.description_km = required;
@@ -545,7 +533,7 @@
                 });
             },
             validateSlideForm() {
-                const required = 'This field is required.';
+                const required = '{{ __('validate.attributes.required') }}';
                 const errors = {};
                 if (this.slideForm.ordering === null || this.slideForm.ordering === '') errors.ordering = required;
                 if (!this.slideForm.image && !this.slideForm.tmp_image) errors.image = required;

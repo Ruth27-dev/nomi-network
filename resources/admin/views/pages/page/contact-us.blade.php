@@ -88,18 +88,17 @@
                             <span class="error" x-show="validate?.embed_map" x-text="validate?.embed_map"></span>
                         </div>
                     </div>
+                    <div class="form-button mt-3">
+                        @can('contact-us-update')
+                            <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
+                                class="!rounded-[50px]">
+                                <span class="material-icons mr-1">save</span>
+                                <span>Save</span>
+                                <div class="loader" style="display: none" x-show="loading"></div>
+                            </button>
+                        @endcan
+                    </div>
                 </fieldset>
-
-                <div class="form-button mb-3">
-                    @can('contact-us-update')
-                        <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
-                            class="!rounded-[50px]">
-                            <span class="material-icons mr-1">save</span>
-                            <span>Save</span>
-                            <div class="loader" style="display: none" x-show="loading"></div>
-                        </button>
-                    @endcan
-                </div>
 
                 <fieldset class="border-[#d8dce5] border rounded p-3 mb-3">
                     <legend>@lang('form.name.contact_info')</legend>
@@ -329,6 +328,7 @@
                     this.form.short_detail_en = data?.short_detail?.en;
                     this.form.short_detail_km = data?.short_detail?.km;
                     this.form.embed_map = data?.content?.embed_map;
+                    this.form.status = data?.status ?? 'ACTIVE';
 
                     const detailList = data?.content?.dataDetail || [];
                     this.dataDetail = detailList.map(item => this.normalizeDetail(item));
@@ -344,6 +344,7 @@
                 this.form.short_detail_en = data?.short_detail?.en ?? this.form.short_detail_en;
                 this.form.short_detail_km = data?.short_detail?.km ?? this.form.short_detail_km;
                 this.form.embed_map = data?.content?.embed_map ?? this.form.embed_map;
+                this.form.status = data?.status ?? this.form.status;
 
                 const detailList = data?.content?.dataDetail || [];
                 this.dataDetail = detailList.map(item => this.normalizeDetail(item));
@@ -422,7 +423,7 @@
                 this.detailValidate = null;
             },
             validateDetailForm() {
-                const required = 'This field is required.';
+                const required = '{{ __('validate.attributes.required') }}';
                 const errors = {};
 
                 if (!this.detailForm.title_en) errors.title_en = required;
@@ -467,9 +468,16 @@
                         btnClose: "@lang('dialog.button.close')",
                         btnSave: "@lang('dialog.button.delete')",
                     },
-                    afterClosed: (result) => {
-                        if (!result) return;
+                    afterClosed: async (result) => {
+                        if (!result || this.loading) return;
+
+                        const previousData = this.dataDetail.map(item => this.cloneDetail(item));
                         this.dataDetail.splice(index, 1);
+
+                        const saved = await this.submitContactUs();
+                        if (!saved) {
+                            this.dataDetail = previousData;
+                        }
                     }
                 });
             },
@@ -611,7 +619,6 @@
                     },
                     afterClosed: async (result) => {
                         if (!result) return;
-
                         await this.submitContactUs();
                     }
                 });

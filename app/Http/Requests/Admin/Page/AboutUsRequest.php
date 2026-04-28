@@ -33,11 +33,11 @@ class AboutUsRequest extends FormRequest
     public function messages()
     {
         return [
-            'title_km.required'     => __('validate.attributes.title_km'),
-            'title_en.required'     => __('validate.attributes.title_en'),
-            'content_km.required'   => __('validate.attributes.content_km'),
-            'content_en.required'   => __('validate.attributes.content_en'),
-            'status.required'       => __('validate.attributes.status'),
+            'title_km.required'     =>  __('validate.attributes.required'),
+            'title_en.required'     =>  __('validate.attributes.required'),
+            'content_km.required'   =>  __('validate.attributes.required'),
+            'content_en.required'   =>  __('validate.attributes.required'),
+            'status.required'       =>  __('validate.attributes.required'),
         ];
     }
 }
