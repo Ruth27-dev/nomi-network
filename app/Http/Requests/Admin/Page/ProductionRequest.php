@@ -23,7 +23,7 @@ class ProductionRequest extends FormRequest
 
             'imageSlides'                    => 'nullable|array',
             'imageSlides.*.ordering'         => 'required|integer',
-            'imageSlides.*.image'            => 'nullable|image|required_without:imageSlides.*.tmp_image',
+            'imageSlides.*.image'            => 'nullable|image',
         ];
     }
 
@@ -37,7 +37,6 @@ class ProductionRequest extends FormRequest
             'dataDetail.*.ordering.integer'          => __('validate.attributes.numeric'),
             'imageSlides.*.ordering.required'        => __('validate.attributes.required'),
             'imageSlides.*.ordering.integer'         => __('validate.attributes.numeric'),
-            'imageSlides.*.image.required_without'   => __('validate.attributes.required'),
         ];
     }
 }
