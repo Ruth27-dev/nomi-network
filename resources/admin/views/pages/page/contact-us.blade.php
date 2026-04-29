@@ -78,7 +78,7 @@
                     </div>
                     <div class="row">
                         <div class="form-row">
-                            <label>@lang('form.body.label.location')<span>*</span></label>
+                            <label>@lang('form.body.label.location')</label>
                             <div class="map !w-full h-[260px]" @click="onAddMap()">
                                 <iframe x-bind:src="form.embed_map || 'about:blank'" width="100%" height="100%"
                                     style="border:0;" allowfullscreen="" loading="lazy"

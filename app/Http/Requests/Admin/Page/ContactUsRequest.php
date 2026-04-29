@@ -26,7 +26,6 @@ class ContactUsRequest extends FormRequest
             'title_en'          => 'required',
             'short_detail_km'   => 'required',
             'short_detail_en'   => 'required',
-            'embed_map'         => 'required',
             'status'            => 'required',
 
 
