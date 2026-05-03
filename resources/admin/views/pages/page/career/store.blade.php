@@ -41,6 +41,20 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row">
+                        <label>@lang('form.body.label.description_en')</label>
+                        <textarea placeholder="@lang('form.body.placeholder.description_en')" rows="3"
+                            x-model="form.description_en" :disabled="form.disabled"></textarea>
+                        <span class="error" x-show="validate?.description_en" x-text="validate?.description_en"></span>
+                    </div>
+                    <div class="form-row">
+                        <label>@lang('form.body.label.description_km')</label>
+                        <textarea placeholder="@lang('form.body.placeholder.description_km')" rows="3"
+                            x-model="form.description_km" :disabled="form.disabled"></textarea>
+                        <span class="error" x-show="validate?.description_km" x-text="validate?.description_km"></span>
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="form-row">
                         <label>@lang('form.body.label.close_date')<span>*</span></label>
                         <input id="career_close_date" placeholder="@lang('form.body.placeholder.date')" type="text"
                             x-model="form.close_date" :disabled="form.disabled" autocomplete="off" readonly>
@@ -80,13 +94,15 @@
     <script>
         Alpine.data('storeCareerDialog', () => ({
             form: new FormGroup({
-                position_en: [null, ['required']],
-                position_km: [null, []],
-                location_en: [null, ['required']],
-                location_km: [null, []],
-                close_date: [null, ['required']],
-                sequence: [null, ['required']],
-                status: ['ACTIVE', ['required']],
+                position_en:    [null, ['required']],
+                position_km:    [null, []],
+                location_en:    [null, ['required']],
+                location_km:    [null, []],
+                description_en: [null, []],
+                description_km: [null, []],
+                close_date:     [null, ['required']],
+                sequence:       [null, ['required']],
+                status:         ['ACTIVE', ['required']],
             }),
             dialogData: null,
             validate: null,
@@ -97,9 +113,11 @@
                     this.form.patchValue(this.dialogData ?? {});
                     this.form.position_en = this.dialogData?.title?.en ?? null;
                     this.form.position_km = this.dialogData?.title?.km ?? null;
-                    this.form.location_en = this.dialogData?.description?.en ?? null;
-                    this.form.location_km = this.dialogData?.description?.km ?? null;
-                    this.form.close_date = this.formatInputDate(this.dialogData?.add_on?.close_date);
+                    this.form.location_en    = this.dialogData?.description?.en ?? null;
+                    this.form.location_km    = this.dialogData?.description?.km ?? null;
+                    this.form.description_en = this.dialogData?.add_on?.description_en ?? null;
+                    this.form.description_km = this.dialogData?.add_on?.description_km ?? null;
+                    this.form.close_date     = this.formatInputDate(this.dialogData?.add_on?.close_date);
                     this.form.sequence = this.dialogData?.sequence ?? null;
                     this.form.status = this.dialogData?.status ?? 'ACTIVE';
                 } else {

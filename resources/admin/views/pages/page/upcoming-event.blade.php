@@ -16,14 +16,14 @@
                     <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.title_en')<span>*</span></label>
-                            <input type="text" placeholder="@lang('form.body.placeholder.title_en')" min="8"
-                                id="title_en" x-model="form.title_en" autocomplete="off">
+                            <input type="text" placeholder="@lang('form.body.placeholder.title_en')" min="8" id="title_en"
+                                x-model="form.title_en" autocomplete="off">
                             <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.title_km')<span>*</span></label>
-                            <input type="text" placeholder="@lang('form.body.placeholder.title_km')" min="8"
-                                id="title_km" x-model="form.title_km" autocomplete="off">
+                            <input type="text" placeholder="@lang('form.body.placeholder.title_km')" min="8" id="title_km"
+                                x-model="form.title_km" autocomplete="off">
                             <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
                         </div>
                     </div>
@@ -31,12 +31,14 @@
                         <div class="form-row">
                             <label>@lang('form.body.label.description_en')<span>*</span> </label>
                             <textarea x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
-                            <span class="error" x-show="validate?.short_detail_en" x-text="validate?.short_detail_en"></span>
+                            <span class="error" x-show="validate?.short_detail_en"
+                                x-text="validate?.short_detail_en"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.description_km')<span>*</span> </label>
                             <textarea x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
-                            <span class="error" x-show="validate?.short_detail_km" x-text="validate?.short_detail_km"></span>
+                            <span class="error" x-show="validate?.short_detail_km"
+                                x-text="validate?.short_detail_km"></span>
                         </div>
                     </div>
                     <div class="form-button mt-3">
@@ -55,8 +57,7 @@
                     <legend>@lang('table.option.detail')</legend>
                     <div class="form-button mb-3">
                         @can('upcoming-event-update')
-                            <button type="button" color="primary" class="!rounded-[50px]"
-                                @click="openCreateDetailDialog()">
+                            <button type="button" color="primary" class="!rounded-[50px]" @click="openCreateDetailDialog()">
                                 <span class="material-icons mr-1">add</span>
                                 <span>@lang('form.name.create')</span>
                             </button>
@@ -102,8 +103,7 @@
                             <tbody>
                                 <template x-if="dataDetail.length === 0">
                                     <tr>
-                                        <td colspan="10" class="text-center text-sm text-gray-400"
-                                            style="padding: 28px;">
+                                        <td colspan="10" class="text-center text-sm text-gray-400" style="padding: 28px;">
                                             @lang('dialog.empty.title')
                                         </td>
                                     </tr>
@@ -124,10 +124,12 @@
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
-                                            x-text="item.is_upcoming_event ? '@lang('form.select.change_room.yes')' : '@lang('form.select.change_room.no')'"></td>
+                                            x-text="item.is_upcoming_event ? '@lang('form.select.change_room.yes')' : '@lang('form.select.change_room.no')'">
+                                        </td>
                                         <td style="padding: 12px;">
                                             <template x-if="item.image_url">
-                                                <button type="button" class="h-[50px] w-[50px] rounded-md overflow-hidden"
+                                                <button type="button"
+                                                    class="h-[50px] w-[50px] rounded-md overflow-hidden"
                                                     @click="onViewImage(item.image_url)">
                                                     <img class="w-full h-full object-contain" :src="item.image_url"
                                                         alt="">
@@ -179,34 +181,36 @@
                     <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.title_en') <span>*</span></label>
-                            <input type="text" x-model="detailForm.title_en"
-                                placeholder="@lang('form.body.placeholder.title_en')" autocomplete="off">
-                            <span class="error" x-show="detailValidate?.title_en" x-text="detailValidate?.title_en"></span>
+                            <input type="text" x-model="detailForm.title_en" placeholder="@lang('form.body.placeholder.title_en')"
+                                autocomplete="off">
+                            <span class="error" x-show="detailValidate?.title_en"
+                                x-text="detailValidate?.title_en"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.title_km') <span>*</span></label>
-                            <input type="text" x-model="detailForm.title_km"
-                                placeholder="@lang('form.body.placeholder.title_km')" autocomplete="off">
-                            <span class="error" x-show="detailValidate?.title_km" x-text="detailValidate?.title_km"></span>
+                            <input type="text" x-model="detailForm.title_km" placeholder="@lang('form.body.placeholder.title_km')"
+                                autocomplete="off">
+                            <span class="error" x-show="detailValidate?.title_km"
+                                x-text="detailValidate?.title_km"></span>
                         </div>
                     </div>
                     <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.location_en') <span>*</span></label>
-                            <input type="text" x-model="detailForm.location_en"
-                                placeholder="@lang('form.body.placeholder.location_en')" autocomplete="off">
+                            <input type="text" x-model="detailForm.location_en" placeholder="@lang('form.body.placeholder.location_en')"
+                                autocomplete="off">
                             <span class="error" x-show="detailValidate?.location_en"
                                 x-text="detailValidate?.location_en"></span>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.location_km') <span>*</span></label>
-                            <input type="text" x-model="detailForm.location_km"
-                                placeholder="@lang('form.body.placeholder.location_km')" autocomplete="off">
+                            <input type="text" x-model="detailForm.location_km" placeholder="@lang('form.body.placeholder.location_km')"
+                                autocomplete="off">
                             <span class="error" x-show="detailValidate?.location_km"
                                 x-text="detailValidate?.location_km"></span>
                         </div>
                     </div>
-                    <div class="row-3">
+                    <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.date') <span>*</span></label>
                             <input id="event_date" x-ref="eventDateInput" type="text" x-model="detailForm.date"
@@ -215,10 +219,24 @@
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.ordering') <span>*</span></label>
-                            <input type="number" x-model="detailForm.ordering"
-                                placeholder="@lang('form.body.placeholder.ordering')" autocomplete="off">
-                            <span class="error" x-show="detailValidate?.ordering" x-text="detailValidate?.ordering"></span>
+                            <input type="number" x-model="detailForm.ordering" placeholder="@lang('form.body.placeholder.ordering')"
+                                autocomplete="off">
+                            <span class="error" x-show="detailValidate?.ordering"
+                                x-text="detailValidate?.ordering"></span>
                         </div>
+
+                    </div>
+                    <div class="row-2">
+                        <div class="form-row">
+                            <label>@lang('form.body.label.description_en')</label>
+                            <textarea x-model="detailForm.description_en" rows="3" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <label>@lang('form.body.label.description_km')</label>
+                            <textarea x-model="detailForm.description_km" rows="3" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                        </div>
+                    </div>
+                    <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.is_upcoming_event')</label>
                             <select x-model.number="detailForm.is_upcoming_event">
@@ -226,8 +244,6 @@
                                 <option value="0">@lang('form.select.change_room.no')</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row-2">
                         <div class="form-row">
                             <label>@lang('form.body.label.image')</label>
                             <input type="file" accept="image/*" class="!p-[12px]" x-ref="detailImageInput"
@@ -328,6 +344,8 @@
                     date: null,
                     location_en: null,
                     location_km: null,
+                    description_en: null,
+                    description_km: null,
                     is_upcoming_event: false,
                     ordering: null,
                     image: null,
@@ -351,6 +369,8 @@
                     date: this.formatInputDate(item.date),
                     location_en: item.location_en ?? null,
                     location_km: item.location_km ?? null,
+                    description_en: item.description_en ?? null,
+                    description_km: item.description_km ?? null,
                     is_upcoming_event: this.toBoolean(item.is_upcoming_event),
                     ordering: item.ordering ?? null,
                     image: item.image instanceof File ? item.image : null,
@@ -368,7 +388,8 @@
             parseDate(date) {
                 if (!date) return null;
 
-                const parsedDate = moment(date, [dateRangePickerInputFormat(), 'YYYY-MM-DD', moment.ISO_8601], true);
+                const parsedDate = moment(date, [dateRangePickerInputFormat(), 'YYYY-MM-DD', moment.ISO_8601],
+                    true);
                 return parsedDate.isValid() ? parsedDate : null;
             },
             formatInputDate(date) {
@@ -580,7 +601,10 @@
                     formData.append(`dataDetail[${index}][date]`, item.date ?? '');
                     formData.append(`dataDetail[${index}][location_en]`, item.location_en ?? '');
                     formData.append(`dataDetail[${index}][location_km]`, item.location_km ?? '');
-                    formData.append(`dataDetail[${index}][is_upcoming_event]`, item.is_upcoming_event ? 1 : 0);
+                    formData.append(`dataDetail[${index}][description_en]`, item.description_en ?? '');
+                    formData.append(`dataDetail[${index}][description_km]`, item.description_km ?? '');
+                    formData.append(`dataDetail[${index}][is_upcoming_event]`, item.is_upcoming_event ?
+                        1 : 0);
                     formData.append(`dataDetail[${index}][ordering]`, item.ordering ?? '');
                     if (item.image instanceof File) {
                         formData.append(`dataDetail[${index}][image]`, item.image);
@@ -595,7 +619,9 @@
             getDetailServerErrors(errors, index) {
                 if (index === null || !errors) return {};
 
-                return ['title_en', 'title_km', 'date', 'location_en', 'location_km', 'is_upcoming_event', 'ordering', 'image']
+                return ['title_en', 'title_km', 'date', 'location_en', 'location_km', 'description_en',
+                        'description_km', 'is_upcoming_event', 'ordering', 'image'
+                    ]
                     .reduce((carry, field) => {
                         const key = `dataDetail.${index}.${field}`;
                         if (errors[key]) {
@@ -614,11 +640,12 @@
                 }
 
                 try {
-                    const res = await Axios.post(`{{ route('admin-page-upcoming-event-save') }}`, this.buildFormData(), {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
+                    const res = await Axios.post(`{{ route('admin-page-upcoming-event-save') }}`, this
+                        .buildFormData(), {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        });
 
                     this.id = res.data.id;
                     this.validate = null;

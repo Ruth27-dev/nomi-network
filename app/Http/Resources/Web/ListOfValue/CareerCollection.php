@@ -14,8 +14,10 @@ class CareerCollection extends ResourceCollection
                 'id' => $item->id,
                 'position' => $item->title,
                 'location' => $item->description,
-                'close_date' => data_get($item, 'add_on.close_date'),
-                'sequence' => $item->sequence,
+                'close_date'     => data_get($item, 'add_on.close_date'),
+                'description_en' => data_get($item, 'add_on.description_en'),
+                'description_km' => data_get($item, 'add_on.description_km'),
+                'sequence'       => $item->sequence,
             ];
         })->toArray();
     }

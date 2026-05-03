@@ -16,9 +16,11 @@ class CareerRequest extends FormRequest
         return [
             'position_en' => 'required|string|max:255',
             'position_km' => 'nullable|string|max:255',
-            'location_en' => 'required|string|max:255',
-            'location_km' => 'nullable|string|max:255',
-            'close_date'  => 'required|date_format:d/m/Y',
+            'location_en'    => 'required|string|max:255',
+            'location_km'    => 'nullable|string|max:255',
+            'description_en' => 'nullable|string',
+            'description_km' => 'nullable|string',
+            'close_date'     => 'required|date_format:d/m/Y',
             'sequence'    => 'required|integer',
             'status'      => 'required',
         ];

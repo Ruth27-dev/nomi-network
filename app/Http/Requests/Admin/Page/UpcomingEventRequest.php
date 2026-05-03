@@ -29,6 +29,8 @@ class UpcomingEventRequest extends FormRequest
             'dataDetail.*.date'             => 'required|date_format:d/m/Y',
             'dataDetail.*.location_km'      => 'required',
             'dataDetail.*.location_en'      => 'required',
+            'dataDetail.*.description_en'   => 'nullable|string',
+            'dataDetail.*.description_km'   => 'nullable|string',
             'dataDetail.*.is_upcoming_event' => 'nullable|boolean',
             'dataDetail.*.ordering'         => 'required',
             'dataDetail.*.image'            => 'nullable|image',

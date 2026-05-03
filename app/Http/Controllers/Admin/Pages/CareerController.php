@@ -75,7 +75,9 @@ class CareerController extends Controller
                     'km' => $request->location_km,
                 ],
                 'add_on' => [
-                    'close_date' => Carbon::createFromFormat('d/m/Y', $request->close_date)->format('Y-m-d'),
+                    'close_date'     => Carbon::createFromFormat('d/m/Y', $request->close_date)->format('Y-m-d'),
+                    'description_en' => $request->description_en,
+                    'description_km' => $request->description_km,
                 ],
                 'sequence' => $request->sequence,
                 'status' => $request->status,
