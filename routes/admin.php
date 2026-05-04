@@ -20,7 +20,10 @@ use App\Http\Controllers\Admin\Pages\PrivacyPolicyController;
 use App\Http\Controllers\Admin\Pages\ProductionController;
 use App\Http\Controllers\Admin\Pages\UpcomingEventController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductAttributeController;
 use App\Http\Controllers\Admin\ProductDiscountController;
+use App\Http\Controllers\Admin\ProductLocationController;
+use App\Http\Controllers\Admin\ProductStockController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Requests\Admin as AdminRequest;
@@ -84,12 +87,17 @@ Route::middleware(['locale'])->group(function () {
             Route::get('category-data', 'fetchCategoryData')->name('category-data');
             Route::get('product-data', 'fetchProductData')->name('product-data');
             Route::get('product-variation-data', 'fetchProductVariationData')->name('product-variation-data');
+            Route::get('product-attribute-data', 'fetchProductAttributeData')->name('product-attribute-data');
+            Route::get('product-source-data', 'fetchProductSourceData')->name('product-source-data');
+            Route::get('product-location-data', 'fetchProductLocationData')->name('product-location-data');
         });
         // Validation
         Route::prefix('validation')->name('validation-')->group(function () {
             Route::post('category', [AdminRequest\CategoryRequest::class, 'validate'])->name('category');
             Route::post('product', [AdminRequest\ProductRequest::class, 'validate'])->name('product');
             Route::post('product-variation', [AdminRequest\ProductVariationRequest::class, 'validate'])->name('product-variation');
+            Route::post('product-attribute', [AdminRequest\ProductAttributeRequest::class, 'validate'])->name('product-attribute');
+            Route::post('product-location', [AdminRequest\ProductLocationRequest::class, 'validate'])->name('product-location');
             Route::post('product-discount', [AdminRequest\DiscountRequest::class, 'validate'])->name('product-discount');
         });
 
@@ -143,9 +151,35 @@ Route::middleware(['locale'])->group(function () {
                 Route::put('restore', 'restore')->name('restore');
                 Route::delete('destroy', 'destroy')->name('destroy');
                 Route::get('sequence', 'sequence')->name('sequence');
+                Route::post('image-upload', 'uploadImage')->name('image-upload');
             });
 
             Route::controller(ProductVariationController::class)->prefix('variation')->name('product-variation-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
+                Route::delete('delete', 'delete')->name('delete');
+            });
+
+            Route::controller(ProductLocationController::class)->prefix('location')->name('product-location-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::post('save', 'save')->name('save');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
+                Route::delete('delete', 'delete')->name('delete');
+            });
+
+            Route::controller(ProductStockController::class)->prefix('stock')->name('product-stock-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::get('history', 'history')->name('history');
+                Route::post('adjust', 'adjust')->name('adjust');
+            });
+
+            Route::controller(ProductAttributeController::class)->prefix('attribute')->name('product-attribute-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
                 Route::post('save', 'save')->name('save');

@@ -23,10 +23,11 @@ class ProductRequest extends FormRequest
     {
         $id = $this->id ?? null;
         return [
-            'code'              => 'nullable|unique:products,code,' . $id,
+            'code'              => 'nullable|unique:products,sku,' . $id,
             'title_en'          => 'required',
             'status'            => 'required',
-            'category_ids'      => 'required|array',
+            'category_ids'      => 'nullable|array',
+            'category_id'       => 'nullable|exists:categories,id',
 
             'product_variates.*.title_en'  => 'required',
             'product_variates.*.title_km'  => 'required',
@@ -52,8 +53,11 @@ class ProductRequest extends FormRequest
     }
 
 
-    public function validate($rules, ...$params)
+    public function validate($rules = null, ...$params)
     {
+        if ($rules === null) {
+            return parent::validate($this->rules(), ...$params);
+        }
         return parent::validate($rules, ...$params);
     }
 }

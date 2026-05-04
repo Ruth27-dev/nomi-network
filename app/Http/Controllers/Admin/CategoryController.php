@@ -5,10 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CategoryRequest;
 use App\Models\Category;
-use App\Models\UploadFile;
 use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
@@ -33,15 +30,16 @@ class CategoryController extends Controller
         try {
             $pag = request('pag') ?? 50;
             $data = Category::query()
-                ->when(request('status'), fn($q) => $q->where('status', request('status')))
+                ->with('parent')
+                ->when(request('status'), function ($q) {
+                    $q->where('status', request('status'));
+                })
                 ->when(request('trash'), fn($q) => $q->onlyTrashed())
                 ->when(request('search'), function ($q) {
                     $q->where(function ($q) {
-                        $q->where('code', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('title->en', 'LIKE', '%' . request('search') . '%');
+                        $q->where('title->en', 'LIKE', '%' . request('search') . '%');
                         $q->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('slug', 'LIKE', '%' . request('search') . '%');
                     });
                 })
                 ->orderByDesc('created_at')
@@ -55,37 +53,26 @@ class CategoryController extends Controller
     {
         DB::beginTransaction();
         try {
-            $image = UploadFile::uploadFile('/category', $request->file('image'));
             $input = [
-                'title'         => [
-                    'en'    => $request->title_en,
-                    'km'    => $request->title_km,
+                'title' => [
+                    'en' => $request->title_en,
+                    'km' => $request->title_km,
                 ],
-                'description'   => [
-                    'en'    => $request->description_en,
-                    'km'    => $request->description_km,
-                ],
-                'slug'          => $request->slug,
-                'status'        => $request->status,
-                'image'         => $image,
-                'sequence'      => $request->sequence,
-                'user_id'       => Auth::user()->id,
+                'parent_id' => $request->parent_id,
+                'status' => $request->status,
+                'slug' => $request->slug,
             ];
             if (!$request->id) {
-                $data = Category::create($input);
+                Category::create($input);
             } else {
-                $data = Category::findOrFail($request->id);
-                if ($request->file('image') || !$request->tmp_file) {
-                    UploadFile::deleteFile('/category', $data->image);
-                }
-                $input['image'] = $image ?? $request->tmp_file;
+                $data = Category::withTrashed()->findOrFail($request->id);
                 $data->update($input);
             }
             DB::commit();
             return $this->responseSuccess();
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->responseError();
+            return $this->responseError($e->getMessage());
         }
     }
 
@@ -146,7 +133,7 @@ class CategoryController extends Controller
     public function sequence()
     {
         try {
-            $data['max_ordering'] = Category::max('sequence') + 1;
+            $data['max_ordering'] = 0;
             return response()->json($data);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()]);

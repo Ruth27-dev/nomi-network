@@ -3,25 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\BankAccount;
-use App\Models\Bill;
-use App\Models\Branch;
 use App\Models\Category;
-use App\Models\ExchangeRate;
-use App\Models\IngredientStockBatch;
-use App\Models\Invoice;
-use App\Models\Item;
-use App\Models\ItemVariate;
 use App\Models\ListOfValue;
-use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductAttribute;
+use App\Models\ProductLocation;
+use App\Models\ProductSource;
 use App\Models\ProductVariation;
-use App\Models\Receipt;
-use App\Models\Shop;
-use App\Models\User;
 use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class FetchDataController extends Controller
 {
@@ -33,11 +22,9 @@ class FetchDataController extends Controller
                 ->where('status', $this->active)
                 ->when(request('search'), function ($q) {
                     $q->where(function ($q) {
-                        $q->where('code', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('title->en', 'LIKE', '%' . request('search') . '%');
+                        $q->where('title->en', 'LIKE', '%' . request('search') . '%');
                         $q->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('slug', 'LIKE', '%' . request('search') . '%');
                     });
                 })
                 ->limit($pag)
@@ -53,14 +40,14 @@ class FetchDataController extends Controller
         try {
             $pag = request('pag') ?? 50;
             $data = Product::query()
-                ->where('status', $this->active)
+                ->where('is_active', true)
                 ->when(request('search'), function ($q) {
                     $q->where(function ($q) {
-                        $q->where('code', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('title->en', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                        $q->where('sku', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('name_en', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('name_kh', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('description_en', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('description_kh', 'LIKE', '%' . request('search') . '%');
                     });
                 })
                 ->limit($pag)
@@ -77,18 +64,67 @@ class FetchDataController extends Controller
             $pag = request('pag') ?? 50;
             $data = ProductVariation::query()
                 ->with('product')
-                ->where('status', $this->active)
+                ->where('is_active', true)
                 ->when(request('search'), function ($q) {
                     $q->where(function ($query) {
-                        $query->where('title->en', 'LIKE', '%' . request('search') . '%');
-                        $query->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
+                        $query->where('name', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhere('sku', 'LIKE', '%' . request('search') . '%');
                         $query->orWhereHas('product', function ($product) {
-                            $product->where('title->en', 'LIKE', '%' . request('search') . '%');
-                            $product->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
+                            $product->where('name_en', 'LIKE', '%' . request('search') . '%');
+                            $product->orWhere('name_kh', 'LIKE', '%' . request('search') . '%');
                         });
                     });
                 })
                 ->limit($pag)
+                ->get();
+            return $data;
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function fetchProductAttributeData()
+    {
+        try {
+            $pag = request('pag') ?? 50;
+            $data = ProductAttribute::query()
+                ->where('is_active', true)
+                ->when(request('search'), function ($q) {
+                    $q->where(function ($query) {
+                        $query->where('name', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhere('code', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhere('input_type', 'LIKE', '%' . request('search') . '%');
+                    });
+                })
+                ->limit($pag)
+                ->get();
+            return $data;
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function fetchProductSourceData()
+    {
+        try {
+            $data = ProductSource::query()
+                ->where('is_active', true)
+                ->when(request('search'), fn($q) => $q->where('name_en', 'LIKE', '%' . request('search') . '%'))
+                ->limit(50)
+                ->get();
+            return $data;
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function fetchProductLocationData()
+    {
+        try {
+            $data = ProductLocation::query()
+                ->where('is_active', true)
+                ->when(request('search'), fn($q) => $q->where('name_en', 'LIKE', '%' . request('search') . '%'))
+                ->limit(50)
                 ->get();
             return $data;
         } catch (Exception $e) {

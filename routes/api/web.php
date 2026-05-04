@@ -38,4 +38,13 @@ Route::prefix('web')->group(function () {
         Route::post('/bank-account', [Web\ListOfValueController::class, 'bankAccount']);
         Route::post('/shipping-method', [Web\ListOfValueController::class, 'shippingMethod']);
     });
+
+    Route::prefix('catalog')->group(function () {
+        Route::post('/categories', [Web\ProductCatalogController::class, 'categories']);
+        Route::post('/category-tree', [Web\ProductCatalogController::class, 'categoryTree']);
+        Route::post('/products', [Web\ProductCatalogController::class, 'products']);
+        Route::post('/product-detail', [Web\ProductCatalogController::class, 'productDetail']);
+        Route::post('/stock-summary', [Web\ProductCatalogController::class, 'stockSummary']);
+        Route::post('/stock-history', [Web\ProductCatalogController::class, 'stockHistory']);
+    });
 });

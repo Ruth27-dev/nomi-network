@@ -1,0 +1,74 @@
+@extends('admin::shared.layout')
+@section('layout')
+    <div class="content-wrapper" x-data="productLocationPage">
+        @include('admin::shared.header', [
+            'title' => 'Product Locations',
+            'header_name' => 'Product Locations',
+        ])
+        <div class="content-body">
+            <div class="content-tab">
+                <div class="content-tab-wrapper">
+                    <span class="title !text-gray-600">
+                        @lang('form.total') <span x-text="table?.paginate?.totalItems"></span>
+                    </span>
+                </div>
+                <div class="content-action-button">
+                    <div class="filter">
+                        <div class="form-row search-inline">
+                            <input type="text" x-model="formFilter.search" placeholder="Search..."
+                                autocomplete="off" @keydown.enter="onFilter()">
+                            <button @click="onFilter()"><i data-feather="search"></i></button>
+                        </div>
+                    </div>
+                    @can('product-location-create')
+                        <button class="btn-create" @click="openStoreDialog()">
+                            <i data-feather="plus"></i>
+                            <span class="uppercase">Create</span>
+                        </button>
+                    @endcan
+                    <button @click="onReset()">
+                        <i data-feather="refresh-ccw"></i>
+                    </button>
+                </div>
+            </div>
+            @include('admin::pages.product-location.table')
+        </div>
+        @include('admin::pages.product-location.store')
+    </div>
+@stop
+@section('script')
+    <script type="module">
+        Alpine.data('productLocationPage', () => ({
+            table: new Table("{{ route('admin-product-location-data') }}"),
+            formFilter: new FormGroup({ search: ['', []] }),
+            init() {
+                this.table.init();
+                feather.replace();
+            },
+            onFilter() {
+                this.table.init(this.formFilter.value());
+            },
+            onReset() {
+                this.formFilter.reset();
+                this.table.reset();
+            },
+            openStoreDialog(id = null) {
+                this.$dialog('storeProductLocationDialog').open({
+                    data: { id },
+                    config: { width: '600px', position: 'right', backdrop: false, blur: 3 },
+                    afterClose: (res) => {
+                        if (res) this.table.reload();
+                    }
+                });
+            },
+            onUpdateStatus(id, status) {
+                Axios.post("{{ route('admin-product-location-status') }}", { id, status })
+                    .then(() => this.table.reload());
+            },
+            onDelete(id) {
+                Axios.delete("{{ route('admin-product-location-delete') }}", { data: { id } })
+                    .then(() => this.table.reload());
+            },
+        }));
+    </script>
+@stop
