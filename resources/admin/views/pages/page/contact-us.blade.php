@@ -166,9 +166,7 @@
                                             x-text="item.title_en || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.title_km || '-'"></td>
-                                        <td class="text-sm text-gray-600" style="padding: 12px;">
-                                            <span x-text="item.description_en || '-'"></span>
-                                        </td>
+                                        <td class="text-sm text-gray-600" style="padding: 12px;" x-text="stripHtml(item.description_en) || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
                                         <td style="padding: 12px;">
@@ -211,27 +209,36 @@
                 </div>
                 <div class="form-body overflow-y-auto" style="max-height: 64vh; padding: 18px 20px 8px;">
                     <div class="form-header mb-0 !text-sm !flex !justify-end">
-                        @include('admin::components.form-change-language')
+                        <div class="change-language">
+                            <div class="change-language-row">
+                                <div class="change-language-row-item" :class="{ 'active': detailLocale == arrayLangLocale.en }" @click="detailLocale = arrayLangLocale.en">
+                                    <span>@lang('form.locale.en')</span>
+                                </div>
+                                <div class="change-language-row-item" :class="{ 'active': detailLocale == arrayLangLocale.km }" @click="detailLocale = arrayLangLocale.km">
+                                    <span>@lang('form.locale.km')</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.en">
                         <label>@lang('form.body.label.title_en') <span>*</span></label>
                         <input type="text" x-model="detailForm.title_en"
                             placeholder="@lang('form.body.placeholder.title_en')" autocomplete="off">
                         <span class="error" x-show="detailValidate?.title_en" x-text="detailValidate?.title_en"></span>
                     </div>
-                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.km">
                         <label>@lang('form.body.label.title_km') <span>*</span></label>
                         <input type="text" x-model="detailForm.title_km"
                             placeholder="@lang('form.body.placeholder.title_km')" autocomplete="off">
                         <span class="error" x-show="detailValidate?.title_km" x-text="detailValidate?.title_km"></span>
                     </div>
-                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.en">
                         <label>@lang('form.body.label.description_en') <span>*</span></label>
                         <textarea id="cu-detail-en" rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
                         <span class="error" x-show="detailValidate?.description_en"
                             x-text="detailValidate?.description_en"></span>
                     </div>
-                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.km">
                         <label>@lang('form.body.label.description_km') <span>*</span></label>
                         <textarea id="cu-detail-km" rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
                         <span class="error" x-show="detailValidate?.description_km"
@@ -296,6 +303,7 @@
     <script type="module">
         Alpine.data('contactUsPage', () => ({
             locale: @json(config('dummy.locale.en')),
+            detailLocale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 page: ['contact_us', ['required']],
                 title_en: [null, ['required']],
@@ -452,6 +460,13 @@
                     icon_url: item.icon_url || this.resolveFileUrl(icon),
                 };
             },
+            stripHtml(html) {
+                if (!html) return '';
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                const text = tmp.textContent || tmp.innerText || '';
+                return text.length > 100 ? text.substring(0, 100) + '...' : text;
+            },
             resolveFileUrl(file) {
                 if (!file) return null;
                 if (file instanceof File) return URL.createObjectURL(file);
@@ -480,6 +495,7 @@
             openCreateDetailDialog() {
                 this.detailEditIndex = null;
                 this.detailValidate = null;
+                this.detailLocale = arrayLangLocale.en;
                 this.detailForm = {
                     ...this.emptyDetail(),
                     ordering: this.getNextOrdering(),
@@ -493,6 +509,7 @@
             openEditDetailDialog(index) {
                 this.detailEditIndex = index;
                 this.detailValidate = null;
+                this.detailLocale = arrayLangLocale.en;
                 this.detailForm = this.cloneDetail(this.dataDetail[index]);
                 this.detailDialogOpen = true;
                 this.resetDetailFileInputs();
@@ -524,30 +541,27 @@
                 this.detailValidate = errors;
                 return Object.keys(errors).length === 0;
             },
-            async onSaveDetail() {
+            onSaveDetail() {
                 this.detailForm.description_en = tinymce.get('cu-detail-en')?.getContent() ?? this.detailForm.description_en;
                 this.detailForm.description_km = tinymce.get('cu-detail-km')?.getContent() ?? this.detailForm.description_km;
-                if (this.detailLoading || !this.validateDetailForm()) return;
+                if (!this.validateDetailForm()) {
+                    const enErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_en'));
+                    const kmErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_km'));
+                    if (enErrors.length > 0) this.detailLocale = arrayLangLocale.en;
+                    else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
+                    return;
+                }
 
-                const originalDataDetail = this.dataDetail.map(item => this.cloneDetail(item));
                 const detail = this.normalizeDetail(this.detailForm);
-                let detailIndex = this.detailEditIndex;
-
-                if (detailIndex === null) {
+                if (this.detailEditIndex === null) {
                     this.dataDetail.push(detail);
-                    detailIndex = this.dataDetail.length - 1;
                 } else {
-                    this.dataDetail.splice(detailIndex, 1, detail);
+                    this.dataDetail.splice(this.detailEditIndex, 1, detail);
                 }
 
-                const saved = await this.submitContactUs(true, detailIndex);
-
-                if (saved) {
-                    this.detailDialogOpen = false;
-                    this.detailValidate = null;
-                } else {
-                    this.dataDetail = originalDataDetail;
-                }
+                this.detailDialogOpen = false;
+                this.detailValidate = null;
+                Toast({ message: "@lang('dialog.toast.save.msg.success')", status: 'success', size: 'small' });
             },
             removeDetail(index) {
                 this.$store.confirmDialog.open({
@@ -557,16 +571,9 @@
                         btnClose: "@lang('dialog.button.close')",
                         btnSave: "@lang('dialog.button.delete')",
                     },
-                    afterClosed: async (result) => {
-                        if (!result || this.loading) return;
-
-                        const previousData = this.dataDetail.map(item => this.cloneDetail(item));
+                    afterClosed: (result) => {
+                        if (!result) return;
                         this.dataDetail.splice(index, 1);
-
-                        const saved = await this.submitContactUs();
-                        if (!saved) {
-                            this.dataDetail = previousData;
-                        }
                     }
                 });
             },
@@ -685,7 +692,16 @@
                         const detailErrors = this.getDetailServerErrors(errors, detailIndex);
                         if (Object.keys(detailErrors).length > 0) {
                             this.detailValidate = detailErrors;
+                            const enErrors = Object.keys(detailErrors).filter(k => k.includes('_en'));
+                            const kmErrors = Object.keys(detailErrors).filter(k => k.includes('_km'));
+                            if (enErrors.length > 0) this.detailLocale = arrayLangLocale.en;
+                            else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
                         }
+                    } else {
+                        const enErrors = Object.keys(errors || {}).filter(k => k.includes('_en'));
+                        const kmErrors = Object.keys(errors || {}).filter(k => k.includes('_km'));
+                        if (enErrors.length > 0) this.locale = arrayLangLocale.en;
+                        else if (kmErrors.length > 0) this.locale = arrayLangLocale.km;
                     }
 
                     return false;

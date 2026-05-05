@@ -60,9 +60,9 @@
                                     <tr class="border-t border-gray-200">
                                         <td class="text-sm text-gray-600" style="padding: 12px;" x-text="index + 1"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
-                                            x-text="item.description_en || '-'"></td>
+                                            x-text="stripHtml(item.description_en) || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
-                                            x-text="item.description_km || '-'"></td>
+                                            x-text="stripHtml(item.description_km) || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
                                         <td style="padding: 12px;">
@@ -196,15 +196,24 @@
                 </div>
                 <div class="form-body overflow-y-auto" style="max-height: 64vh; padding: 18px 20px 8px;">
                     <div class="form-header mb-0 !text-sm !flex !justify-end">
-                        @include('admin::components.form-change-language')
+                        <div class="change-language">
+                            <div class="change-language-row">
+                                <div class="change-language-row-item" :class="{ 'active': detailLocale == arrayLangLocale.en }" @click="detailLocale = arrayLangLocale.en">
+                                    <span>@lang('form.locale.en')</span>
+                                </div>
+                                <div class="change-language-row-item" :class="{ 'active': detailLocale == arrayLangLocale.km }" @click="detailLocale = arrayLangLocale.km">
+                                    <span>@lang('form.locale.km')</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.en">
                         <label>@lang('form.body.label.description_en') <span>*</span></label>
                         <textarea id="prod-detail-en" rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
                         <span class="error" x-show="detailValidate?.description_en"
                             x-text="detailValidate?.description_en"></span>
                     </div>
-                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.km">
                         <label>@lang('form.body.label.description_km') <span>*</span></label>
                         <textarea id="prod-detail-km" rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
                         <span class="error" x-show="detailValidate?.description_km"
@@ -426,6 +435,13 @@
                     image_url: null,
                 };
             },
+            stripHtml(html) {
+                if (!html) return '';
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                const text = tmp.textContent || tmp.innerText || '';
+                return text.length > 100 ? text.substring(0, 100) + '...' : text;
+            },
             resolveFileUrl(file) {
                 if (!file) return null;
                 if (file instanceof File) return URL.createObjectURL(file);
@@ -500,7 +516,14 @@
             async onSaveDetail() {
                 this.detailForm.description_en = tinymce.get('prod-detail-en')?.getContent() ?? this.detailForm.description_en;
                 this.detailForm.description_km = tinymce.get('prod-detail-km')?.getContent() ?? this.detailForm.description_km;
-                if (this.detailLoading || !this.validateDetailForm()) return;
+                if (this.detailLoading) return;
+                if (!this.validateDetailForm()) {
+                    const enErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_en'));
+                    const kmErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_km'));
+                    if (enErrors.length > 0) this.detailLocale = arrayLangLocale.en;
+                    else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
+                    return;
+                }
 
                 const previousData = this.dataDetail.map(item => this.clone(item));
                 const detail = this.normalizeDetail(this.detailForm);
@@ -756,6 +779,10 @@
                         const detailErrors = this.getDetailServerErrors(errors, index);
                         if (Object.keys(detailErrors).length > 0) {
                             this.detailValidate = detailErrors;
+                            const enErrors = Object.keys(detailErrors).filter(k => k.includes('_en'));
+                            const kmErrors = Object.keys(detailErrors).filter(k => k.includes('_km'));
+                            if (enErrors.length > 0) this.detailLocale = arrayLangLocale.en;
+                            else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
                         }
                     }
 
