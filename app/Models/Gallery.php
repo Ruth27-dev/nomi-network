@@ -28,6 +28,12 @@ class Gallery extends Model
 
     public function getUrlAttribute()
     {
+        if (!$this->image) return null;
+        // New records store a relative path (e.g. "product/images/file.jpg")
+        if (str_contains($this->image, '/')) {
+            return asset('storage/' . $this->image);
+        }
+        // Legacy variation images stored without a path prefix
         return asset('storage/product/variation/' . $this->image);
     }
 }

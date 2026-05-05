@@ -11,32 +11,39 @@ class ProductVariation extends Model
     protected $table = 'product_variations';
     protected $fillable = [
         'product_id',
-        'title',
-        'status',
+        'sku',
+        'barcode',
+        'name',
+        'combination_key',
         'price',
-        'size',
-        'description',
-        'note',
-        'is_available',
-        'image',
-        'user_id',
+        'stock',
+        'image_url',
+        'is_active',
     ];
 
     protected $casts = [
-        'title'         => 'array',
-        'description'   => 'array',
-        'note'   => 'array',
+        'is_active' => 'boolean',
     ];
-    protected $appends = ['image_url'];
+    protected $appends = ['title', 'status', 'description'];
 
-    public function getImageUrlAttribute()
+    public function getTitleAttribute(): array
     {
-        return $this->image ? asset('storage/uploads/item/' . $this->image) : asset('images/logo.jpg');
+        return ['en' => $this->name, 'km' => null];
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return $this->is_active ? 'ACTIVE' : 'INACTIVE';
+    }
+
+    public function getDescriptionAttribute(): array
+    {
+        return ['en' => null, 'km' => null];
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'id');
     }
 
     public function product()

@@ -51,6 +51,7 @@
     </div>
 @stop
 @section('script')
+    <script src="{{ asset('plugin/tinymce/tinymce.min.js') }}" referrerpolicy="origin"></script>
     <script type="module">
         Alpine.data('productPage', () => ({
             table: new Table("{{ route('admin-product-data', $type) }}"),

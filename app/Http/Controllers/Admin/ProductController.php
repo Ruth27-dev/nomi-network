@@ -11,7 +11,6 @@ use App\Models\ProductVariation;
 use App\Models\UploadFile;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
@@ -29,7 +28,7 @@ class ProductController extends Controller
     public function index()
     {
         $data = [
-            'categories' => Category::query()->where('status', $this->active)->get(),
+            'categories' => Category::query()->active()->get(),
             'type'      => request('type'),
         ];
 
@@ -41,18 +40,21 @@ class ProductController extends Controller
         try {
             $pag = request('pag') ?? 50;
             $data = Product::query()
-                ->when(request('status'), fn($q) => $q->where('status', request('status')))
+                ->with(['category', 'images'])
+                ->when(request('status'), function ($q) {
+                    $q->where('is_active', request('status') === $this->active);
+                })
                 ->when(request('trash'), fn($q) => $q->onlyTrashed())
                 ->when(request('category_id'), function ($q) {
-                    $q->whereHas('categories', fn($cat) => $cat->where('categories.id', request('category_id')));
+                    $q->where('category_id', request('category_id'));
                 })
                 ->when(request('search'), function ($q) {
                     $q->where(function ($q) {
-                        $q->where('code', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('title->en', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
-                        $q->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                        $q->where('sku', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('name_en', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('name_kh', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('description_en', 'LIKE', '%' . request('search') . '%');
+                        $q->orWhere('description_kh', 'LIKE', '%' . request('search') . '%');
                     });
                 })
                 ->orderByDesc('created_at')
@@ -71,35 +73,34 @@ class ProductController extends Controller
 
             /* ================= PRODUCT ================= */
 
-            $image = UploadFile::uploadFile(
-                '/product',
-                $request->file('image'),
-                $request->tmp_file
-            );
+            $categoryId = is_array($request->category_ids)
+                ? ($request->category_ids[0] ?? null)
+                : $request->category_id;
 
             if (!$request->id) {
 
                 /* ================= CREATE ================= */
 
                 $product = Product::create([
-                    'code'        => $request->code,
-                    'title'       => [
-                        'en' => $request->title_en,
-                        'km' => $request->title_km,
-                    ],
-                    'status'      => $request->status,
-                    'type'        => $request->display_type,
-                    'description' => [
-                        'en' => $request->description_en,
-                        'km' => $request->description_km,
-                    ],
-                    'image'       => $image,
-                    'user_id'     => Auth::id(),
+                    'sku' => $request->code,
+                    'name_en' => $request->title_en,
+                    'name_kh' => $request->title_km,
+                    'description_en' => $request->description_en,
+                    'description_kh' => $request->description_km,
+                    'price' => $request->price ?? 0,
+                    'stock' => $request->stock ?? 0,
+                    'is_preorder' => (bool) $request->is_preorder,
+                    'is_active' => $request->status === $this->active,
+                    'has_variation' => is_array($request->product_variations) && count($request->product_variations) > 0,
+                    'category_id' => $categoryId,
+                    'product_source_id' => $request->product_source_id ?: null,
+                    'product_location_id' => $request->product_location_id ?: null,
+                    'source_en' => $request->source_en ?: null,
+                    'source_kh' => $request->source_kh ?: null,
                 ]);
 
-                $product->categories()->sync($request->category_ids ?? []);
-
                 $this->createVariations($product, $request);
+                $this->syncImages($product, $request);
             } else {
 
                 /* ================= UPDATE ================= */
@@ -107,21 +108,22 @@ class ProductController extends Controller
                 $product = Product::findOrFail($request->id);
 
                 $product->update([
-                    'code'        => $request->code,
-                    'title'       => [
-                        'en' => $request->title_en,
-                        'km' => $request->title_km,
-                    ],
-                    'status'      => $request->status,
-                    'type'        => $request->display_type,
-                    'description' => [
-                        'en' => $request->description_en,
-                        'km' => $request->description_km,
-                    ],
-                    'image'       => $image,
+                    'sku' => $request->code,
+                    'name_en' => $request->title_en,
+                    'name_kh' => $request->title_km,
+                    'description_en' => $request->description_en,
+                    'description_kh' => $request->description_km,
+                    'price' => $request->price ?? 0,
+                    'stock' => $request->stock ?? 0,
+                    'is_preorder' => (bool) $request->is_preorder,
+                    'is_active' => $request->status === $this->active,
+                    'has_variation' => is_array($request->product_variations) && count($request->product_variations) > 0,
+                    'category_id' => $categoryId,
+                    'product_source_id' => $request->product_source_id ?: null,
+                    'product_location_id' => $request->product_location_id ?: null,
+                    'source_en' => $request->source_en ?: null,
+                    'source_kh' => $request->source_kh ?: null,
                 ]);
-
-                $product->categories()->sync($request->category_ids ?? []);
 
                 /* ===== DELETE OLD VARIATIONS ===== */
 
@@ -130,8 +132,7 @@ class ProductController extends Controller
                 /* ===== RECREATE VARIATIONS ===== */
 
                 $this->createVariations($product, $request);
-
-                $this->cleanupOrphanVariationImages($product);
+                $this->syncImages($product, $request);
             }
 
             DB::commit();
@@ -142,78 +143,79 @@ class ProductController extends Controller
         }
     }
 
+    public function uploadImage(Request $request)
+    {
+        try {
+            if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+                return response()->json(['error' => true, 'message' => 'Invalid file'], 422);
+            }
+            $filename = UploadFile::uploadFile('product/images', $request->file('file'));
+            $path = 'product/images/' . $filename;
+            return response()->json([
+                'error' => false,
+                'path' => $path,
+                'url'  => asset('storage/' . $path),
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => true, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function syncImages(Product $product, Request $request): void
+    {
+        if (!isset($request->images) || !is_array($request->images)) {
+            return;
+        }
+        Gallery::where('foreign_id', $product->id)
+            ->where('foreign_model', Product::class)
+            ->delete();
+        foreach ($request->images as $imagePath) {
+            if ($imagePath) {
+                Gallery::create([
+                    'foreign_id'    => $product->id,
+                    'foreign_model' => Product::class,
+                    'image'         => $imagePath,
+                    'user_id'       => auth()->id(),
+                ]);
+            }
+        }
+    }
+
     private function createVariations(Product $product, Request $request): void
     {
         if (!is_array($request->product_variations)) {
             return;
         }
 
+        $usedSkus = [];
+
         foreach ($request->product_variations as $index => $variate) {
+            $baseSku = trim((string) ($variate['sku'] ?? ''));
+            if ($baseSku === '') {
+                $baseSku = ($product->sku ?? ('P' . $product->id)) . '-' . ($index + 1);
+            }
 
-            $variation = ProductVariation::create([
+            $sku = $baseSku;
+            $suffix = 1;
+            while (
+                in_array($sku, $usedSkus, true) ||
+                ProductVariation::where('sku', $sku)->exists()
+            ) {
+                $sku = $baseSku . '-' . $suffix;
+                $suffix++;
+            }
+            $usedSkus[] = $sku;
+
+            ProductVariation::create([
                 'product_id' => $product->id,
-                'title' => [
-                    'en' => $variate['title_en'] ?? null,
-                    'km' => $variate['title_km'] ?? null,
-                ],
-                'status' => $variate['status'] ?? 'ACTIVE',
+                'sku' => $sku,
+                'barcode' => $variate['barcode'] ?? null,
+                'name' => $variate['title_en'] ?? null,
+                'combination_key' => $variate['combination_key'] ?? null,
                 'price'  => $variate['price'] ?? 0,
-                'size'   => $variate['size'] ?? null,
-                'description' => [
-                    'en' => $variate['description_en'] ?? null,
-                    'km' => $variate['description_km'] ?? null,
-                ],
-                'note' => [
-                    'en' => $variate['note_en'] ?? null,
-                    'km' => $variate['note_km'] ?? null,
-                ],
-                'is_available' => true,
-                'is_note'      => true,
-                'user_id'      => Auth::id(),
+                'stock' => $variate['stock'] ?? 0,
+                'is_active' => ($variate['status'] ?? 'ACTIVE') === $this->active,
             ]);
-
-            /* ===== REATTACH OLD IMAGES ===== */
-
-            if (!empty($variate['tmp_files']) && is_array($variate['tmp_files'])) {
-                Gallery::whereIn('image', $variate['tmp_files'])
-                    ->update([
-                        'foreign_id'    => $variation->id,
-                        'foreign_model' => ProductVariation::class,
-                    ]);
-            }
-
-            /* ===== UPLOAD NEW IMAGES ===== */
-
-            if ($request->hasFile("product_variations.$index.images")) {
-                foreach ($request->file("product_variations.$index.images") as $file) {
-
-                    $path = UploadFile::uploadFile('/product/variation', $file, null);
-
-                    Gallery::create([
-                        'foreign_id'    => $variation->id,
-                        'foreign_model' => ProductVariation::class,
-                        'image'         => $path,
-                        'user_id'       => Auth::id(),
-                    ]);
-                }
-            }
-        }
-    }
-
-    private function cleanupOrphanVariationImages(): void
-    {
-        $orphans = Gallery::where('foreign_model', ProductVariation::class)
-            ->whereNotIn('foreign_id', function ($query) {
-                $query->select('id')
-                    ->from('product_variations');
-            })
-            ->get();
-
-        foreach ($orphans as $gallery) {
-            // delete physical file
-            UploadFile::deleteFile('/product/variation', $gallery->image);
-            // delete database record
-            $gallery->delete();
         }
     }
 
@@ -234,7 +236,7 @@ class ProductController extends Controller
         try {
             $data = Product::findOrFail(request('id'));
             $data->update([
-                'status' => request('status')
+                'is_active' => request('status') === $this->active
             ]);
             DB::commit();
             return $this->responseSuccess(null, __('form.message.update.success'));

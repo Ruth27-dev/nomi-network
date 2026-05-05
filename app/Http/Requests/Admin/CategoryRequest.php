@@ -22,10 +22,12 @@ class CategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->id ?: null;
         return [
             'title_en'        => 'required',
-            'sequence'        => 'required|integer',
             'status'          => 'required',
+            'parent_id'       => 'nullable|exists:categories,id',
+            'slug'            => 'required|unique:categories,slug,' . $id,
         ];
     }
 
@@ -34,8 +36,16 @@ class CategoryRequest extends FormRequest
         return [
             'title_en.required'         => __('validate.attributes.required'),
             'status.required'           => __('validate.attributes.required'),
-            'sequence.required'         => __('validate.attributes.required'),
-            'sequence.integer'          => __('validate.attributes.numeric'),
+            'slug.required'             => __('validate.attributes.required'),
+            'slug.unique'               => __('validate.attributes.unique'),
         ];
+    }
+
+    public function validate($rules = null, ...$params)
+    {
+        if ($rules === null) {
+            return parent::validate($this->rules(), ...$params);
+        }
+        return parent::validate($rules, ...$params);
     }
 }

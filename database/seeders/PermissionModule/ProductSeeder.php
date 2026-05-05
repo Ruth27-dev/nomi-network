@@ -141,6 +141,42 @@ class ProductSeeder extends Seeder
             ],
         ]);
 
+        $productAttribute = ModulePermission::create([
+            'parent_id'     => $product->id,
+            'display_name'  => json_encode([
+                'en' => 'Product Attributes',
+                'km' => 'លក្ខណៈផលិតផល',
+            ]),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'product-attribute-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $productAttribute->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'product-attribute-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $productAttribute->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'product-attribute-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $productAttribute->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'product-attribute-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $productAttribute->id,
+            ],
+        ]);
+
         $productDiscount = ModulePermission::create([
             'parent_id'     => $product->id,
             'display_name'  => json_encode([
@@ -188,6 +224,67 @@ class ProductSeeder extends Seeder
                 'module_id'     => $productDiscount->id,
             ],
         ]);
+
+        $productLocation = ModulePermission::create([
+            'parent_id'     => $product->id,
+            'display_name'  => json_encode([
+                'en' => 'Product Locations',
+                'km' => 'ទីតាំងផលិតផល',
+            ]),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'product-location-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $productLocation->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.create')),
+                'name'          => 'product-location-create',
+                'guard_name'    => 'admin',
+                'module_id'     => $productLocation->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'product-location-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $productLocation->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.delete')),
+                'name'          => 'product-location-delete',
+                'guard_name'    => 'admin',
+                'module_id'     => $productLocation->id,
+            ],
+        ]);
+
+        $productStock = ModulePermission::create([
+            'parent_id'     => $product->id,
+            'display_name'  => json_encode([
+                'en' => 'Stock Inventory',
+                'km' => 'ស្តុក',
+            ]),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'product-stock-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $productStock->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'product-stock-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $productStock->id,
+            ],
+        ]);
+
     }
 
     public $index = 0;

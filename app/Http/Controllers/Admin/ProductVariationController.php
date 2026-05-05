@@ -4,12 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductVariationRequest;
-use App\Models\Gallery;
 use App\Models\Product;
 use App\Models\ProductVariation;
-use App\Models\UploadFile;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProductVariationController extends Controller
@@ -26,7 +23,7 @@ class ProductVariationController extends Controller
     public function index()
     {
         $products = Product::query()
-            ->where('status', $this->active)
+            ->where('is_active', true)
             ->orderBy('id', 'desc')
             ->get();
 
@@ -41,17 +38,16 @@ class ProductVariationController extends Controller
             $pag = request('pag') ?? 50;
             $data = ProductVariation::query()
                 ->with('product')
-                ->when(request('status'), fn($q) => $q->where('status', request('status')))
+                ->when(request('status'), fn($q) => $q->where('is_active', request('status') === $this->active))
                 ->when(request('product_id'), fn($q) => $q->where('product_id', request('product_id')))
                 ->when(request('search'), function ($q) {
                     $q->where(function ($query) {
-                        $query->where('title->en', 'LIKE', '%' . request('search') . '%');
-                        $query->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
-                        $query->orWhere('description->en', 'LIKE', '%' . request('search') . '%');
-                        $query->orWhere('description->km', 'LIKE', '%' . request('search') . '%');
+                        $query->where('name', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhere('sku', 'LIKE', '%' . request('search') . '%');
+                        $query->orWhere('barcode', 'LIKE', '%' . request('search') . '%');
                         $query->orWhereHas('product', function ($product) {
-                            $product->where('title->en', 'LIKE', '%' . request('search') . '%');
-                            $product->orWhere('title->km', 'LIKE', '%' . request('search') . '%');
+                            $product->where('name_en', 'LIKE', '%' . request('search') . '%');
+                            $product->orWhere('name_kh', 'LIKE', '%' . request('search') . '%');
                         });
                     });
                 })
@@ -79,23 +75,13 @@ class ProductVariationController extends Controller
         try {
             $payload = [
                 'product_id' => $request->product_id,
-                'title' => [
-                    'en' => $request->title_en,
-                    'km' => $request->title_km,
-                ],
-                'status' => $request->status,
+                'sku' => $request->sku,
+                'barcode' => $request->barcode,
+                'name' => $request->title_en,
+                'combination_key' => $request->combination_key,
                 'price' => $request->price,
-                'size' => $request->size,
-                'description' => [
-                    'en' => $request->description_en,
-                    'km' => $request->description_km,
-                ],
-                'note' => [
-                    'en' => $request->note_en,
-                    'km' => $request->note_km,
-                ],
-                'is_available' => true,
-                'user_id' => Auth::id(),
+                'stock' => $request->stock ?? 0,
+                'is_active' => $request->status === $this->active,
             ];
 
             if (!$request->id) {
@@ -105,44 +91,11 @@ class ProductVariationController extends Controller
                 $variation->update($payload);
             }
 
-            $this->syncVariationImages($variation, $request);
-
             DB::commit();
             return $this->responseSuccess();
         } catch (Exception $e) {
             DB::rollBack();
             return $this->responseError();
-        }
-    }
-
-    private function syncVariationImages(ProductVariation $variation, ProductVariationRequest $request): void
-    {
-        $keepImages = $request->input('tmp_files', []);
-        if (!is_array($keepImages)) {
-            $keepImages = [];
-        }
-
-        $existing = Gallery::where('foreign_model', ProductVariation::class)
-            ->where('foreign_id', $variation->id)
-            ->get();
-
-        foreach ($existing as $gallery) {
-            if (!in_array($gallery->image, $keepImages, true)) {
-                UploadFile::deleteFile('/product/variation', $gallery->image);
-                $gallery->delete();
-            }
-        }
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = UploadFile::uploadFile('/product/variation', $file, null);
-                Gallery::create([
-                    'foreign_id' => $variation->id,
-                    'foreign_model' => ProductVariation::class,
-                    'image' => $path,
-                    'user_id' => Auth::id(),
-                ]);
-            }
         }
     }
 
@@ -152,7 +105,7 @@ class ProductVariationController extends Controller
         try {
             $data = ProductVariation::findOrFail(request('id'));
             $data->update([
-                'status' => request('status'),
+                'is_active' => request('status') === $this->active,
             ]);
             DB::commit();
             return $this->responseSuccess(null, __('form.message.update.success'));
@@ -166,17 +119,7 @@ class ProductVariationController extends Controller
     {
         DB::beginTransaction();
         try {
-            $variation = ProductVariation::findOrFail(request('id'));
-            $images = Gallery::where('foreign_model', ProductVariation::class)
-                ->where('foreign_id', $variation->id)
-                ->get();
-
-            foreach ($images as $gallery) {
-                UploadFile::deleteFile('/product/variation', $gallery->image);
-                $gallery->delete();
-            }
-
-            $variation->delete();
+            ProductVariation::findOrFail(request('id'))->delete();
             DB::commit();
             return $this->responseSuccess(null, __('form.message.delete.success'));
         } catch (Exception $e) {

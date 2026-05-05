@@ -12,24 +12,40 @@ class Category extends Model
 
     protected $table = 'categories';
     protected $fillable = [
+        'parent_id',
         'title',
         'description',
-        'sequence',
         'status',
-        'image',
         'slug',
-        'user_id',
     ];
+    protected $casts = ['title' => 'array', 'description' => 'array'];
 
-    protected $casts = [
-        'title'         => 'array',
-        'description'   => 'array',
-    ];
-    protected array $translatable = ['title', 'description'];
-    protected $appends = ['image_url'];
+    protected $appends = ['title', 'status'];
 
-    public function getImageUrlAttribute()
+    public function getTitleAttribute(): array
     {
-        return $this->image ? asset('storage/category/' . $this->image) : asset("images/no.jpg");
+        $title = $this->attributes['title'] ?? null;
+        $decoded = is_string($title) ? json_decode($title, true) : $title;
+        return is_array($decoded) ? ['en' => $decoded['en'] ?? null, 'km' => $decoded['km'] ?? null] : ['en' => null, 'km' => null];
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return strtoupper((string) ($this->attributes['status'] ?? 'ACTIVE')) === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE';
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'ACTIVE');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id');
     }
 }
