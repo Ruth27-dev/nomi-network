@@ -11,47 +11,44 @@
                 <span @click="close()"><i data-feather="x"></i></span>
             </div>
             <div class="form-body flex-auto overflow-y-auto">
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.position_en')<span>*</span></label>
-                        <input placeholder="@lang('form.body.placeholder.position')" type="text" x-model="form.position_en"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.position_en" x-text="validate?.position_en"></span>
-                    </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.position_km')</label>
-                        <input placeholder="@lang('form.body.placeholder.position')" type="text" x-model="form.position_km"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.position_km" x-text="validate?.position_km"></span>
-                    </div>
+                <div class="form-header mb-0 !text-sm !flex !justify-end">
+                    @include('admin::components.form-change-language')
                 </div>
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.location_en')<span>*</span></label>
-                        <input placeholder="@lang('form.body.placeholder.location_en')" type="text" x-model="form.location_en"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.location_en" x-text="validate?.location_en"></span>
-                    </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.location_km')</label>
-                        <input placeholder="@lang('form.body.placeholder.location_km')" type="text" x-model="form.location_km"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.location_km" x-text="validate?.location_km"></span>
-                    </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <label>@lang('form.body.label.position_en')<span>*</span></label>
+                    <input placeholder="@lang('form.body.placeholder.position')" type="text" x-model="form.position_en"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.position_en" x-text="validate?.position_en"></span>
                 </div>
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.description_en')</label>
-                        <textarea placeholder="@lang('form.body.placeholder.description_en')" rows="3"
-                            x-model="form.description_en" :disabled="form.disabled"></textarea>
-                        <span class="error" x-show="validate?.description_en" x-text="validate?.description_en"></span>
-                    </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.description_km')</label>
-                        <textarea placeholder="@lang('form.body.placeholder.description_km')" rows="3"
-                            x-model="form.description_km" :disabled="form.disabled"></textarea>
-                        <span class="error" x-show="validate?.description_km" x-text="validate?.description_km"></span>
-                    </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <label>@lang('form.body.label.position_km')</label>
+                    <input placeholder="@lang('form.body.placeholder.position')" type="text" x-model="form.position_km"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.position_km" x-text="validate?.position_km"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <label>@lang('form.body.label.location_en')<span>*</span></label>
+                    <input placeholder="@lang('form.body.placeholder.location_en')" type="text" x-model="form.location_en"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.location_en" x-text="validate?.location_en"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <label>@lang('form.body.label.location_km')</label>
+                    <input placeholder="@lang('form.body.placeholder.location_km')" type="text" x-model="form.location_km"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.location_km" x-text="validate?.location_km"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <label>@lang('form.body.label.description_en')</label>
+                    <textarea id="career-desc-en" placeholder="@lang('form.body.placeholder.description_en')" rows="3"
+                        x-model="form.description_en" :disabled="form.disabled"></textarea>
+                    <span class="error" x-show="validate?.description_en" x-text="validate?.description_en"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <label>@lang('form.body.label.description_km')</label>
+                    <textarea id="career-desc-km" placeholder="@lang('form.body.placeholder.description_km')" rows="3"
+                        x-model="form.description_km" :disabled="form.disabled"></textarea>
+                    <span class="error" x-show="validate?.description_km" x-text="validate?.description_km"></span>
                 </div>
                 <div class="row-2">
                     <div class="form-row">
@@ -67,16 +64,14 @@
                         <span class="error" x-show="validate?.sequence" x-text="validate?.sequence"></span>
                     </div>
                 </div>
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.status')<span>*</span> </label>
-                        <select x-model="form.status" :disabled="form.disabled">
-                            @foreach (config('dummy.status') as $key => $status)
-                                <option value="{{ $status['key'] }}">{{ $status['text'] }}</option>
-                            @endforeach
-                        </select>
-                        <span class="error" x-show="validate?.status" x-text="validate?.status"></span>
-                    </div>
+                <div class="form-row">
+                    <label>@lang('form.body.label.status')<span>*</span> </label>
+                    <select x-model="form.status" :disabled="form.disabled">
+                        @foreach (config('dummy.status') as $key => $status)
+                            <option value="{{ $status['key'] }}">{{ $status['text'] }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error" x-show="validate?.status" x-text="validate?.status"></span>
                 </div>
             </div>
             <div class="form-footer">
@@ -93,6 +88,7 @@
     </div>
     <script>
         Alpine.data('storeCareerDialog', () => ({
+            locale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 position_en:    [null, ['required']],
                 position_km:    [null, []],
@@ -127,6 +123,8 @@
                 }
                 this.initCloseDatePicker();
                 feather.replace();
+                await this.$nextTick();
+                await this.initTinymce();
             },
             async getMaxOrdering(callback) {
                 await Axios({
@@ -137,6 +135,42 @@
                     callback(res.data)
                 }).catch((e) => {
                     console.log(e);
+                });
+            },
+            async initTinymce() {
+                tinymce.remove('#career-desc-en, #career-desc-km');
+                await tinymce.init({
+                    relative_urls: false,
+                    selector: 'textarea#career-desc-en,textarea#career-desc-km',
+                    height: 400,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'wordcount'
+                    ],
+                    toolbar: 'fullscreen | bold italic underline | addImage media link | numlist bullist | styles | alignleft aligncenter alignright alignjustify | outdent indent',
+                    setup: function(editor) {
+                        editor.ui.registry.addButton('addImage', {
+                            text: 'Image',
+                            icon: 'image',
+                            onAction: () => {
+                                fileManager({
+                                    multiple: true,
+                                    afterClose: (result, basePath) => {
+                                        if (result && result.length > 0) {
+                                            result.map((file) => {
+                                                const img = editor.dom.createHTML('img', {
+                                                    src: basePath + file.path,
+                                                    style: 'width:100% !important;'
+                                                });
+                                                editor.insertContent(img);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    },
                 });
             },
             parseDate(date) {
@@ -204,6 +238,8 @@
                     },
                     afterClosed: (result) => {
                         if (result) {
+                            this.form.description_en = tinymce.get('career-desc-en')?.getContent() ?? '';
+                            this.form.description_km = tinymce.get('career-desc-km')?.getContent() ?? '';
                             this.form.disable();
                             this.loading = true;
                             const data = this.form.value();
@@ -226,6 +262,12 @@
                                 });
                             }).catch((e) => {
                                 this.validate = e.response?.data?.errors;
+                                if (this.validate) {
+                                    const enErrors = Object.keys(this.validate).filter(k => k.includes('_en'));
+                                    const kmErrors = Object.keys(this.validate).filter(k => k.includes('_km'));
+                                    if (enErrors.length > 0) this.locale = arrayLangLocale.en;
+                                    else if (kmErrors.length > 0) this.locale = arrayLangLocale.km;
+                                }
                             }).finally(() => {
                                 this.form.enable();
                                 this.loading = false;
@@ -235,6 +277,7 @@
                 });
             },
             close() {
+                tinymce.remove('#career-desc-en, #career-desc-km');
                 const input = $('#career_close_date');
                 const datePicker = input.data('daterangepicker');
                 if (datePicker) {

@@ -13,31 +13,30 @@
             <div class="form-body">
                 <fieldset class="border-[#d8dce5] border rounded p-3 mb-3">
                     <legend>Header</legend>
-                    <div class="row-2">
-                        <div class="form-row">
-                            <label>@lang('form.body.label.title_en')<span>*</span></label>
-                            <input type="text" placeholder="@lang('form.body.placeholder.title_en')" min="8"
-                                id="title_en" x-model="form.title_en" autocomplete="off">
-                            <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
-                        </div>
-                        <div class="form-row">
-                            <label>@lang('form.body.label.title_km')<span>*</span></label>
-                            <input type="text" placeholder="@lang('form.body.placeholder.title_km')" min="8"
-                                id="title_km" x-model="form.title_km" autocomplete="off">
-                            <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
-                        </div>
+                    <div class="form-header mb-0 !text-sm !flex !justify-end">
+                        @include('admin::components.form-change-language')
                     </div>
-                    <div class="row-2">
-                        <div class="form-row">
-                            <label>@lang('form.body.label.description_en')<span>*</span> </label>
-                            <textarea x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
-                            <span class="error" x-show="validate?.short_detail_en" x-text="validate?.short_detail_en"></span>
-                        </div>
-                        <div class="form-row">
-                            <label>@lang('form.body.label.description_km')<span>*</span> </label>
-                            <textarea x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
-                            <span class="error" x-show="validate?.short_detail_km" x-text="validate?.short_detail_km"></span>
-                        </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                        <label>@lang('form.body.label.title_en')<span>*</span></label>
+                        <input type="text" placeholder="@lang('form.body.placeholder.title_en')" min="8"
+                            id="title_en" x-model="form.title_en" autocomplete="off">
+                        <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
+                    </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                        <label>@lang('form.body.label.title_km')<span>*</span></label>
+                        <input type="text" placeholder="@lang('form.body.placeholder.title_km')" min="8"
+                            id="title_km" x-model="form.title_km" autocomplete="off">
+                        <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
+                    </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                        <label>@lang('form.body.label.description_en')<span>*</span> </label>
+                        <textarea id="op-header-en" x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                        <span class="error" x-show="validate?.short_detail_en" x-text="validate?.short_detail_en"></span>
+                    </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                        <label>@lang('form.body.label.description_km')<span>*</span> </label>
+                        <textarea id="op-header-km" x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                        <span class="error" x-show="validate?.short_detail_km" x-text="validate?.short_detail_km"></span>
                     </div>
                     <div class="form-button mt-3">
                         @can('our-program-update')
@@ -177,33 +176,32 @@
                     <span style="cursor: pointer;" @click="closeDetailDialog()"><i data-feather="x"></i></span>
                 </div>
                 <div class="form-body overflow-y-auto" style="max-height: 64vh; padding: 18px 20px 8px;">
-                    <div class="row-2">
-                        <div class="form-row">
-                            <label>@lang('form.body.label.title_en') <span>*</span></label>
-                            <input type="text" x-model="detailForm.title_en"
-                                placeholder="@lang('form.body.placeholder.title_en')" autocomplete="off">
-                            <span class="error" x-show="detailValidate?.title_en" x-text="detailValidate?.title_en"></span>
-                        </div>
-                        <div class="form-row">
-                            <label>@lang('form.body.label.title_km') <span>*</span></label>
-                            <input type="text" x-model="detailForm.title_km"
-                                placeholder="@lang('form.body.placeholder.title_km')" autocomplete="off">
-                            <span class="error" x-show="detailValidate?.title_km" x-text="detailValidate?.title_km"></span>
-                        </div>
+                    <div class="form-header mb-0 !text-sm !flex !justify-end">
+                        @include('admin::components.form-change-language')
                     </div>
-                    <div class="row-2">
-                        <div class="form-row">
-                            <label>@lang('form.body.label.description_en') <span>*</span></label>
-                            <textarea rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
-                            <span class="error" x-show="detailValidate?.description_en"
-                                x-text="detailValidate?.description_en"></span>
-                        </div>
-                        <div class="form-row">
-                            <label>@lang('form.body.label.description_km') <span>*</span></label>
-                            <textarea rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
-                            <span class="error" x-show="detailValidate?.description_km"
-                                x-text="detailValidate?.description_km"></span>
-                        </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                        <label>@lang('form.body.label.title_en') <span>*</span></label>
+                        <input type="text" x-model="detailForm.title_en"
+                            placeholder="@lang('form.body.placeholder.title_en')" autocomplete="off">
+                        <span class="error" x-show="detailValidate?.title_en" x-text="detailValidate?.title_en"></span>
+                    </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                        <label>@lang('form.body.label.title_km') <span>*</span></label>
+                        <input type="text" x-model="detailForm.title_km"
+                            placeholder="@lang('form.body.placeholder.title_km')" autocomplete="off">
+                        <span class="error" x-show="detailValidate?.title_km" x-text="detailValidate?.title_km"></span>
+                    </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.en">
+                        <label>@lang('form.body.label.description_en') <span>*</span></label>
+                        <textarea id="op-detail-en" rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                        <span class="error" x-show="detailValidate?.description_en"
+                            x-text="detailValidate?.description_en"></span>
+                    </div>
+                    <div class="form-row" x-show="locale == arrayLangLocale.km">
+                        <label>@lang('form.body.label.description_km') <span>*</span></label>
+                        <textarea id="op-detail-km" rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                        <span class="error" x-show="detailValidate?.description_km"
+                            x-text="detailValidate?.description_km"></span>
                     </div>
                     <div class="row-3">
                         <div class="form-row">
@@ -286,8 +284,10 @@
     </div>
 @stop
 @section('script')
+    <script src="{{ asset('plugin/tinymce/tinymce.min.js') }}" referrerpolicy="origin"></script>
     <script type="module">
         Alpine.data('OurProgram', () => ({
+            locale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 page: ['our_program', ['required']],
                 title_en: [null, ['required']],
@@ -323,6 +323,83 @@
                     const detailList = data?.content?.dataDetail || [];
                     this.dataDetail = detailList.map(item => this.normalizeDetail(item));
                 }
+
+                await this.$nextTick();
+                await this.initHeaderTinymce();
+            },
+            async initHeaderTinymce() {
+                tinymce.remove('#op-header-en, #op-header-km');
+                await tinymce.init({
+                    relative_urls: false,
+                    selector: 'textarea#op-header-en,textarea#op-header-km',
+                    height: 300,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'wordcount'
+                    ],
+                    toolbar: 'fullscreen | bold italic underline | addImage media link | numlist bullist | styles | alignleft aligncenter alignright alignjustify | outdent indent',
+                    setup: function(editor) {
+                        editor.ui.registry.addButton('addImage', {
+                            text: 'Image',
+                            icon: 'image',
+                            onAction: () => {
+                                fileManager({
+                                    multiple: true,
+                                    afterClose: (result, basePath) => {
+                                        if (result && result.length > 0) {
+                                            result.map((file) => {
+                                                const img = editor.dom.createHTML('img', {
+                                                    src: basePath + file.path,
+                                                    style: 'width:100% !important;'
+                                                });
+                                                editor.insertContent(img);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    },
+                });
+            },
+            async initDetailTinymce(descEn, descKm) {
+                tinymce.remove('#op-detail-en, #op-detail-km');
+                await tinymce.init({
+                    relative_urls: false,
+                    selector: 'textarea#op-detail-en,textarea#op-detail-km',
+                    height: 300,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'wordcount'
+                    ],
+                    toolbar: 'fullscreen | bold italic underline | addImage media link | numlist bullist | styles | alignleft aligncenter alignright alignjustify | outdent indent',
+                    setup: function(editor) {
+                        editor.ui.registry.addButton('addImage', {
+                            text: 'Image',
+                            icon: 'image',
+                            onAction: () => {
+                                fileManager({
+                                    multiple: true,
+                                    afterClose: (result, basePath) => {
+                                        if (result && result.length > 0) {
+                                            result.map((file) => {
+                                                const img = editor.dom.createHTML('img', {
+                                                    src: basePath + file.path,
+                                                    style: 'width:100% !important;'
+                                                });
+                                                editor.insertContent(img);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    },
+                });
+                tinymce.get('op-detail-en')?.setContent(descEn ?? '');
+                tinymce.get('op-detail-km')?.setContent(descKm ?? '');
             },
             applySavedPage(data) {
                 if (!data) return;
@@ -402,6 +479,9 @@
                 };
                 this.detailDialogOpen = true;
                 this.resetDetailFileInputs();
+                this.$nextTick(async () => {
+                    await this.initDetailTinymce('', '');
+                });
             },
             openEditDetailDialog(index) {
                 this.detailEditIndex = index;
@@ -409,9 +489,16 @@
                 this.detailForm = this.cloneDetail(this.dataDetail[index]);
                 this.detailDialogOpen = true;
                 this.resetDetailFileInputs();
+                this.$nextTick(async () => {
+                    await this.initDetailTinymce(
+                        this.detailForm.description_en ?? '',
+                        this.detailForm.description_km ?? ''
+                    );
+                });
             },
             closeDetailDialog() {
                 if (this.detailLoading) return;
+                tinymce.remove('#op-detail-en, #op-detail-km');
                 this.detailDialogOpen = false;
                 this.detailValidate = null;
             },
@@ -431,6 +518,8 @@
                 return Object.keys(errors).length === 0;
             },
             async onSaveDetail() {
+                this.detailForm.description_en = tinymce.get('op-detail-en')?.getContent() ?? this.detailForm.description_en;
+                this.detailForm.description_km = tinymce.get('op-detail-km')?.getContent() ?? this.detailForm.description_km;
                 if (this.detailLoading || !this.validateDetailForm()) return;
 
                 const originalDataDetail = this.dataDetail.map(item => this.cloneDetail(item));
@@ -634,6 +723,8 @@
                     },
                     afterClosed: async (result) => {
                         if (!result) return;
+                        this.form.short_detail_en = tinymce.get('op-header-en')?.getContent() ?? this.form.short_detail_en;
+                        this.form.short_detail_km = tinymce.get('op-header-km')?.getContent() ?? this.form.short_detail_km;
                         await this.submitProgram();
                     }
                 });
