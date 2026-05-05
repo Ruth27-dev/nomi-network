@@ -11,19 +11,20 @@
                 <span @click="close()"><i data-feather="x"></i></span>
             </div>
             <div class="form-body flex-auto overflow-y-auto">
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.title_en') <span>*</span></label>
-                        <input type="text" placeholder="@lang('form.body.placeholder.title_en')" x-model="form.title_en"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
-                    </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.title_km') <span>*</span></label>
-                        <input type="text" placeholder="@lang('form.body.placeholder.title_km')" x-model="form.title_km"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
-                    </div>
+                <div class="form-header mb-0 !text-sm !flex !justify-end">
+                    @include('admin::components.form-change-language')
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <label>@lang('form.body.label.title_en') <span>*</span></label>
+                    <input type="text" placeholder="@lang('form.body.placeholder.title_en')" x-model="form.title_en"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <label>@lang('form.body.label.title_km') <span>*</span></label>
+                    <input type="text" placeholder="@lang('form.body.placeholder.title_km')" x-model="form.title_km"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
                 </div>
                 <div class="row-2">
                     <div class="form-row">
@@ -95,6 +96,7 @@
     </div>
     <script>
         Alpine.data('storeSocialMediaDialog', () => ({
+            locale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 title_en: [null, ['required']],
                 title_km: [null, ['required']],
@@ -193,7 +195,13 @@
                                     size: 'small',
                                 });
                             }).catch((e) => {
-                                this.validate = e.response.data.errors;
+                                this.validate = e.response?.data?.errors;
+                                if (this.validate) {
+                                    const enErrors = Object.keys(this.validate).filter(k => k.includes('_en'));
+                                    const kmErrors = Object.keys(this.validate).filter(k => k.includes('_km'));
+                                    if (enErrors.length > 0) this.locale = arrayLangLocale.en;
+                                    else if (kmErrors.length > 0) this.locale = arrayLangLocale.km;
+                                }
                             }).finally(() => {
                                 this.form.enable();
                                 this.loading = false;

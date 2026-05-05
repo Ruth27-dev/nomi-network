@@ -60,9 +60,9 @@
                                     <tr class="border-t border-gray-200">
                                         <td class="text-sm text-gray-600" style="padding: 12px;" x-text="index + 1"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
-                                            x-text="item.description_en || '-'"></td>
+                                            x-text="stripHtml(item.description_en) || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
-                                            x-text="item.description_km || '-'"></td>
+                                            x-text="stripHtml(item.description_km) || '-'"></td>
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
                                         <td style="padding: 12px;">
@@ -195,19 +195,29 @@
                     <span style="cursor: pointer;" @click="closeDetailDialog()"><i data-feather="x"></i></span>
                 </div>
                 <div class="form-body overflow-y-auto" style="max-height: 64vh; padding: 18px 20px 8px;">
-                    <div class="row-2">
-                        <div class="form-row">
-                            <label>@lang('form.body.label.description_en') <span>*</span></label>
-                            <textarea rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
-                            <span class="error" x-show="detailValidate?.description_en"
-                                x-text="detailValidate?.description_en"></span>
+                    <div class="form-header mb-0 !text-sm !flex !justify-end">
+                        <div class="change-language">
+                            <div class="change-language-row">
+                                <div class="change-language-row-item" :class="{ 'active': detailLocale == arrayLangLocale.en }" @click="detailLocale = arrayLangLocale.en">
+                                    <span>@lang('form.locale.en')</span>
+                                </div>
+                                <div class="change-language-row-item" :class="{ 'active': detailLocale == arrayLangLocale.km }" @click="detailLocale = arrayLangLocale.km">
+                                    <span>@lang('form.locale.km')</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-row">
-                            <label>@lang('form.body.label.description_km') <span>*</span></label>
-                            <textarea rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
-                            <span class="error" x-show="detailValidate?.description_km"
-                                x-text="detailValidate?.description_km"></span>
-                        </div>
+                    </div>
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.en">
+                        <label>@lang('form.body.label.description_en') <span>*</span></label>
+                        <textarea id="prod-detail-en" rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                        <span class="error" x-show="detailValidate?.description_en"
+                            x-text="detailValidate?.description_en"></span>
+                    </div>
+                    <div class="form-row" x-show="detailLocale == arrayLangLocale.km">
+                        <label>@lang('form.body.label.description_km') <span>*</span></label>
+                        <textarea id="prod-detail-km" rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                        <span class="error" x-show="detailValidate?.description_km"
+                            x-text="detailValidate?.description_km"></span>
                     </div>
                     <div class="row-2">
                         <div class="form-row">
@@ -329,8 +339,10 @@
     </div>
 @stop
 @section('script')
+    <script src="{{ asset('plugin/tinymce/tinymce.min.js') }}" referrerpolicy="origin"></script>
     <script type="module">
         Alpine.data('ProductionPage', () => ({
+            locale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 page: ['production', ['required']],
                 status: ['ACTIVE', ['required']],
@@ -362,6 +374,44 @@
                     this.applySavedPage(data);
                 }
             },
+            async initDetailTinymce(descEn, descKm) {
+                tinymce.remove('#prod-detail-en, #prod-detail-km');
+                await tinymce.init({
+                    relative_urls: false,
+                    selector: 'textarea#prod-detail-en,textarea#prod-detail-km',
+                    height: 300,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'wordcount'
+                    ],
+                    toolbar: 'fullscreen | bold italic underline | addImage media link | numlist bullist | styles | alignleft aligncenter alignright alignjustify | outdent indent',
+                    setup: function(editor) {
+                        editor.ui.registry.addButton('addImage', {
+                            text: 'Image',
+                            icon: 'image',
+                            onAction: () => {
+                                fileManager({
+                                    multiple: true,
+                                    afterClose: (result, basePath) => {
+                                        if (result && result.length > 0) {
+                                            result.map((file) => {
+                                                const img = editor.dom.createHTML('img', {
+                                                    src: basePath + file.path,
+                                                    style: 'width:100% !important;'
+                                                });
+                                                editor.insertContent(img);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    },
+                });
+                tinymce.get('prod-detail-en')?.setContent(descEn ?? '');
+                tinymce.get('prod-detail-km')?.setContent(descKm ?? '');
+            },
             applySavedPage(data) {
                 this.form.status = data?.status ?? 'ACTIVE';
                 this.dataDetail = (data?.content?.dataDetail || []).map(item => this.normalizeDetail(item));
@@ -384,6 +434,13 @@
                     tmp_image: null,
                     image_url: null,
                 };
+            },
+            stripHtml(html) {
+                if (!html) return '';
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                const text = tmp.textContent || tmp.innerText || '';
+                return text.length > 100 ? text.substring(0, 100) + '...' : text;
             },
             resolveFileUrl(file) {
                 if (!file) return null;
@@ -427,9 +484,10 @@
                     ordering: this.getNextOrdering(this.dataDetail),
                 };
                 this.detailDialogOpen = true;
-                this.$nextTick(() => {
+                this.$nextTick(async () => {
                     if (this.$refs.detailImageInput) this.$refs.detailImageInput.value = '';
                     feather.replace();
+                    await this.initDetailTinymce('', '');
                 });
             },
             openEditDetailDialog(index) {
@@ -437,9 +495,13 @@
                 this.detailValidate = null;
                 this.detailForm = this.clone(this.dataDetail[index]);
                 this.detailDialogOpen = true;
-                this.$nextTick(() => {
+                this.$nextTick(async () => {
                     if (this.$refs.detailImageInput) this.$refs.detailImageInput.value = '';
                     feather.replace();
+                    await this.initDetailTinymce(
+                        this.detailForm.description_en ?? '',
+                        this.detailForm.description_km ?? ''
+                    );
                 });
             },
             validateDetailForm() {
@@ -452,7 +514,16 @@
                 return Object.keys(errors).length === 0;
             },
             async onSaveDetail() {
-                if (this.detailLoading || !this.validateDetailForm()) return;
+                this.detailForm.description_en = tinymce.get('prod-detail-en')?.getContent() ?? this.detailForm.description_en;
+                this.detailForm.description_km = tinymce.get('prod-detail-km')?.getContent() ?? this.detailForm.description_km;
+                if (this.detailLoading) return;
+                if (!this.validateDetailForm()) {
+                    const enErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_en'));
+                    const kmErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_km'));
+                    if (enErrors.length > 0) this.detailLocale = arrayLangLocale.en;
+                    else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
+                    return;
+                }
 
                 const previousData = this.dataDetail.map(item => this.clone(item));
                 const detail = this.normalizeDetail(this.detailForm);
@@ -493,6 +564,7 @@
                 });
             },
             closeDetailDialog() {
+                tinymce.remove('#prod-detail-en, #prod-detail-km');
                 this.detailDialogOpen = false;
                 this.detailValidate = null;
             },
@@ -707,6 +779,10 @@
                         const detailErrors = this.getDetailServerErrors(errors, index);
                         if (Object.keys(detailErrors).length > 0) {
                             this.detailValidate = detailErrors;
+                            const enErrors = Object.keys(detailErrors).filter(k => k.includes('_en'));
+                            const kmErrors = Object.keys(detailErrors).filter(k => k.includes('_km'));
+                            if (enErrors.length > 0) this.detailLocale = arrayLangLocale.en;
+                            else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
                         }
                     }
 

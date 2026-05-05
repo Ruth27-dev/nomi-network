@@ -11,19 +11,20 @@
                 <span @click="close()"><i data-feather="x"></i></span>
             </div>
             <div class="form-body flex-auto overflow-y-auto">
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.title_en')<span>*</span></label>
-                        <input placeholder="@lang('form.body.placeholder.title_en')" type="text" x-model="form.title_en"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
-                    </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.title_km')</label>
-                        <input placeholder="@lang('form.body.placeholder.title_km')" type="text" x-model="form.title_km"
-                            :disabled="form.disabled" autocomplete="off">
-                        <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
-                    </div>
+                <div class="form-header mb-0 !text-sm !flex !justify-end">
+                    @include('admin::components.form-change-language')
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <label>@lang('form.body.label.title_en')<span>*</span></label>
+                    <input placeholder="@lang('form.body.placeholder.title_en')" type="text" x-model="form.title_en"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.title_en" x-text="validate?.title_en"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <label>@lang('form.body.label.title_km')</label>
+                    <input placeholder="@lang('form.body.placeholder.title_km')" type="text" x-model="form.title_km"
+                        :disabled="form.disabled" autocomplete="off">
+                    <span class="error" x-show="validate?.title_km" x-text="validate?.title_km"></span>
                 </div>
                 <div class="row-2">
                     <div class="form-row">
@@ -61,19 +62,17 @@
                         <span class="error" x-show="validate?.status" x-text="validate?.status"></span>
                     </div>
                 </div>
-                <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('form.body.label.description_en')</label>
-                        <textarea type="text" placeholder="@lang('form.body.placeholder.description_en')" x-model="form.description_en"
-                            :disabled="form.disabled" autocomplete="off" rows="5"></textarea>
-                        <span class="error" x-show="validate?.description_en" x-text="validate?.description_en"></span>
-                    </div>
-                    <div class="form-row">
-                        <label>@lang('form.body.label.description_km')</label>
-                        <textarea type="text" placeholder="@lang('form.body.placeholder.description_km')" x-model="form.description_km"
-                            :disabled="form.disabled" autocomplete="off" rows="5"></textarea>
-                        <span class="error" x-show="validate?.description_km" x-text="validate?.description_km"></span>
-                    </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.en">
+                    <label>@lang('form.body.label.description_en')</label>
+                    <textarea id="banner-desc-en" type="text" placeholder="@lang('form.body.placeholder.description_en')" x-model="form.description_en"
+                        :disabled="form.disabled" autocomplete="off" rows="5"></textarea>
+                    <span class="error" x-show="validate?.description_en" x-text="validate?.description_en"></span>
+                </div>
+                <div class="form-row" x-show="locale == arrayLangLocale.km">
+                    <label>@lang('form.body.label.description_km')</label>
+                    <textarea id="banner-desc-km" type="text" placeholder="@lang('form.body.placeholder.description_km')" x-model="form.description_km"
+                        :disabled="form.disabled" autocomplete="off" rows="5"></textarea>
+                    <span class="error" x-show="validate?.description_km" x-text="validate?.description_km"></span>
                 </div>
                 <div class="row">
                     <div class="form-row">
@@ -121,6 +120,7 @@
     </div>
     <script>
         Alpine.data('storeBannerDialog', () => ({
+            locale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 title_en: [null, ['required']],
                 title_km: [null, []],
@@ -159,6 +159,8 @@
                     });
                 }
                 feather.replace();
+                await this.$nextTick();
+                await this.initTinymce();
             },
             async getMaxOrdering(callback) {
                 await Axios({
@@ -169,6 +171,42 @@
                     callback(res.data)
                 }).catch((e) => {
                     console.log(e);
+                });
+            },
+            async initTinymce() {
+                tinymce.remove('#banner-desc-en, #banner-desc-km');
+                await tinymce.init({
+                    relative_urls: false,
+                    selector: 'textarea#banner-desc-en,textarea#banner-desc-km',
+                    height: 400,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'wordcount'
+                    ],
+                    toolbar: 'fullscreen | bold italic underline | addImage media link | numlist bullist | styles | alignleft aligncenter alignright alignjustify | outdent indent',
+                    setup: function(editor) {
+                        editor.ui.registry.addButton('addImage', {
+                            text: 'Image',
+                            icon: 'image',
+                            onAction: () => {
+                                fileManager({
+                                    multiple: true,
+                                    afterClose: (result, basePath) => {
+                                        if (result && result.length > 0) {
+                                            result.map((file) => {
+                                                const img = editor.dom.createHTML('img', {
+                                                    src: basePath + file.path,
+                                                    style: 'width:100% !important;'
+                                                });
+                                                editor.insertContent(img);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    },
                 });
             },
             onPreviewImage(el) {
@@ -203,6 +241,8 @@
                     },
                     afterClosed: (result) => {
                         if (result) {
+                            this.form.description_en = tinymce.get('banner-desc-en')?.getContent() ?? '';
+                            this.form.description_km = tinymce.get('banner-desc-km')?.getContent() ?? '';
                             this.form.disable();
                             this.loading = true;
                             let file = document.querySelector('#image');
@@ -229,7 +269,13 @@
                                     size: 'small',
                                 });
                             }).catch((e) => {
-                                this.validate = e.response.data.errors;
+                                this.validate = e.response?.data?.errors;
+                                if (this.validate) {
+                                    const enErrors = Object.keys(this.validate).filter(k => k.includes('_en'));
+                                    const kmErrors = Object.keys(this.validate).filter(k => k.includes('_km'));
+                                    if (enErrors.length > 0) this.locale = arrayLangLocale.en;
+                                    else if (kmErrors.length > 0) this.locale = arrayLangLocale.km;
+                                }
                             }).finally(() => {
                                 this.form.enable();
                                 this.loading = false;
@@ -239,6 +285,7 @@
                 });
             },
             close() {
+                tinymce.remove('#banner-desc-en, #banner-desc-km');
                 this.$dialog('storeBannerDialog').close();
             }
         }));
