@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\LOV\SocialMediaController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\Pages\AboutUsController;
 use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
 use App\Http\Controllers\Admin\Pages\CareerController;
@@ -197,6 +198,15 @@ Route::middleware(['locale'])->group(function () {
                 Route::delete('delete', 'delete')->name('delete');
                 Route::put('restore', 'restore')->name('restore');
                 Route::delete('destroy', 'destroy')->name('destroy');
+            });
+        });
+
+        Route::prefix('order')->name('order-')->group(function () {
+            Route::controller(OrderController::class)->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::get('detail', 'detail')->name('detail');
+                Route::post('status', 'updateStatus')->name('status');
             });
         });
 

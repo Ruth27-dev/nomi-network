@@ -16,6 +16,15 @@ Route::prefix('web')->group(function () {
         Route::post('/logout', [Web\AuthController::class, 'logout']);
         Route::post('/profile', [Web\AuthController::class, 'profile']);
         Route::post('/update-profile', [Web\AuthController::class, 'updateProfile']);
+
+        Route::prefix('order')->group(function () {
+            Route::post('/address-list', [Web\OrderController::class, 'addressList']);
+            Route::post('/address-save', [Web\OrderController::class, 'saveAddress']);
+            Route::post('/create', [Web\OrderController::class, 'create']);
+            Route::post('/list', [Web\OrderController::class, 'orders']);
+            Route::post('/detail', [Web\OrderController::class, 'detail']);
+            Route::post('/cancel', [Web\OrderController::class, 'cancel']);
+        });
     });
 
     Route::prefix('list-of-value')->name('list-of-value-')->group(function () {

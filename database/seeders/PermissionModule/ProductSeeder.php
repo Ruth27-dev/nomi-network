@@ -284,6 +284,7 @@ class ProductSeeder extends Seeder
                 'module_id'     => $productStock->id,
             ],
         ]);
+
     }
 
     public $index = 0;
