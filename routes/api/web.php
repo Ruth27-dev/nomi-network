@@ -17,6 +17,14 @@ Route::prefix('web')->group(function () {
         Route::post('/profile', [Web\AuthController::class, 'profile']);
         Route::post('/update-profile', [Web\AuthController::class, 'updateProfile']);
 
+        Route::prefix('cart')->group(function () {
+            Route::post('/add', [Web\CartController::class, 'add']);
+            Route::post('/list', [Web\CartController::class, 'list']);
+            Route::post('/update-qty', [Web\CartController::class, 'updateQty']);
+            Route::post('/remove', [Web\CartController::class, 'remove']);
+            Route::post('/clear', [Web\CartController::class, 'clear']);
+        });
+
         Route::prefix('order')->group(function () {
             Route::post('/address-list', [Web\OrderController::class, 'addressList']);
             Route::post('/address-save', [Web\OrderController::class, 'saveAddress']);

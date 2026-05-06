@@ -1,0 +1,233 @@
+<?php
+
+namespace App\Http\Controllers\Api\Web;
+
+use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\ProductStock;
+use App\Models\ProductVariation;
+use App\Models\UserCartItem;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+class CartController extends Controller
+{
+    public function add(Request $request)
+    {
+        $user = Auth::guard('api_web')->user();
+        $validator = Validator::make($request->all(), [
+            'product_id' => 'required|exists:products,id',
+            'product_variation_id' => 'nullable|exists:product_variations,id',
+            'quantity' => 'nullable|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $product = Product::query()->where('is_active', true)->findOrFail($request->product_id);
+            $variation = null;
+            if ($request->filled('product_variation_id')) {
+                $variation = ProductVariation::query()
+                    ->where('product_id', $product->id)
+                    ->where('is_active', true)
+                    ->findOrFail($request->product_variation_id);
+            }
+
+            $qty = max(1, (int) $request->input('quantity', 1));
+
+            $cartItem = UserCartItem::query()
+                ->where('user_id', $user->id)
+                ->where('product_id', $product->id)
+                ->where(function ($q) use ($variation) {
+                    if ($variation) {
+                        $q->where('product_variation_id', $variation->id);
+                    } else {
+                        $q->whereNull('product_variation_id');
+                    }
+                })
+                ->lockForUpdate()
+                ->first();
+
+            $this->resolveAndValidateUnitPrice($product, $variation);
+            $newQty = $cartItem ? ((int) $cartItem->quantity + $qty) : $qty;
+            $this->assertStockAvailable($product->id, $variation?->id, $newQty);
+
+            if ($cartItem) {
+                $cartItem->update(['quantity' => $newQty]);
+            } else {
+                $cartItem = UserCartItem::create([
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                    'product_variation_id' => $variation?->id,
+                    'quantity' => $newQty,
+                ]);
+            }
+
+            DB::commit();
+            return $this->responseSuccess($this->cartSummary($user->id), 'Item added to cart successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function list()
+    {
+        try {
+            $user = Auth::guard('api_web')->user();
+            return $this->responseSuccess($this->cartSummary($user->id));
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function updateQty(Request $request)
+    {
+        $user = Auth::guard('api_web')->user();
+        $validator = Validator::make($request->all(), [
+            'cart_item_id' => 'required|integer',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $cartItem = UserCartItem::query()
+                ->where('user_id', $user->id)
+                ->lockForUpdate()
+                ->findOrFail($request->cart_item_id);
+
+            $product = Product::query()
+                ->where('is_active', true)
+                ->findOrFail($cartItem->product_id);
+            $variation = null;
+            if ($cartItem->product_variation_id) {
+                $variation = ProductVariation::query()
+                    ->where('product_id', $product->id)
+                    ->where('is_active', true)
+                    ->findOrFail($cartItem->product_variation_id);
+            }
+
+            $this->resolveAndValidateUnitPrice($product, $variation);
+            $this->assertStockAvailable($cartItem->product_id, $cartItem->product_variation_id, (int) $request->quantity);
+            $cartItem->update(['quantity' => (int) $request->quantity]);
+
+            DB::commit();
+            return $this->responseSuccess($this->cartSummary($user->id), 'Cart quantity updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function remove(Request $request)
+    {
+        $user = Auth::guard('api_web')->user();
+        $validator = Validator::make($request->all(), [
+            'cart_item_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            UserCartItem::query()
+                ->where('user_id', $user->id)
+                ->where('id', $request->cart_item_id)
+                ->delete();
+
+            return $this->responseSuccess($this->cartSummary($user->id), 'Item removed from cart successfully.');
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function clear()
+    {
+        try {
+            $user = Auth::guard('api_web')->user();
+            UserCartItem::query()->where('user_id', $user->id)->delete();
+            return $this->responseSuccess($this->cartSummary($user->id), 'Cart cleared successfully.');
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    private function assertStockAvailable(int $productId, ?int $variationId, int $quantity): void
+    {
+        $stock = ProductStock::query()
+            ->where('product_id', $productId)
+            ->where(function ($q) use ($variationId) {
+                if ($variationId) {
+                    $q->where('product_variation_id', $variationId);
+                } else {
+                    $q->whereNull('product_variation_id');
+                }
+            })
+            ->first();
+
+        if (!$stock) {
+            throw new Exception('Stock record not found for selected product.');
+        }
+
+        if ((int) $stock->stock_available < $quantity) {
+            throw new Exception('Insufficient stock for selected quantity.');
+        }
+    }
+
+    private function resolveAndValidateUnitPrice(Product $product, ?ProductVariation $variation): float
+    {
+        $unitPrice = (float) ($variation?->price ?? $product->price ?? 0);
+
+        if ($unitPrice <= 0) {
+            throw new Exception('Invalid product price.');
+        }
+
+        return $unitPrice;
+    }
+
+    private function cartSummary(int $userId): array
+    {
+        $items = UserCartItem::query()
+            ->with([
+                'product:id,sku,name_en,name_kh,price,is_active',
+                'variation:id,product_id,sku,name,price,is_active',
+            ])
+            ->where('user_id', $userId)
+            ->orderByDesc('id')
+            ->get();
+
+        $mapped = $items->map(function (UserCartItem $item) {
+            $unitPrice = $item->variation?->price ?? $item->product?->price ?? 0;
+            $lineTotal = (float) $unitPrice * (int) $item->quantity;
+
+            return [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'product_variation_id' => $item->product_variation_id,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => (float) $unitPrice,
+                'line_total' => $lineTotal,
+                'product' => $item->product,
+                'variation' => $item->variation,
+            ];
+        })->values();
+
+        return [
+            'items' => $mapped,
+            'item_count' => $mapped->count(),
+            'total_quantity' => (int) $mapped->sum('quantity'),
+            'sub_total' => (float) $mapped->sum('line_total'),
+        ];
+    }
+}
