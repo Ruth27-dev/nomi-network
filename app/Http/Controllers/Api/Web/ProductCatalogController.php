@@ -48,6 +48,13 @@ class ProductCatalogController extends Controller
                 ->when(request('category_id'), function ($q) {
                     $q->where('category_id', request('category_id'));
                 })
+                ->when(request()->has('is_feature') || request()->has('is_fature'), function ($q) {
+                    $isFeature = request()->has('is_feature') ? request('is_feature') : request('is_fature');
+                    $isFeature = filter_var($isFeature, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    if ($isFeature !== null) {
+                        $q->where('is_feature', $isFeature);
+                    }
+                })
                 ->when(request('search'), function ($q) {
                     $search = trim((string) request('search'));
                     $q->where(function ($inner) use ($search) {

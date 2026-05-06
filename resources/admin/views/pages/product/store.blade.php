@@ -75,6 +75,13 @@
                             <option value="1">Yes</option>
                         </select>
                     </div>
+                    <div class="form-row">
+                        <label>Feature</label>
+                        <select x-model="form.is_feature" :disabled="form.disabled">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="row-2">
                     <div class="form-row">
@@ -263,6 +270,7 @@
                 price: ['', []],
                 stock: ['', []],
                 is_preorder: ['0', []],
+                is_feature: ['0', []],
                 type: ["{{ $type }}", []],
                 category_ids: [[], []],
                 category_title: ['', []],
@@ -363,6 +371,7 @@
                 this.form.price = data?.price ?? '';
                 this.form.stock = data?.stock ?? '';
                 this.form.is_preorder = data?.is_preorder ? '1' : '0';
+                this.form.is_feature = data?.is_feature ? '1' : '0';
 
                 if (data?.images?.length) {
                     this.product_images = data.images.map(g => ({

@@ -23,6 +23,7 @@ class Product extends Model
         'price',
         'stock',
         'is_preorder',
+        'is_feature',
         'has_variation',
         'is_active',
         'product_source_id',
@@ -33,6 +34,7 @@ class Product extends Model
 
     protected $casts = [
         'is_preorder' => 'boolean',
+        'is_feature' => 'boolean',
         'has_variation' => 'boolean',
         'is_active' => 'boolean',
     ];
