@@ -13,12 +13,15 @@ class RegisterRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $email = $this->input('email');
+
         $this->merge([
             'first_name' => $this->input('first_name', $this->input('firstName')),
             'last_name' => $this->input('last_name', $this->input('lastName')),
             'confirm_password' => $this->input('confirm_password', $this->input('password_confirmation')),
             'agree_terms' => $this->input('agree_terms', $this->input('terms_accepted', $this->input('is_agree'))),
             'receive_updates' => $this->input('receive_updates', $this->input('is_subscribed')),
+            'email' => is_string($email) ? strtolower(trim($email)) : $email,
         ]);
     }
 
@@ -34,6 +37,13 @@ class RegisterRequest extends FormRequest
             'confirm_password' => 'required|same:password',
             'agree_terms' => 'required|accepted',
             'receive_updates' => 'nullable|boolean',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.unique' => 'This email is already registered.',
         ];
     }
 }
