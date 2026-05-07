@@ -6,41 +6,46 @@
             'header_name' => 'Stock Report',
         ])
         <div class="content-body">
-            <div class="content-tab">
+            <div class="content-tab h-auto! py-2 flex-wrap gap-y-2">
                 <div class="content-tab-wrapper">
                     <span class="title !text-gray-600">
                         @lang('form.total') <span x-text="table?.paginate?.totalItems"></span>
                     </span>
                 </div>
                 <div class="content-action-button flex-wrap gap-2">
-                    <div class="filter">
+                    <div class="filter flex-wrap gap-2">
                         <div class="form-row search-inline">
                             <input type="text" x-model="formFilter.search" placeholder="Search product or SKU..."
                                 autocomplete="off" @keydown.enter="onFilter()">
                             <button @click="onFilter()"><i data-feather="search"></i></button>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <input type="date" x-model="formFilter.from_date">
-                    </div>
-                    <div class="form-row">
-                        <input type="date" x-model="formFilter.to_date">
-                    </div>
-                    <div class="form-row">
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-600">
-                            <input type="checkbox" x-model="formFilter.low_stock_only">
-                            Low Stock Only
-                        </label>
-                    </div>
-                    <div class="form-row" x-show="formFilter.low_stock_only">
-                        <input type="number" min="0" x-model="formFilter.threshold" placeholder="Threshold">
+                        <div class="form-row gap-1">
+                            <span class="text-xs text-gray-400 whitespace-nowrap">From</span>
+                            <input type="date" x-model="formFilter.from_date" class="text-sm text-gray-600">
+                        </div>
+                        <div class="form-row gap-1">
+                            <span class="text-xs text-gray-400 whitespace-nowrap">To</span>
+                            <input type="date" x-model="formFilter.to_date" class="text-sm text-gray-600">
+                        </div>
+                        <div class="form-row">
+                            <label class="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                                <input type="checkbox" x-model="formFilter.low_stock_only" class="accent-blue-600">
+                                Low Stock Only
+                            </label>
+                        </div>
+                        <div class="form-row" x-show="formFilter.low_stock_only" x-cloak>
+                            <span class="text-xs text-gray-400 whitespace-nowrap">Threshold</span>
+                            <input type="number" min="0" x-model="formFilter.threshold" class="w-14 text-sm text-gray-600 text-center">
+                        </div>
                     </div>
                     <button @click="onExport()" class="btn-create">
                         <i data-feather="download"></i>
-                        <span class="uppercase">Export CSV</span>
+                        <span class="uppercase">Export XLSX</span>
                     </button>
-                    <a href="{{ route('admin-product-stock-list') }}" class="btn-create !bg-gray-100 !text-gray-700">
-                        <span class="uppercase">Back Inventory</span>
+                    <a href="{{ route('admin-product-stock-list') }}"
+                        class="flex items-center gap-1.5 h-[35px] px-3 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200 transition-colors no-underline uppercase">
+                        <i data-feather="arrow-left"></i>
+                        Back
                     </a>
                     <button @click="onReset()">
                         <i data-feather="refresh-ccw"></i>
@@ -72,7 +77,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="table-body !w-full !p-0">
+                        <div class="table-body w-full! p-0!">
                             <template x-for="(item, index) in table.data" :key="`report-${item.id}-${index}`">
                                 <div class="w-full flex gap-3 h-[68px]">
                                     <div class="flex-auto border-b border-gray-200">

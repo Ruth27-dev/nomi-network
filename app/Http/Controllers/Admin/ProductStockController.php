@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 
 class ProductStockController extends Controller
 {
@@ -216,44 +221,59 @@ class ProductStockController extends Controller
                 ->orderBy('variation_name')
                 ->get();
 
-            $fileName = 'stock-report-' . now()->format('Ymd_His') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename={$fileName}",
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Stock Report');
+
+            $headers = ['No', 'Product', 'Product SKU', 'Variation', 'Variation SKU', 'On Hand', 'Reserved', 'Available', 'Moves', 'Latest Movement'];
+            $sheet->fromArray($headers, null, 'A1');
+
+            $headerStyle = [
+                'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ];
+            $sheet->getStyle('A1:J1')->applyFromArray($headerStyle);
 
-            $callback = function () use ($rows) {
-                $out = fopen('php://output', 'w');
-                fputcsv($out, [
-                    'Product',
-                    'Product SKU',
-                    'Variation',
-                    'Variation SKU',
-                    'Stock On Hand',
-                    'Stock Reserved',
-                    'Stock Available',
-                    'Movement Count',
-                    'Latest Movement',
-                ]);
+            foreach ($rows as $i => $row) {
+                $rowNum = $i + 2;
+                $sheet->fromArray([
+                    $i + 1,
+                    $row->product_name_en ?? '',
+                    $row->product_sku ?? '',
+                    $row->variation_name ?? 'Main Product',
+                    $row->variation_sku ?? '',
+                    (int) ($row->stock_on_hand ?? 0),
+                    (int) ($row->stock_reserved ?? 0),
+                    (int) ($row->stock_available ?? 0),
+                    (int) ($row->movement_count ?? 0),
+                    $row->latest_stock_history_at
+                        ? Carbon::parse($row->latest_stock_history_at)->format('d/m/Y H:i')
+                        : '',
+                ], null, "A{$rowNum}");
 
-                foreach ($rows as $row) {
-                    fputcsv($out, [
-                        $row->product_name_en ?? '',
-                        $row->product_sku ?? '',
-                        $row->variation_name ?? 'Main Product',
-                        $row->variation_sku ?? '',
-                        (int) ($row->stock_on_hand ?? 0),
-                        (int) ($row->stock_reserved ?? 0),
-                        (int) ($row->stock_available ?? 0),
-                        (int) ($row->movement_count ?? 0),
-                        $row->latest_stock_history_at ?? '',
-                    ]);
-                }
+                $available = (int) ($row->stock_available ?? 0);
+                $color = $available <= 0 ? 'FEE2E2' : ($available <= 5 ? 'FEF3C7' : 'D1FAE5');
+                $sheet->getStyle("A{$rowNum}:J{$rowNum}")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB($color);
+            }
 
-                fclose($out);
-            };
+            foreach (range('A', 'J') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
 
-            return response()->stream($callback, 200, $headers);
+            $sheet->getStyle('A1:J1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $fileName = 'stock-report-' . now()->format('Ymd_His') . '.xlsx';
+
+            $writer = new XlsxWriter($spreadsheet);
+            $tempFile = tempnam(sys_get_temp_dir(), 'stock_report_');
+            $writer->save($tempFile);
+
+            return response()->download($tempFile, $fileName, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
         } catch (Exception $e) {
             return $this->responseError($e->getMessage());
         }
