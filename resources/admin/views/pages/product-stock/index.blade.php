@@ -8,14 +8,18 @@
         <div class="content-body">
             <div class="mb-3 flex items-center gap-2">
                 <button
-                    class="px-3 py-1.5 rounded text-sm border"
-                    :class="activeTab === 'inventory' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-300'"
+                    class="px-3 py-1.5 rounded text-sm border transition"
+                    :style="activeTab === 'inventory'
+                        ? 'background-color:#2563eb;color:#ffffff;border-color:#2563eb;'
+                        : 'background-color:#ffffff;color:#4b5563;border-color:#d1d5db;'"
                     @click="switchTab('inventory')">
                     Inventory
                 </button>
                 <button
-                    class="px-3 py-1.5 rounded text-sm border"
-                    :class="activeTab === 'summary' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-300'"
+                    class="px-3 py-1.5 rounded text-sm border transition"
+                    :style="activeTab === 'summary'
+                        ? 'background-color:#2563eb;color:#ffffff;border-color:#2563eb;'
+                        : 'background-color:#ffffff;color:#4b5563;border-color:#d1d5db;'"
                     @click="switchTab('summary')">
                     Movement Summary
                 </button>
