@@ -15,7 +15,7 @@
                                 <div class="w-10/100 text-sm font-bold text-gray-500 grid place-items-center">On Hand</div>
                                 <div class="w-10/100 text-sm font-bold text-gray-500 grid place-items-center">Reserved</div>
                                 <div class="w-10/100 text-sm font-bold text-gray-500 grid place-items-center">Available</div>
-                                <div class="w-15/100 text-sm font-bold text-gray-500 grid place-items-center">Updated</div>
+                                <div class="w-15/100 text-sm font-bold text-gray-500 grid place-items-center">Last Movement</div>
                                 <div class="w-5/100 text-sm font-bold text-gray-500 grid place-items-center"></div>
                             </div>
                         </div>
@@ -49,7 +49,7 @@
                                     <span class="text-sm" x-text="item.stock_available ?? 0"></span>
                                 </div>
                                 <div class="w-15/100 grid place-items-center text-gray-500">
-                                    <span class="text-xs" x-text="item.updated_at ?? '-'"></span>
+                                    <span class="text-xs" x-text="item.latest_stock_history_at ?? item.updated_at ?? '-'"></span>
                                 </div>
                                 <div class="w-5/100 grid place-items-center">
                                     <button class="text-blue-600 text-xs underline" @click="openAdjustDialog(item)">
@@ -70,4 +70,3 @@
         @component('admin::components.empty', ['name' => 'No stock', 'msg' => 'No stock records found']) @endcomponent
     </template>
 </div>
-

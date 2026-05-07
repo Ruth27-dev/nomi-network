@@ -2,8 +2,8 @@
 @section('layout')
     <div class="content-wrapper" x-data="userPage">
         @include('admin::shared.header', [
-            'title' => __('form.name.user_admin'),
-            'header_name' => __('form.name.user_admin'),
+            'title' => request('scope') === 'customer' ? 'Customer' : (request('scope') === 'operation' ? 'Operation User' : __('form.name.user_admin')),
+            'header_name' => request('scope') === 'customer' ? 'Customer' : (request('scope') === 'operation' ? 'Operation User' : __('form.name.user_admin')),
         ])
         <div class="content-body">
             <div class="content-tab">
@@ -45,8 +45,9 @@
     <script type="module">
         Alpine.data('userPage', () => ({
             table: new Table("{{ route('admin-user-data') }}"),
+            scope: `{{ request('scope') }}`,
             init() {
-                this.table.init();
+                this.table.init(this.baseQuery());
                 this.initDatePicker();
                 feather.replace();
             },
@@ -54,17 +55,24 @@
                 search: [null || `{{ request('search') }}`, []],
             }),
             onFilter() {
-                this.table.init(this.formFilter.value());
+                this.table.init({
+                    ...this.baseQuery(),
+                    ...this.formFilter.value(),
+                });
             },
             viewTrash() {
                 this.table.init({
+                    ...this.baseQuery(),
                     trash: true
                 });
             },
             onReset() {
                 this.formFilter.reset();
-                this.table.reset();
+                this.table.init(this.baseQuery());
                 this.initDatePicker();
+            },
+            baseQuery() {
+                return this.scope ? { scope: this.scope } : {};
             },
             onViewProfile(path) {
                 const thumbnail = Fancybox.show([{
@@ -115,7 +123,10 @@
                     },
                     afterClose: (res) => {
                         if (res) {
-                            this.table.reload();
+                            this.table.init({
+                                ...this.baseQuery(),
+                                ...this.formFilter.value(),
+                            });
                         }
                     }
                 });
@@ -131,7 +142,10 @@
                     },
                     afterClose: (res) => {
                         if (res) {
-                            this.table.reload();
+                            this.table.init({
+                                ...this.baseQuery(),
+                                ...this.formFilter.value(),
+                            });
                         }
                     }
                 });

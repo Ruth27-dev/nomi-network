@@ -36,6 +36,8 @@ class UserController extends Controller
     public function index()
     {
         $data['roles'] = Role::where('status', $this->active)->get();
+        $scope = request('scope');
+        $data['scope'] = in_array($scope, ['customer', 'operation'], true) ? $scope : null;
         return view("admin::pages.user.user.index", $data);
     }
 
@@ -53,6 +55,12 @@ class UserController extends Controller
             })
             ->when(request('type'), function ($q) {
                 $q->where('type', request('type'));
+            })
+            ->when(request('scope') === 'customer', function ($q) {
+                $q->whereNull('role_id');
+            })
+            ->when(request('scope') === 'operation', function ($q) {
+                $q->whereNotNull('role_id');
             })
             ->when(request('trash'), function ($q) {
                 $q->onlyTrashed();

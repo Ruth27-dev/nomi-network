@@ -102,6 +102,7 @@ class ProductController extends Controller
 
                 $this->createVariations($product, $request);
                 $this->syncImages($product, $request);
+                $this->syncProductAttributes($product, $request);
             } else {
 
                 /* ================= UPDATE ================= */
@@ -135,6 +136,7 @@ class ProductController extends Controller
 
                 $this->createVariations($product, $request);
                 $this->syncImages($product, $request);
+                $this->syncProductAttributes($product, $request);
             }
 
             DB::commit();
@@ -219,6 +221,33 @@ class ProductController extends Controller
                 'is_active' => ($variate['status'] ?? 'ACTIVE') === $this->active,
             ]);
         }
+    }
+
+    private function syncProductAttributes(Product $product, Request $request): void
+    {
+        $attributeIds = collect($request->input('product_attribute_ids', []))
+            ->filter(fn($id) => !is_null($id) && $id !== '')
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        DB::table('product_attribute_maps')
+            ->where('product_id', $product->id)
+            ->delete();
+
+        if ($attributeIds->isEmpty()) {
+            return;
+        }
+
+        $rows = $attributeIds->map(fn($attributeId) => [
+            'product_id' => $product->id,
+            'product_attribute_id' => $attributeId,
+            'is_required' => false,
+            'is_variation' => true,
+            'created_at' => now(),
+        ])->all();
+
+        DB::table('product_attribute_maps')->insert($rows);
     }
 
 

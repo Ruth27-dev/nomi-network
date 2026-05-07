@@ -105,6 +105,12 @@ Route::middleware(['locale'])->group(function () {
         Route::prefix('user')->group(function () {
             Route::controller(Admin\UserController::class)->prefix('user')->name('user-')->group(function () {
                 Route::get('list',  'index')->name('list');
+                Route::get('customer/list', function () {
+                    return redirect()->route('admin-user-list', ['scope' => 'customer']);
+                })->name('customer-list');
+                Route::get('operation/list', function () {
+                    return redirect()->route('admin-user-list', ['scope' => 'operation']);
+                })->name('operation-list');
                 Route::get('data',  'data')->name('data');
                 Route::post('save',  'save')->name('save');
                 Route::post('update',  'onUpdate')->name('update');
