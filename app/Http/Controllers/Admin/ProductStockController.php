@@ -30,6 +30,18 @@ class ProductStockController extends Controller
             $pag = request('pag') ?? 50;
             $data = ProductStock::query()
                 ->with(['product:id,sku,name_en,name_kh', 'variation:id,sku,name'])
+                ->addSelect([
+                    'latest_stock_history_at' => DB::table('stock_history as sh')
+                        ->selectRaw('MAX(sh.created_at)')
+                        ->whereColumn('sh.product_id', 'product_stocks.product_id')
+                        ->where(function ($q) {
+                            $q->whereColumn('sh.product_variation_id', 'product_stocks.product_variation_id')
+                                ->orWhere(function ($sub) {
+                                    $sub->whereNull('sh.product_variation_id')
+                                        ->whereNull('product_stocks.product_variation_id');
+                                });
+                        }),
+                ])
                 ->when(request('search'), function ($q) {
                     $search = request('search');
                     $q->whereHas('product', function ($sub) use ($search) {
@@ -54,6 +66,37 @@ class ProductStockController extends Controller
     {
         try {
             $pag = request('pag') ?? 50;
+
+            if (filter_var(request('summary', false), FILTER_VALIDATE_BOOLEAN)) {
+                $summary = DB::table('stock_history as sh')
+                    ->leftJoin('products as p', 'p.id', '=', 'sh.product_id')
+                    ->leftJoin('product_variations as pv', 'pv.id', '=', 'sh.product_variation_id')
+                    ->selectRaw('
+                        sh.product_id,
+                        sh.product_variation_id,
+                        p.sku as product_sku,
+                        p.name_en as product_name_en,
+                        pv.sku as variation_sku,
+                        pv.name as variation_name,
+                        MAX(sh.created_at) as latest_stock_history_at,
+                        COUNT(*) as movement_count
+                    ')
+                    ->when(request('product_id'), fn($q) => $q->where('sh.product_id', request('product_id')))
+                    ->when(request('transaction_type'), fn($q) => $q->where('sh.transaction_type', request('transaction_type')))
+                    ->groupBy(
+                        'sh.product_id',
+                        'sh.product_variation_id',
+                        'p.sku',
+                        'p.name_en',
+                        'pv.sku',
+                        'pv.name',
+                    )
+                    ->orderByDesc('latest_stock_history_at')
+                    ->paginate($pag);
+
+                return $summary;
+            }
+
             $query = DB::table('stock_history as sh')
                 ->leftJoin('products as p', 'p.id', '=', 'sh.product_id')
                 ->leftJoin('product_variations as pv', 'pv.id', '=', 'sh.product_variation_id')
@@ -144,4 +187,3 @@ class ProductStockController extends Controller
         }
     }
 }
-

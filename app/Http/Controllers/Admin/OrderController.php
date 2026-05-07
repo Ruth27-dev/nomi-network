@@ -53,6 +53,65 @@ class OrderController extends Controller
             $data = Order::query()
                 ->with(['user:id,name,phone', 'items'])
                 ->findOrFail(request('id'));
+
+            $stocks = collect();
+            $stockHistories = collect();
+            if ($data->items->isNotEmpty()) {
+                $stocks = ProductStock::query()
+                    ->where(function ($q) use ($data) {
+                        foreach ($data->items as $item) {
+                            $q->orWhere(function ($sub) use ($item) {
+                                $sub->where('product_id', $item->product_id);
+                                if ($item->product_variation_id) {
+                                    $sub->where('product_variation_id', $item->product_variation_id);
+                                } else {
+                                    $sub->whereNull('product_variation_id');
+                                }
+                            });
+                        }
+                    })
+                    ->get(['product_id', 'product_variation_id', 'stock_on_hand', 'stock_reserved', 'stock_available']);
+
+                $stockHistories = DB::table('stock_history as sh')
+                    ->selectRaw('sh.product_id, sh.product_variation_id, MAX(sh.created_at) as latest_stock_history_at')
+                    ->where(function ($q) use ($data) {
+                        foreach ($data->items as $item) {
+                            $q->orWhere(function ($sub) use ($item) {
+                                $sub->where('sh.product_id', $item->product_id);
+                                if ($item->product_variation_id) {
+                                    $sub->where('sh.product_variation_id', $item->product_variation_id);
+                                } else {
+                                    $sub->whereNull('sh.product_variation_id');
+                                }
+                            });
+                        }
+                    })
+                    ->groupBy('sh.product_id', 'sh.product_variation_id')
+                    ->get();
+            }
+
+            $stockByKey = $stocks->keyBy(function ($row) {
+                return $row->product_id . ':' . ($row->product_variation_id ?? 'null');
+            });
+            $historyByKey = $stockHistories->keyBy(function ($row) {
+                return $row->product_id . ':' . ($row->product_variation_id ?? 'null');
+            });
+
+            $data->items->transform(function ($item) use ($stockByKey, $historyByKey) {
+                $key = $item->product_id . ':' . ($item->product_variation_id ?? 'null');
+                $stock = $stockByKey->get($key);
+                $history = $historyByKey->get($key);
+
+                $item->current_stock = [
+                    'stock_on_hand' => (int) ($stock->stock_on_hand ?? 0),
+                    'stock_reserved' => (int) ($stock->stock_reserved ?? 0),
+                    'stock_available' => (int) ($stock->stock_available ?? 0),
+                ];
+                $item->latest_stock_history_at = $history->latest_stock_history_at ?? null;
+
+                return $item;
+            });
+
             return $this->responseSuccess($data);
         } catch (Exception $e) {
             return $this->responseError($e->getMessage());
@@ -121,4 +180,3 @@ class OrderController extends Controller
         }
     }
 }
-
