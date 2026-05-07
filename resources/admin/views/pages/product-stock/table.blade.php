@@ -46,10 +46,30 @@
                                     <span class="text-sm" x-text="item.stock_reserved ?? 0"></span>
                                 </div>
                                 <div class="w-10/100 grid place-items-center text-gray-700">
-                                    <span class="text-sm" x-text="item.stock_available ?? 0"></span>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span class="text-sm font-semibold" x-text="item.stock_available ?? 0"></span>
+                                        <span
+                                            class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                                            :class="(item.stock_available ?? 0) <= 0
+                                                ? 'bg-red-100 text-red-700'
+                                                : ((item.stock_available ?? 0) <= 5 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700')"
+                                            x-text="(item.stock_available ?? 0) <= 0
+                                                ? 'Out'
+                                                : ((item.stock_available ?? 0) <= 5 ? 'Low' : 'In Stock')">
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="w-15/100 grid place-items-center text-gray-500">
-                                    <span class="text-xs" x-text="item.latest_stock_history_at ?? item.updated_at ?? '-'"></span>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-xs"
+                                            x-text="(item.latest_stock_history_at ?? item.updated_at)
+                                                ? moment(item.latest_stock_history_at ?? item.updated_at).format('MMM DD, YYYY HH:mm')
+                                                : '-'"></span>
+                                        <span class="text-[11px] text-gray-400"
+                                            x-text="(item.latest_stock_history_at ?? item.updated_at)
+                                                ? moment(item.latest_stock_history_at ?? item.updated_at).fromNow()
+                                                : ''"></span>
+                                    </div>
                                 </div>
                                 <div class="w-5/100 grid place-items-center">
                                     <button class="text-blue-600 text-xs underline" @click="openAdjustDialog(item)">
