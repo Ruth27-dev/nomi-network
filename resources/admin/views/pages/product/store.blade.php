@@ -153,6 +153,19 @@
                         </button>
                     </div>
 
+                    <div x-show="selected_attributes.length > 0" class="mb-3 rounded border border-[#d8dce5] bg-gray-50 p-3">
+                        <p class="text-xs font-semibold text-gray-600 mb-2">Selected Attributes</p>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="(attribute, idx) in selected_attributes" :key="`attr-${attribute.id}-${idx}`">
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border border-primary/30 text-primary bg-white">
+                                    <span x-text="attribute.name"></span>
+                                    <span class="text-gray-400">•</span>
+                                    <span class="text-gray-500" x-text="`${attribute.values?.length ?? 0} values`"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
                     {{-- empty state --}}
                     <div x-show="product_variations.length === 0"
                         class="flex flex-col items-center justify-center py-10 text-gray-400 select-none">
@@ -278,10 +291,11 @@
                 source_kh: ['', []],
                 product_location_id: ['', []],
                 location_title: ['', []],
+                product_attribute_ids: [[], []],
             }),
             product_variations: [],
             product_images: [],
-            selected_attribute: null,
+            selected_attributes: [],
             selected_categories: [],
             dialogData: null,
             validate: null,
@@ -359,7 +373,7 @@
                 this.form.reset();
                 this.product_variations = [];
                 this.product_images = [];
-                this.selected_attribute = null;
+                this.selected_attributes = [];
             },
             setValue(data) {
                 this.form.code = data?.code;
@@ -414,6 +428,18 @@
                         selected: false,
                     }));
                 }
+
+                if (data?.product_attributes?.length) {
+                    this.selected_attributes = data.product_attributes.map(attr => ({
+                        id: attr.id,
+                        name: attr.name,
+                        values: (attr.values ?? []).map(v => v.value).filter(Boolean),
+                    }));
+                    this.form.product_attribute_ids = this.selected_attributes.map(a => a.id);
+                } else {
+                    this.selected_attributes = [];
+                    this.form.product_attribute_ids = [];
+                }
             },
             onViewImage(path) {
                 const thumbnail = Fancybox.show([{
@@ -443,15 +469,35 @@
                     selected: false,
                 };
             },
+            buildVariationTitles(attributes) {
+                if (!Array.isArray(attributes) || attributes.length === 0) return [];
+
+                let combos = [''];
+                attributes.forEach((attribute) => {
+                    const values = Array.isArray(attribute.values) ? attribute.values.filter(Boolean) : [];
+                    if (values.length === 0) return;
+
+                    const next = [];
+                    combos.forEach((prefix) => {
+                        values.forEach((value) => {
+                            next.push(prefix ? `${prefix} / ${value}` : `${value}`);
+                        });
+                    });
+                    combos = next;
+                });
+
+                return combos.filter(Boolean);
+            },
             selectAttribute() {
                 SelectOption({
                     title: "Select Product Attribute",
                     placeholder: "Search...",
-                    multiple: false,
-                    selected: this.selected_attribute
-                        ? { _id: this.selected_attribute.id, _title: this.selected_attribute.name }
-                        : null,
-                    unselect: false,
+                    multiple: true,
+                    selected: this.selected_attributes.map(attr => ({
+                        _id: attr.id,
+                        _title: attr.name,
+                    })),
+                    unselect: true,
                     onReady: (callback_data) => {
                         Axios.get(`{{ route('admin-fetch-product-attribute-data') }}`).then((res) => {
                             const data = (res.data ?? []).map(item => ({
@@ -475,14 +521,31 @@
                         });
                     },
                     afterClose: async (res) => {
-                        if (!res) return;
-                        const detail = await Axios.get(`{{ route('admin-product-attribute-detail') }}`, {
-                            params: { id: res._id }
+                        if (!res || !res.length) {
+                            this.selected_attributes = [];
+                            this.form.product_attribute_ids = [];
+                            this.product_variations = [];
+                            return;
+                        }
+
+                        const details = await Promise.all(
+                            res.map(item => Axios.get(`{{ route('admin-product-attribute-detail') }}`, {
+                                params: { id: item._id }
+                            }))
+                        );
+
+                        this.selected_attributes = details.map(response => {
+                            const attr = response.data.data;
+                            return {
+                                id: attr.id,
+                                name: attr.name,
+                                values: (attr.values ?? []).map(v => v.value).filter(Boolean),
+                            };
                         });
-                        const attr = detail.data.data;
-                        this.selected_attribute = { id: attr.id, name: attr.name };
-                        const values = (attr.values ?? []).map(v => v.value).filter(Boolean);
-                        this.product_variations = values.map(val => this.makeVariation(val));
+                        this.form.product_attribute_ids = this.selected_attributes.map(item => item.id);
+
+                        const titles = this.buildVariationTitles(this.selected_attributes);
+                        this.product_variations = titles.map(title => this.makeVariation(title));
                     },
                 });
             },

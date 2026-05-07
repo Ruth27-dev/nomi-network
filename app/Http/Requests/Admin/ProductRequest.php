@@ -28,6 +28,8 @@ class ProductRequest extends FormRequest
             'status'            => 'required',
             'category_ids'      => 'nullable|array',
             'category_id'       => 'nullable|exists:categories,id',
+            'product_attribute_ids' => 'nullable|array',
+            'product_attribute_ids.*' => 'integer|exists:product_attributes,id',
 
             'product_variates.*.title_en'  => 'required',
             'product_variates.*.title_km'  => 'required',

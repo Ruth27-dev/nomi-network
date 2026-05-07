@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Gallery;
+use App\Models\ProductAttribute;
 
 
 class Product extends Model
@@ -69,7 +70,13 @@ class Product extends Model
 
     public function scopeWithRelation($query)
     {
-        return $query->with(['category', 'images', 'productVariations.images']);
+        return $query->with(['category', 'images', 'productVariations.images', 'productAttributes.values']);
+    }
+
+    public function productAttributes()
+    {
+        return $this->belongsToMany(ProductAttribute::class, 'product_attribute_maps', 'product_id', 'product_attribute_id')
+            ->withPivot(['is_required', 'is_variation']);
     }
 
     public function getTitleAttribute(): array
