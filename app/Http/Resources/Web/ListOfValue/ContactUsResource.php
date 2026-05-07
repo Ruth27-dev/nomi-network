@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Web\ListOfValue;
 
+use App\Models\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -50,6 +51,6 @@ class ContactUsResource extends JsonResource
             return $icon;
         }
 
-        return asset('storage/list-of-value/' . $icon);
+        return UploadFile::resolvePublicUrl($icon, 'list-of-value', asset('images/no.jpg'));
     }
 }

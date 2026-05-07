@@ -118,6 +118,7 @@
             loading: false,
             locale: @json(config('dummy.locale.en')),
             baseUrl: "{{ asset('storage/list-of-value') }}/",
+            baseStorageUrl: "{{ asset('storage') }}/",
             image_url: null,
             async init() {
                 feather.replace();
@@ -130,7 +131,7 @@
                     this.form.title_km = data?.title?.km ?? null;
                     this.form.content_en = data?.content?.en ?? null;
                     this.form.content_km = data?.content?.km ?? null;
-                    this.image_url = data?.image ? this.baseUrl + data.image : null;
+                    this.image_url = this.resolveFileUrl(data?.image ?? null);
                     this.form.tmp_file = data?.image ?? null;
                 }
 
@@ -158,6 +159,13 @@
                 this.form.tmp_file = null;
                 this.image_url = null;
                 document.querySelector('#image').value = '';
+            },
+            resolveFileUrl(file) {
+                if (!file) return null;
+                if (file instanceof File) return URL.createObjectURL(file);
+                if (file.startsWith('http') || file.startsWith('blob:')) return file;
+                if (file.includes('/')) return this.baseStorageUrl + file;
+                return this.baseUrl + file;
             },
             async initTinymce() {
                 await tinymce.remove();

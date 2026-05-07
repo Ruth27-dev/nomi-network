@@ -27,11 +27,7 @@ class ListOfValue extends Model
 
     public function getImageUrlAttribute()
     {
-        if ($this->image) {
-            return asset('storage/list-of-value/' . $this->image);
-        }
-
-        return asset('images/no.png');
+        return UploadFile::resolvePublicUrl($this->image, 'list-of-value', asset('images/no.png'));
     }
 
 

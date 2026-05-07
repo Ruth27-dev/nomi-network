@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Web\ListOfValue;
 
+use App\Models\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -42,6 +43,6 @@ class OurCoreValueResource extends JsonResource
             return $file;
         }
 
-        return asset('storage/list-of-value/' . $file);
+        return UploadFile::resolvePublicUrl($file, 'list-of-value');
     }
 }

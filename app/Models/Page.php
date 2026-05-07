@@ -35,7 +35,7 @@ class Page extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset('storage/item/' . $this->image) : asset('images/logo.jpg');
+        return UploadFile::resolvePublicUrl($this->image, 'item', asset('images/logo.jpg'));
     }
     public function getTranslatable()
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Web\ListOfValue;
 
+use App\Models\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Collection;
@@ -33,7 +34,7 @@ class ReportDocumentCollection extends ResourceCollection
                 ] : null,
                 'date' => data_get($item, 'add_on.date'),
                 'file' => $file,
-                'file_url' => $file ? asset('storage/report-document/' . $file) : null,
+                'file_url' => UploadFile::resolvePublicUrl($file, 'report-document'),
                 'sequence' => $item->sequence,
             ];
         })->toArray();

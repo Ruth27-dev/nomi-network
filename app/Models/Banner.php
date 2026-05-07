@@ -31,6 +31,6 @@ class Banner extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset('storage/banner/' . $this->image) : asset('images/no.jpg');
+        return UploadFile::resolvePublicUrl($this->image, 'banner', asset('images/no.jpg'));
     }
 }

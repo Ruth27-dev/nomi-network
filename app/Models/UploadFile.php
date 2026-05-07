@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class UploadFile
@@ -64,13 +64,19 @@ class UploadFile
 
     # old code for local storage
 
+    public const UNIFIED_UPLOAD_DIR = 'uploads';
+
     public static function uploadFile($destination, $image, $fallbackName = null)
     {
         if ($image && $image->isValid()) {
             $originalName = $image->getClientOriginalName();
             $fileName = time() . rand(1111, 9999) . '-' . str_replace(' ', '_', $originalName);
+            $directory = self::resolveTargetDirectory($destination, $image);
 
-            Storage::disk('public')->putFileAs($destination, $image, $fileName);
+            Storage::disk('public')->putFileAs($directory, $image, $fileName);
+            if (self::shouldUseUnifiedDirectory($image)) {
+                return self::UNIFIED_UPLOAD_DIR . '/' . $fileName;
+            }
         } else {
             $fileName = $fallbackName;
         }
@@ -81,7 +87,74 @@ class UploadFile
     public static function deleteFile($destination, $filename)
     {
         if ($filename) {
-            Storage::disk('public')->delete($destination . '/' . $filename);
+            if (filter_var($filename, FILTER_VALIDATE_URL)) {
+                return;
+            }
+
+            $filename = ltrim($filename, '/');
+            if (str_contains($filename, '/')) {
+                Storage::disk('public')->delete($filename);
+                return;
+            }
+
+            $legacyDir = trim((string) $destination, '/');
+            $paths = [self::UNIFIED_UPLOAD_DIR . '/' . $filename];
+            if ($legacyDir !== '') {
+                $paths[] = $legacyDir . '/' . $filename;
+            }
+
+            Storage::disk('public')->delete($paths);
         }
+    }
+
+    public static function resolvePublicUrl(?string $file, string $legacyDirectory, ?string $fallback = null): ?string
+    {
+        if (!$file) {
+            return $fallback;
+        }
+
+        if (filter_var($file, FILTER_VALIDATE_URL)) {
+            return $file;
+        }
+
+        $file = ltrim($file, '/');
+        if (str_contains($file, '/')) {
+            return asset('storage/' . $file);
+        }
+
+        $legacyDirectory = trim($legacyDirectory, '/');
+        if ($legacyDirectory !== '') {
+            $legacyPath = $legacyDirectory . '/' . $file;
+            if (Storage::disk('public')->exists($legacyPath)) {
+                return asset('storage/' . $legacyPath);
+            }
+        }
+
+        $uploadPath = self::UNIFIED_UPLOAD_DIR . '/' . $file;
+        if (Storage::disk('public')->exists($uploadPath)) {
+            return asset('storage/' . $uploadPath);
+        }
+
+        if ($legacyDirectory !== '') {
+            return asset('storage/' . $legacyDirectory . '/' . $file);
+        }
+
+        return asset('storage/' . $file);
+    }
+
+    private static function resolveTargetDirectory($destination, UploadedFile $file): string
+    {
+        if (self::shouldUseUnifiedDirectory($file)) {
+            return self::UNIFIED_UPLOAD_DIR;
+        }
+
+        $legacyDirectory = trim((string) $destination, '/');
+        return $legacyDirectory !== '' ? $legacyDirectory : self::UNIFIED_UPLOAD_DIR;
+    }
+
+    private static function shouldUseUnifiedDirectory(UploadedFile $file): bool
+    {
+        $mime = (string) $file->getMimeType();
+        return str_starts_with($mime, 'image/');
     }
 }

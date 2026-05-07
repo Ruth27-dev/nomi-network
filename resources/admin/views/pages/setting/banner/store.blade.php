@@ -248,16 +248,19 @@
                             let file = document.querySelector('#image');
                             this.form.image = file.files[0];
                             const data = this.form.value();
+                            const payload = new FormData();
+                            Object.entries({
+                                ...data,
+                                id: this.dialogData?.id ?? '',
+                            }).forEach(([key, value]) => {
+                                if (value !== undefined && value !== null) {
+                                    payload.append(key, value);
+                                }
+                            });
                             Axios({
                                 url: `{{ route('admin-page-banner-save') }}`,
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'multipart/form-data',
-                                },
-                                data: {
-                                    ...data,
-                                    id: this.dialogData?.id,
-                                }
+                                data: payload
                             }).then((res) => {
                                 if (res.data.error == false) {
                                     this.form.reset();

@@ -85,7 +85,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function getProfileUrlAttribute()
     {
-        return $this->profile ? asset('storage/user/' . $this->profile) : asset("images/profile.png");
+        return UploadFile::resolvePublicUrl($this->profile, 'user', asset('images/profile.png'));
     }
 
     public function userRole()

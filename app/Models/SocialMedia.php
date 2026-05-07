@@ -34,6 +34,6 @@ class SocialMedia extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset('storage/social-media/' . $this->image) : asset("images/no.jpg");
+        return UploadFile::resolvePublicUrl($this->image, 'social-media', asset('images/no.jpg'));
     }
 }

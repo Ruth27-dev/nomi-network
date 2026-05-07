@@ -240,6 +240,7 @@
             }),
             selected_products: [],
             baseUrl: "{{ asset('storage/discount') }}/",
+            baseStorageUrl: "{{ asset('storage') }}/",
             image_url: null,
             dialogData: null,
             validate: null,
@@ -312,7 +313,14 @@
                 }
 
                 this.form.tmp_file = data?.image;
-                this.image_url = data?.image ? this.baseUrl + data?.image : null;
+                this.image_url = this.resolveFileUrl(data?.image ?? null);
+            },
+            resolveFileUrl(file) {
+                if (!file) return null;
+                if (file instanceof File) return URL.createObjectURL(file);
+                if (file.startsWith('http') || file.startsWith('blob:')) return file;
+                if (file.includes('/')) return this.baseStorageUrl + file;
+                return this.baseUrl + file;
             },
             onPreviewImage(el) {
                 const profile = URL.createObjectURL(el.files[0]);
