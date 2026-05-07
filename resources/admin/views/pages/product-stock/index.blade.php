@@ -30,7 +30,7 @@
                         @lang('form.total') <span x-text="currentTable()?.paginate?.totalItems"></span>
                     </span>
                 </div>
-                <div class="content-action-button">
+                <div class="content-action-button flex-wrap gap-2">
                     <div class="filter">
                         <div class="form-row search-inline">
                             <input type="text" x-model="formFilter.search" placeholder="Search product or SKU..."
@@ -41,9 +41,10 @@
                     <button @click="onReset()">
                         <i data-feather="refresh-ccw"></i>
                     </button>
-                    <a href="{{ route('admin-product-stock-report') }}" class="btn-create">
+                    <a href="{{ route('admin-product-stock-report') }}"
+                        class="btn-create flex items-center gap-1.5 h-[35px] px-3 rounded bg-[#30ace2]! text-white! no-underline">
                         <i data-feather="file-text"></i>
-                        <span class="uppercase">Stock Report</span>
+                        <span class="uppercase text-xs">Stock Report</span>
                     </a>
                 </div>
             </div>
