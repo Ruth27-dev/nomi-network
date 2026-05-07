@@ -6,10 +6,24 @@
             'header_name' => 'Stock Inventory',
         ])
         <div class="content-body">
+            <div class="mb-3 flex items-center gap-2">
+                <button
+                    class="px-3 py-1.5 rounded text-sm border"
+                    :class="activeTab === 'inventory' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-300'"
+                    @click="switchTab('inventory')">
+                    Inventory
+                </button>
+                <button
+                    class="px-3 py-1.5 rounded text-sm border"
+                    :class="activeTab === 'summary' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-300'"
+                    @click="switchTab('summary')">
+                    Movement Summary
+                </button>
+            </div>
             <div class="content-tab">
                 <div class="content-tab-wrapper">
                     <span class="title !text-gray-600">
-                        @lang('form.total') <span x-text="table?.paginate?.totalItems"></span>
+                        @lang('form.total') <span x-text="currentTable()?.paginate?.totalItems"></span>
                     </span>
                 </div>
                 <div class="content-action-button">
@@ -25,7 +39,16 @@
                     </button>
                 </div>
             </div>
-            @include('admin::pages.product-stock.table')
+            <template x-if="activeTab === 'inventory'">
+                <div>
+                    @include('admin::pages.product-stock.table')
+                </div>
+            </template>
+            <template x-if="activeTab === 'summary'">
+                <div>
+                    @include('admin::pages.product-stock.summary-table')
+                </div>
+            </template>
         </div>
         @include('admin::pages.product-stock.store')
     </div>
@@ -33,44 +56,42 @@
 @section('script')
     <script type="module">
         Alpine.data('productStockPage', () => ({
-            table: new Table("{{ route('admin-product-stock-data') }}"),
+            inventoryTable: new Table("{{ route('admin-product-stock-data') }}"),
+            summaryTable: new Table("{{ route('admin-product-stock-history') }}"),
+            activeTab: 'inventory',
             formFilter: new FormGroup({ search: ['', []] }),
             selectedStock: null,
             init() {
-                this.table.init();
+                this.inventoryTable.init();
                 feather.replace();
             },
+            currentTable() {
+                return this.activeTab === 'summary' ? this.summaryTable : this.inventoryTable;
+            },
+            switchTab(tab) {
+                this.activeTab = tab;
+                this.onReset();
+                if (tab === 'summary') {
+                    this.summaryTable.init({ summary: true });
+                } else {
+                    this.inventoryTable.init();
+                }
+            },
             onFilter() {
-                this.table.init(this.formFilter.value());
+                const filter = this.formFilter.value();
+                if (this.activeTab === 'summary') {
+                    this.summaryTable.init({ ...filter, summary: true });
+                } else {
+                    this.inventoryTable.init(filter);
+                }
             },
             onReset() {
                 this.formFilter.reset();
-                this.table.reset();
-            },
-            groupedStocks() {
-                const rows = Array.isArray(this.table?.data) ? this.table.data : [];
-                const grouped = new Map();
-
-                rows.forEach((row) => {
-                    const key = `${row.product_id ?? 'null'}`;
-                    if (!grouped.has(key)) {
-                        grouped.set(key, {
-                            product_id: row.product_id,
-                            product_name: row.product?.name_en ?? '-',
-                            product_sku: row.product?.sku ?? '-',
-                            items: [],
-                            start_index: 0,
-                        });
-                    }
-                    grouped.get(key).items.push(row);
-                });
-
-                let cursor = 0;
-                return Array.from(grouped.values()).map((group) => {
-                    group.start_index = cursor;
-                    cursor += group.items.length;
-                    return group;
-                });
+                if (this.activeTab === 'summary') {
+                    this.summaryTable.init({ summary: true });
+                } else {
+                    this.inventoryTable.reset();
+                }
             },
             openAdjustDialog(stock) {
                 this.selectedStock = stock;
@@ -78,7 +99,7 @@
                     data: { stock },
                     config: { width: '520px', position: 'right', backdrop: false, blur: 3 },
                     afterClose: (res) => {
-                        if (res) this.table.reload();
+                        if (res) this.inventoryTable.reload();
                     }
                 });
             },
