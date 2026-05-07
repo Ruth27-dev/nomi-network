@@ -56,7 +56,7 @@ class CartController extends Controller
 
             $this->resolveAndValidateUnitPrice($product, $variation);
             $newQty = $cartItem ? ((int) $cartItem->quantity + $qty) : $qty;
-            $this->assertStockAvailable($product->id, $variation?->id, $newQty);
+            $this->assertStockAvailable($product, $variation, $newQty);
 
             if ($cartItem) {
                 $cartItem->update(['quantity' => $newQty]);
@@ -118,7 +118,7 @@ class CartController extends Controller
             }
 
             $this->resolveAndValidateUnitPrice($product, $variation);
-            $this->assertStockAvailable($cartItem->product_id, $cartItem->product_variation_id, (int) $request->quantity);
+            $this->assertStockAvailable($product, $variation, (int) $request->quantity);
             $cartItem->update(['quantity' => (int) $request->quantity]);
 
             DB::commit();
@@ -163,10 +163,11 @@ class CartController extends Controller
         }
     }
 
-    private function assertStockAvailable(int $productId, ?int $variationId, int $quantity): void
+    private function assertStockAvailable(Product $product, ?ProductVariation $variation, int $quantity): void
     {
+        $variationId = $variation?->id;
         $stock = ProductStock::query()
-            ->where('product_id', $productId)
+            ->where('product_id', $product->id)
             ->where(function ($q) use ($variationId) {
                 if ($variationId) {
                     $q->where('product_variation_id', $variationId);
@@ -177,7 +178,14 @@ class CartController extends Controller
             ->first();
 
         if (!$stock) {
-            throw new Exception('Stock record not found for selected product.');
+            $fallbackStock = $variation ? (int) ($variation->stock ?? 0) : (int) ($product->stock ?? 0);
+            $stock = ProductStock::create([
+                'product_id' => $product->id,
+                'product_variation_id' => $variation?->id,
+                'stock_on_hand' => $fallbackStock,
+                'stock_reserved' => 0,
+                'stock_available' => max(0, $fallbackStock),
+            ]);
         }
 
         if ((int) $stock->stock_available < $quantity) {
