@@ -208,8 +208,8 @@ class CartController extends Controller
     {
         $items = UserCartItem::query()
             ->with([
-                'product:id,sku,name_en,name_kh,price,is_active',
-                'variation:id,product_id,sku,name,price,is_active',
+                'product:id,sku,name_en,name_kh,description_en,description_kh,price,stock,is_active',
+                'variation:id,product_id,sku,barcode,name,price,stock,image_url,is_active',
             ])
             ->where('user_id', $userId)
             ->orderByDesc('id')
@@ -226,8 +226,49 @@ class CartController extends Controller
                 'quantity' => (int) $item->quantity,
                 'unit_price' => (float) $unitPrice,
                 'line_total' => $lineTotal,
-                'product' => $item->product,
-                'variation' => $item->variation,
+                'product' => $item->product ? [
+                    'id' => $item->product->id,
+                    'sku' => $item->product->sku,
+                    'name_en' => $item->product->name_en,
+                    'name_kh' => $item->product->name_kh,
+                    'description_en' => $item->product->description_en,
+                    'description_kh' => $item->product->description_kh,
+                    'price' => (float) $item->product->price,
+                    'stock' => (int) ($item->product->stock ?? 0),
+                    'is_active' => (bool) $item->product->is_active,
+                    'title' => $item->product->title,
+                    'description' => $item->product->description,
+                    'status' => $item->product->status,
+                    'code' => $item->product->code,
+                ] : null,
+                'product_variation' => $item->variation ? [
+                    'id' => $item->variation->id,
+                    'product_id' => $item->variation->product_id,
+                    'sku' => $item->variation->sku,
+                    'barcode' => $item->variation->barcode,
+                    'name' => $item->variation->name,
+                    'price' => (float) $item->variation->price,
+                    'stock' => (int) ($item->variation->stock ?? 0),
+                    'image_url' => $item->variation->image_url,
+                    'is_active' => (bool) $item->variation->is_active,
+                    'title' => $item->variation->title,
+                    'description' => $item->variation->description,
+                    'status' => $item->variation->status,
+                ] : null,
+                'variation' => $item->variation ? [
+                    'id' => $item->variation->id,
+                    'product_id' => $item->variation->product_id,
+                    'sku' => $item->variation->sku,
+                    'barcode' => $item->variation->barcode,
+                    'name' => $item->variation->name,
+                    'price' => (float) $item->variation->price,
+                    'stock' => (int) ($item->variation->stock ?? 0),
+                    'image_url' => $item->variation->image_url,
+                    'is_active' => (bool) $item->variation->is_active,
+                    'title' => $item->variation->title,
+                    'description' => $item->variation->description,
+                    'status' => $item->variation->status,
+                ] : null,
             ];
         })->values();
 
