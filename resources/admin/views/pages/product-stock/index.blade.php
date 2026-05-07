@@ -47,6 +47,31 @@
                 this.formFilter.reset();
                 this.table.reset();
             },
+            groupedStocks() {
+                const rows = Array.isArray(this.table?.data) ? this.table.data : [];
+                const grouped = new Map();
+
+                rows.forEach((row) => {
+                    const key = `${row.product_id ?? 'null'}`;
+                    if (!grouped.has(key)) {
+                        grouped.set(key, {
+                            product_id: row.product_id,
+                            product_name: row.product?.name_en ?? '-',
+                            product_sku: row.product?.sku ?? '-',
+                            items: [],
+                            start_index: 0,
+                        });
+                    }
+                    grouped.get(key).items.push(row);
+                });
+
+                let cursor = 0;
+                return Array.from(grouped.values()).map((group) => {
+                    group.start_index = cursor;
+                    cursor += group.items.length;
+                    return group;
+                });
+            },
             openAdjustDialog(stock) {
                 this.selectedStock = stock;
                 this.$dialog('adjustStockDialog').open({
@@ -60,4 +85,3 @@
         }));
     </script>
 @stop
-
