@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductStock;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,11 @@ class ProductStockController extends Controller
     public function index()
     {
         return view('admin::pages.product-stock.index');
+    }
+
+    public function report()
+    {
+        return view('admin::pages.product-stock.report');
     }
 
     public function data()
@@ -185,5 +191,134 @@ class ProductStockController extends Controller
             DB::rollBack();
             return $this->responseError($e->getMessage());
         }
+    }
+
+    public function reportData(Request $request)
+    {
+        try {
+            $pag = (int) ($request->get('pag') ?? 50);
+            $pag = $pag > 0 ? min($pag, 200) : 50;
+
+            return $this->buildStockReportQuery($request)
+                ->orderBy('product_name_en')
+                ->orderBy('variation_name')
+                ->paginate($pag);
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function reportExport(Request $request)
+    {
+        try {
+            $rows = $this->buildStockReportQuery($request)
+                ->orderBy('product_name_en')
+                ->orderBy('variation_name')
+                ->get();
+
+            $fileName = 'stock-report-' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename={$fileName}",
+            ];
+
+            $callback = function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, [
+                    'Product',
+                    'Product SKU',
+                    'Variation',
+                    'Variation SKU',
+                    'Stock On Hand',
+                    'Stock Reserved',
+                    'Stock Available',
+                    'Movement Count',
+                    'Latest Movement',
+                ]);
+
+                foreach ($rows as $row) {
+                    fputcsv($out, [
+                        $row->product_name_en ?? '',
+                        $row->product_sku ?? '',
+                        $row->variation_name ?? 'Main Product',
+                        $row->variation_sku ?? '',
+                        (int) ($row->stock_on_hand ?? 0),
+                        (int) ($row->stock_reserved ?? 0),
+                        (int) ($row->stock_available ?? 0),
+                        (int) ($row->movement_count ?? 0),
+                        $row->latest_stock_history_at ?? '',
+                    ]);
+                }
+
+                fclose($out);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    private function buildStockReportQuery(Request $request)
+    {
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+        $threshold = (int) $request->get('threshold', 5);
+        $threshold = $threshold >= 0 ? $threshold : 5;
+
+        $historyQuery = DB::table('stock_history as sh')
+            ->selectRaw('
+                sh.product_id,
+                sh.product_variation_id,
+                MAX(sh.created_at) as latest_stock_history_at,
+                COUNT(*) as movement_count
+            ')
+            ->when($fromDate, function ($q) use ($fromDate) {
+                $q->where('sh.created_at', '>=', Carbon::parse($fromDate)->startOfDay());
+            })
+            ->when($toDate, function ($q) use ($toDate) {
+                $q->where('sh.created_at', '<=', Carbon::parse($toDate)->endOfDay());
+            })
+            ->groupBy('sh.product_id', 'sh.product_variation_id');
+
+        return DB::table('product_stocks as ps')
+            ->leftJoin('products as p', 'p.id', '=', 'ps.product_id')
+            ->leftJoin('product_variations as pv', 'pv.id', '=', 'ps.product_variation_id')
+            ->leftJoinSub($historyQuery, 'hm', function ($join) {
+                $join->on('hm.product_id', '=', 'ps.product_id')
+                    ->where(function ($q) {
+                        $q->whereColumn('hm.product_variation_id', 'ps.product_variation_id')
+                            ->orWhere(function ($sub) {
+                                $sub->whereNull('hm.product_variation_id')
+                                    ->whereNull('ps.product_variation_id');
+                            });
+                    });
+            })
+            ->select([
+                'ps.id',
+                'ps.product_id',
+                'ps.product_variation_id',
+                'ps.stock_on_hand',
+                'ps.stock_reserved',
+                'ps.stock_available',
+                'p.sku as product_sku',
+                'p.name_en as product_name_en',
+                'pv.sku as variation_sku',
+                'pv.name as variation_name',
+                DB::raw('COALESCE(hm.movement_count, 0) as movement_count'),
+                'hm.latest_stock_history_at',
+            ])
+            ->when($request->get('search'), function ($q) use ($request) {
+                $search = trim((string) $request->get('search'));
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('p.sku', 'LIKE', "%{$search}%")
+                        ->orWhere('p.name_en', 'LIKE', "%{$search}%")
+                        ->orWhere('pv.sku', 'LIKE', "%{$search}%")
+                        ->orWhere('pv.name', 'LIKE', "%{$search}%");
+                });
+            })
+            ->when(filter_var($request->get('low_stock_only', false), FILTER_VALIDATE_BOOLEAN), function ($q) use ($threshold) {
+                $q->where('ps.stock_available', '<=', $threshold);
+            });
     }
 }

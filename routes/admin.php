@@ -183,6 +183,9 @@ Route::middleware(['locale'])->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
                 Route::get('history', 'history')->name('history');
+                Route::get('report', 'report')->name('report');
+                Route::get('report-data', 'reportData')->name('report-data');
+                Route::get('report-export', 'reportExport')->name('report-export');
                 Route::post('adjust', 'adjust')->name('adjust');
             });
 

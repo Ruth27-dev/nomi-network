@@ -41,6 +41,10 @@
                     <button @click="onReset()">
                         <i data-feather="refresh-ccw"></i>
                     </button>
+                    <a href="{{ route('admin-product-stock-report') }}" class="btn-create">
+                        <i data-feather="file-text"></i>
+                        <span class="uppercase">Stock Report</span>
+                    </a>
                 </div>
             </div>
             <template x-if="activeTab === 'inventory'">
