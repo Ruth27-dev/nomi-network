@@ -10,11 +10,11 @@
                         <div class="flex-auto border-t border-b border-gray-200 bg-gray-50">
                             <div class="flex h-11">
                                 <div class="w-5/100 text-sm font-bold text-gray-500 grid place-items-center">No</div>
-                                <div class="w-34/100 text-sm font-bold text-gray-500 flex items-center">Item</div>
-                                <div class="w-16/100 text-sm font-bold text-gray-500 grid place-items-center">Available</div>
-                                <div class="w-16/100 text-sm font-bold text-gray-500 grid place-items-center">Stock Status</div>
+                                <div class="w-35/100 text-sm font-bold text-gray-500 flex items-center">Item</div>
+                                <div class="w-15/100 text-sm font-bold text-gray-500 grid place-items-center">Available</div>
+                                <div class="w-15/100 text-sm font-bold text-gray-500 grid place-items-center">Stock Status</div>
                                 <div class="w-20/100 text-sm font-bold text-gray-500 grid place-items-center">Last Movement</div>
-                                <div class="w-9/100 text-sm font-bold text-gray-500 grid place-items-center">Action</div>
+                                <div class="w-10/100 text-sm font-bold text-gray-500 grid place-items-center">Action</div>
                             </div>
                         </div>
                     </div>
@@ -28,17 +28,17 @@
                                 <div class="w-5/100 grid place-items-center text-gray-500">
                                     <span class="text-sm" x-text="index + 1"></span>
                                 </div>
-                                <div class="w-34/100 text-gray-600 flex items-center pr-2">
+                                <div class="w-35/100 text-gray-600 flex items-center pr-2">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-medium" x-text="item.product?.name_en ?? '-'"></span>
                                         <span class="text-xs text-gray-400"
                                             x-text="`${item.product?.sku ?? '-'}${item.product_variation_id ? ' • ' + (item.variation?.name ?? 'Variant') : ' • Main Product'}`"></span>
                                     </div>
                                 </div>
-                                <div class="w-16/100 grid place-items-center text-gray-700">
+                                <div class="w-15/100 grid place-items-center text-gray-700">
                                     <span class="text-base font-semibold" x-text="item.stock_available ?? 0"></span>
                                 </div>
-                                <div class="w-16/100 grid place-items-center text-gray-700">
+                                <div class="w-15/100 grid place-items-center text-gray-700">
                                     <span
                                         class="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-semibold"
                                         :class="(item.stock_available ?? 0) <= 0
@@ -61,7 +61,7 @@
                                                 : ''"></span>
                                     </div>
                                 </div>
-                                <div class="w-9/100 grid place-items-center">
+                                <div class="w-10/100 grid place-items-center">
                                     <button class="text-blue-600 text-xs underline" @click="openAdjustDialog(item)">
                                         Adjust
                                     </button>
