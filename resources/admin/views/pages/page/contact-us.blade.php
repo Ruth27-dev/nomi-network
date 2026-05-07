@@ -323,6 +323,7 @@
             validate: null,
             loading: false,
             baseUrl: "{{ asset('storage/list-of-value') }}/",
+            baseStorageUrl: "{{ asset('storage') }}/",
             async init() {
                 feather.replace();
                 this.detailForm = this.emptyDetail();
@@ -471,7 +472,7 @@
                 if (!file) return null;
                 if (file instanceof File) return URL.createObjectURL(file);
                 if (file.startsWith('http') || file.startsWith('blob:')) return file;
-
+                if (file.includes('/')) return this.baseStorageUrl + file;
                 return this.baseUrl + file;
             },
             cloneDetail(item) {

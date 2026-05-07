@@ -153,8 +153,7 @@ class ProductController extends Controller
             if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
                 return response()->json(['error' => true, 'message' => 'Invalid file'], 422);
             }
-            $filename = UploadFile::uploadFile('product/images', $request->file('file'));
-            $path = 'product/images/' . $filename;
+            $path = UploadFile::uploadFile('product/images', $request->file('file'));
             return response()->json([
                 'error' => false,
                 'path' => $path,

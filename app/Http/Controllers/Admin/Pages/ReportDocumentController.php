@@ -80,7 +80,7 @@ class ReportDocumentController extends Controller
             $categoryId = data_get($item, 'add_on.category_id');
             $file = data_get($item, 'add_on.file');
             $item->category = $categoryId ? $categoryMap->get($categoryId) : null;
-            $item->file_url = $file ? asset('storage/report-document/' . $file) : null;
+            $item->file_url = UploadFile::resolvePublicUrl($file, 'report-document');
             return $item;
         });
 
