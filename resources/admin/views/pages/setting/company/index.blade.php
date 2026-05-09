@@ -80,7 +80,7 @@
 
                 </div>
                 <div class="form-button">
-                    @can('about-us-update')
+                    @can('company-update')
                         <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
                             class="!rounded-[50px]">
                             <span class="material-icons mr-1">save</span>
