@@ -155,10 +155,11 @@ class ProductController extends Controller
                 return response()->json(['error' => true, 'message' => 'Invalid file'], 422);
             }
             $path = UploadFile::uploadFile('product/images', $request->file('file'));
+            $publicPath = preg_replace('#^uploads/#', '', ltrim((string) $path, '/'));
             return response()->json([
                 'error' => false,
                 'path' => $path,
-                'url'  => Storage::disk('public')->url($path),
+                'url'  => Storage::disk('uploads')->url($publicPath),
             ]);
         } catch (Exception $e) {
             return response()->json(['error' => true, 'message' => $e->getMessage()], 500);

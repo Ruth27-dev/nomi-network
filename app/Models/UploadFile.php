@@ -119,27 +119,29 @@ class UploadFile
 
         $file = ltrim($file, '/');
         if (str_contains($file, '/')) {
-            return asset('uploads/' . $file);
+            return self::resolveUploadsDiskUrl($file);
         }
 
         $legacyDirectory = trim($legacyDirectory, '/');
         if ($legacyDirectory !== '') {
             $legacyPath = $legacyDirectory . '/' . $file;
-            if (Storage::disk('uploads')->exists($legacyPath)) {
-                return asset('uploads/' . $legacyPath);
+            $normalizedLegacyPath = self::normalizeUploadsPath($legacyPath);
+            if (Storage::disk('uploads')->exists($legacyPath) || Storage::disk('uploads')->exists($normalizedLegacyPath)) {
+                return self::resolveUploadsDiskUrl($legacyPath);
             }
         }
 
         $uploadPath = self::UNIFIED_UPLOAD_DIR . '/' . $file;
-        if (Storage::disk('uploads')->exists($uploadPath)) {
-            return asset('uploads/' . $uploadPath);
+        $normalizedUploadPath = self::normalizeUploadsPath($uploadPath);
+        if (Storage::disk('uploads')->exists($uploadPath) || Storage::disk('uploads')->exists($normalizedUploadPath)) {
+            return self::resolveUploadsDiskUrl($uploadPath);
         }
 
         if ($legacyDirectory !== '') {
-            return asset('uploads/' . $legacyDirectory . '/' . $file);
+            return self::resolveUploadsDiskUrl($legacyDirectory . '/' . $file);
         }
 
-        return asset('uploads/' . $file);
+        return self::resolveUploadsDiskUrl($file);
     }
 
     private static function resolveTargetDirectory($destination, UploadedFile $file): string
@@ -156,5 +158,15 @@ class UploadFile
     {
         $mime = (string) $file->getMimeType();
         return str_starts_with($mime, 'image/');
+    }
+
+    private static function normalizeUploadsPath(string $path): string
+    {
+        return preg_replace('#^uploads/#', '', ltrim($path, '/'));
+    }
+
+    private static function resolveUploadsDiskUrl(string $path): string
+    {
+        return Storage::disk('uploads')->url(self::normalizeUploadsPath($path));
     }
 }
