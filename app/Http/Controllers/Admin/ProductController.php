@@ -12,6 +12,7 @@ use App\Models\UploadFile;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -157,7 +158,7 @@ class ProductController extends Controller
             return response()->json([
                 'error' => false,
                 'path' => $path,
-                'url'  => asset('storage/' . $path),
+                'url'  => Storage::disk('public')->url($path),
             ]);
         } catch (Exception $e) {
             return response()->json(['error' => true, 'message' => $e->getMessage()], 500);
