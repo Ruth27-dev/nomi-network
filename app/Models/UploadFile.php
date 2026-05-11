@@ -73,7 +73,7 @@ class UploadFile
             $fileName = time() . rand(1111, 9999) . '-' . str_replace(' ', '_', $originalName);
             $directory = self::resolveTargetDirectory($destination, $image);
 
-            Storage::disk('public')->putFileAs($directory, $image, $fileName);
+            Storage::disk('uploads')->putFileAs($directory, $image, $fileName);
             if (self::shouldUseUnifiedDirectory($image)) {
                 return self::UNIFIED_UPLOAD_DIR . '/' . $fileName;
             }
@@ -93,7 +93,7 @@ class UploadFile
 
             $filename = ltrim($filename, '/');
             if (str_contains($filename, '/')) {
-                Storage::disk('public')->delete($filename);
+                Storage::disk('uploads')->delete($filename);
                 return;
             }
 
@@ -103,7 +103,7 @@ class UploadFile
                 $paths[] = $legacyDir . '/' . $filename;
             }
 
-            Storage::disk('public')->delete($paths);
+            Storage::disk('uploads')->delete($paths);
         }
     }
 
@@ -119,27 +119,27 @@ class UploadFile
 
         $file = ltrim($file, '/');
         if (str_contains($file, '/')) {
-            return asset('storage/' . $file);
+            return asset('uploads/' . $file);
         }
 
         $legacyDirectory = trim($legacyDirectory, '/');
         if ($legacyDirectory !== '') {
             $legacyPath = $legacyDirectory . '/' . $file;
-            if (Storage::disk('public')->exists($legacyPath)) {
-                return asset('storage/' . $legacyPath);
+            if (Storage::disk('uploads')->exists($legacyPath)) {
+                return asset('uploads/' . $legacyPath);
             }
         }
 
         $uploadPath = self::UNIFIED_UPLOAD_DIR . '/' . $file;
-        if (Storage::disk('public')->exists($uploadPath)) {
-            return asset('storage/' . $uploadPath);
+        if (Storage::disk('uploads')->exists($uploadPath)) {
+            return asset('uploads/' . $uploadPath);
         }
 
         if ($legacyDirectory !== '') {
-            return asset('storage/' . $legacyDirectory . '/' . $file);
+            return asset('uploads/' . $legacyDirectory . '/' . $file);
         }
 
-        return asset('storage/' . $file);
+        return asset('uploads/' . $file);
     }
 
     private static function resolveTargetDirectory($destination, UploadedFile $file): string
