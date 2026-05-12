@@ -21,9 +21,9 @@ class RoleRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->id ?? null;
         return [
             'display_name_en' => 'required',
+            'display_name_km' => 'required',
             'status'          => 'required',
         ];
     }
@@ -31,9 +31,9 @@ class RoleRequest extends FormRequest
     public function messages()
     {
         return [
-            'display_name_en.required'          => __('validate.attributes.required'),
-            'status.required'                   => __('validate.attributes.required'),
-            
+            'display_name_en.required' => __('validate.attributes.required'),
+            'display_name_km.required' => __('validate.attributes.required'),
+            'status.required'          => __('validate.attributes.required'),
         ];
     }
 }

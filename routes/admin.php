@@ -106,10 +106,12 @@ Route::middleware(['locale'])->group(function () {
             Route::controller(Admin\UserController::class)->prefix('user')->name('user-')->group(function () {
                 Route::get('list',  'index')->name('list');
                 Route::get('customer/list', function () {
-                    return redirect()->route('admin-user-list', ['scope' => 'customer']);
+                    request()->merge(['scope' => 'customer']);
+                    return app(Admin\UserController::class)->index();
                 })->name('customer-list');
                 Route::get('operation/list', function () {
-                    return redirect()->route('admin-user-list', ['scope' => 'operation']);
+                    request()->merge(['scope' => 'operation']);
+                    return app(Admin\UserController::class)->index();
                 })->name('operation-list');
                 Route::get('data',  'data')->name('data');
                 Route::post('save',  'save')->name('save');

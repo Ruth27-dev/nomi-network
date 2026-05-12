@@ -10,8 +10,8 @@
                 </h3>
                 <span @click="$dialog('storeRoleDialog').close()"><i data-feather="x"></i></span>
             </div>
-            <div class="form-body flex-auto overflow-y-auto" x-data="{ show_password: false, show_confirm_password: false }">
-                <div class="row">
+            <div class="form-body flex-auto overflow-y-auto">
+                <div class="row-2">
                     <div class="form-row">
                         <label>@lang('form.body.label.name_en')<span>*</span></label>
                         <input placeholder="@lang('form.body.placeholder.name_en')" type="text" x-model="form.display_name_en"
@@ -19,6 +19,14 @@
                             :readonly="form.name == 'chef' || form.name == 'operator'">
                         <span class="error" x-show="validate?.display_name_en"
                             x-text="validate?.display_name_en"></span>
+                    </div>
+                    <div class="form-row">
+                        <label>@lang('form.body.label.name_km')<span>*</span></label>
+                        <input placeholder="@lang('form.body.placeholder.name_km')" type="text" x-model="form.display_name_km"
+                            :disabled="form.disabled" autocomplete="off"
+                            :readonly="form.name == 'chef' || form.name == 'operator'">
+                        <span class="error" x-show="validate?.display_name_km"
+                            x-text="validate?.display_name_km"></span>
                     </div>
                     <div class="form-row">
                         <label>@lang('form.body.label.status')<span>*</span> </label>
@@ -47,6 +55,7 @@
         Alpine.data('storeRoleDialog', () => ({
             form: new FormGroup({
                 display_name_en: [null, ['required']],
+                display_name_km: [null, ['required']],
                 name: [null, ['required']],
                 status: [active, ['required']],
             }),

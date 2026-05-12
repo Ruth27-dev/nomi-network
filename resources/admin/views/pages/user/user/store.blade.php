@@ -1,12 +1,19 @@
+@php
+    $scopeTitle = request('scope') === 'customer'
+        ? __('form.body.label.customer')
+        : (request('scope') === 'operation'
+            ? 'Operation User'
+            : __('form.name.user_admin'));
+@endphp
 <template x-dialog="storeUserDialog">
     <div x-data="storeUserDialog" class="form-admin !w-full h-full">
         <form class="form-wrapper flex flex-col h-full">
             <div class="form-header">
                 <h3 x-show="!dialogData?.id">
-                    @lang('form.header.create', ['name' => __('form.title.user')])
+                    @lang('form.header.create', ['name' => $scopeTitle])
                 </h3>
                 <h3 x-show="dialogData?.id">
-                    @lang('form.header.update', ['name' => __('form.title.user')])
+                    @lang('form.header.update', ['name' => $scopeTitle])
                 </h3>
                 <span @click="$dialog('storeUserDialog').close()"><i data-feather="x"></i></span>
             </div>
@@ -32,11 +39,14 @@
                     </div>
                     <div class="form-row">
                         <label>@lang('form.body.label.role')<span>*</span> </label>
-                        <select x-model="form.role_id" :disabled="form.disabled">
+                        <select x-model="form.role_id"
+                            :disabled="form.disabled"
+                            @if(request('scope') === 'customer') disabled style="opacity:0.6; cursor:not-allowed; pointer-events:none;" @endif>
                             <option value="">@lang('form.body.placeholder.role')</option>
-                            <template x-for="(item,index) in roleData">
-                                <option :value="item?.id" :selected="item?.id == form.role_id"><span
-                                        x-text="item?.display_name?.[langLocale]"></span></option>
+                            <template x-for="(item,index) in roleData.filter(r => {{ request('scope') === 'operation' ? 'r.name !== \'customer\'' : 'true' }})">
+                                <option :value="item?.id" :selected="item?.id == form.role_id">
+                                    <span x-text="item?.display_name?.[langLocale]"></span>
+                                </option>
                             </template>
                         </select>
                         <span class="error" x-show="validate?.role_id" x-text="validate?.role_id"></span>
@@ -81,9 +91,9 @@
                 <div class="row">
                     <div class="form-row">
                         <label>@lang('form.body.label.address')</label>
-                        <textarea x-model="form.address" name="" id="" rows="1" placeholder="@lang('form.body.placeholder.address')"></textarea>
+                        <textarea x-model="form.address" name="" id="" rows="3" placeholder="@lang('form.body.placeholder.address')"></textarea>
+                        <span class="error" x-show="validate?.address" x-text="validate?.address"></span>
                     </div>
-                    <span class="error" x-show="validate?.address" x-text="validate?.address"></span>
                 </div>
                 <div class="row-2">
                     <div class="form-row">
@@ -162,6 +172,12 @@
                 this.dialogData = this.$dialog('storeUserDialog').data;
                 this.form.patchValue(this.dialogData ?? {});
                 feather.replace();
+                @if(request('scope') === 'customer')
+                if (!this.dialogData?.id) {
+                    const customerRole = this.roleData.find(r => r.name === 'customer');
+                    if (customerRole) this.form.role_id = customerRole.id;
+                }
+                @endif
                 this.form.default_branch_title = this.dialogData?.branch_default ? this.dialogData
                     ?.branch_default?.title?.en : null;
                 this.form.default_branch_id = this.dialogData?.branch_id;

@@ -13,7 +13,7 @@
                                     <span>@lang('table.field.no')</span>
                                 </div>
                                 <div class="w-40/100 text-sm font-bold text-gray-500 grid place-items-center">
-                                    <span>@lang('table.field.name_km')</span>
+                                    <span>@lang('table.field.name')</span>
                                 </div>                 
                                 <div class="w-45/100 text-sm font-bold text-gray-500 grid place-items-center">
                                     <span>@lang('table.field.status')</span>
@@ -35,7 +35,7 @@
                                     <span class="text-sm" x-text="index + 1"></span>
                                 </div>
                                 <div class="w-40/100 text-gray-500 grid place-items-center">
-                                    <span class="text-sm text-center" x-text="item.display_name?.en"></span>
+                                    <span class="text-sm text-center" x-text="item.display_name?.{{ app()->getLocale() }}"></span>
                                 </div>
                                 <div class="w-45/100 text-gray-500 grid place-items-center">
                                     <template x-if="status == active">
