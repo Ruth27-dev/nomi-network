@@ -117,8 +117,8 @@
             validate: null,
             loading: false,
             locale: @json(config('dummy.locale.en')),
-            baseUrl: "{{ asset('storage/list-of-value') }}/",
-            baseStorageUrl: "{{ asset('storage') }}/",
+            baseLegacyUrl: "{{ asset('storage/list-of-value') }}/",
+            baseUploadUrl: "{{ asset('uploads') }}/",
             image_url: null,
             async init() {
                 feather.replace();
@@ -164,8 +164,11 @@
                 if (!file) return null;
                 if (file instanceof File) return URL.createObjectURL(file);
                 if (file.startsWith('http') || file.startsWith('blob:')) return file;
-                if (file.includes('/')) return this.baseStorageUrl + file;
-                return this.baseUrl + file;
+                const normalized = file.replace(/^\/+/, '');
+                if (normalized.includes('/')) {
+                    return this.baseUploadUrl + normalized.replace(/^uploads\//, '');
+                }
+                return this.baseLegacyUrl + normalized;
             },
             async initTinymce() {
                 await tinymce.remove();

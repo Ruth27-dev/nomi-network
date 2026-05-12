@@ -313,8 +313,8 @@
             id: null,
             validate: null,
             loading: false,
-            baseUrl: "{{ asset('storage/list-of-value') }}/",
-            baseStorageUrl: "{{ asset('storage') }}/",
+            baseLegacyUrl: "{{ asset('storage/list-of-value') }}/",
+            baseUploadUrl: "{{ asset('uploads') }}/",
             async init() {
                 feather.replace();
                 this.detailForm = this.emptyDetail();
@@ -462,8 +462,11 @@
                 if (!file) return null;
                 if (file instanceof File) return URL.createObjectURL(file);
                 if (file.startsWith('http') || file.startsWith('blob:')) return file;
-                if (file.includes('/')) return this.baseStorageUrl + file;
-                return this.baseUrl + file;
+                const normalized = file.replace(/^\/+/, '');
+                if (normalized.includes('/')) {
+                    return this.baseUploadUrl + normalized.replace(/^uploads\//, '');
+                }
+                return this.baseLegacyUrl + normalized;
             },
             cloneDetail(item) {
                 return {

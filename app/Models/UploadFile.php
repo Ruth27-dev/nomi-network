@@ -77,11 +77,11 @@ class UploadFile
             if (self::shouldUseUnifiedDirectory($image)) {
                 return self::UNIFIED_UPLOAD_DIR . '/' . $fileName;
             }
-        } else {
-            $fileName = $fallbackName;
+
+            return $fileName;
         }
 
-        return $fileName;
+        return $fallbackName;
     }
 
     public static function deleteFile($destination, $filename)
@@ -92,18 +92,10 @@ class UploadFile
             }
 
             $filename = ltrim($filename, '/');
-            if (str_contains($filename, '/')) {
-                Storage::disk('uploads')->delete($filename);
-                return;
-            }
-
             $legacyDir = trim((string) $destination, '/');
-            $paths = [self::UNIFIED_UPLOAD_DIR . '/' . $filename];
-            if ($legacyDir !== '') {
-                $paths[] = $legacyDir . '/' . $filename;
-            }
-
+            $paths = self::buildDiskPathCandidates($filename, $legacyDir);
             Storage::disk('uploads')->delete($paths);
+            Storage::disk('public')->delete($paths);
         }
     }
 
@@ -118,36 +110,28 @@ class UploadFile
         }
 
         $file = ltrim($file, '/');
-        if (str_contains($file, '/')) {
-            return self::resolveUploadsDiskUrl($file);
-        }
-
         $legacyDirectory = trim($legacyDirectory, '/');
-        if ($legacyDirectory !== '') {
-            $legacyPath = $legacyDirectory . '/' . $file;
-            $normalizedLegacyPath = self::normalizeUploadsPath($legacyPath);
-            if (Storage::disk('uploads')->exists($legacyPath) || Storage::disk('uploads')->exists($normalizedLegacyPath)) {
-                return self::resolveUploadsDiskUrl($legacyPath);
-            }
+
+        $diskFile = self::resolveExistingDiskFile($file, $legacyDirectory);
+        if ($diskFile !== null) {
+            return self::resolveDiskUrl($diskFile['disk'], $diskFile['path']);
         }
 
-        $uploadPath = self::UNIFIED_UPLOAD_DIR . '/' . $file;
-        $normalizedUploadPath = self::normalizeUploadsPath($uploadPath);
-        if (Storage::disk('uploads')->exists($uploadPath) || Storage::disk('uploads')->exists($normalizedUploadPath)) {
-            return self::resolveUploadsDiskUrl($uploadPath);
+        if (str_contains($file, '/')) {
+            return self::resolveDiskUrl('uploads', self::stripUnifiedPrefix($file));
         }
 
         if ($legacyDirectory !== '') {
-            return self::resolveUploadsDiskUrl($legacyDirectory . '/' . $file);
+            return self::resolveDiskUrl('public', $legacyDirectory . '/' . $file);
         }
 
-        return self::resolveUploadsDiskUrl($file);
+        return self::resolveDiskUrl('uploads', $file);
     }
 
     private static function resolveTargetDirectory($destination, UploadedFile $file): string
     {
         if (self::shouldUseUnifiedDirectory($file)) {
-            return self::UNIFIED_UPLOAD_DIR;
+            return '';
         }
 
         $legacyDirectory = trim((string) $destination, '/');
@@ -160,13 +144,64 @@ class UploadFile
         return str_starts_with($mime, 'image/');
     }
 
-    private static function normalizeUploadsPath(string $path): string
+    private static function stripUnifiedPrefix(string $path): string
     {
-        return preg_replace('#^uploads/#', '', ltrim($path, '/'));
+        return preg_replace(
+            '#^' . preg_quote(self::UNIFIED_UPLOAD_DIR, '#') . '/#',
+            '',
+            ltrim($path, '/')
+        );
     }
 
-    private static function resolveUploadsDiskUrl(string $path): string
+    private static function resolveDiskUrl(string $disk, string $path): string
     {
-        return Storage::disk('uploads')->url(self::normalizeUploadsPath($path));
+        return Storage::disk($disk)->url(ltrim($path, '/'));
+    }
+
+    private static function resolveExistingDiskFile(string $file, string $legacyDirectory = ''): ?array
+    {
+        foreach (self::buildDiskPathCandidates($file, $legacyDirectory) as $candidate) {
+            if (Storage::disk('uploads')->exists($candidate)) {
+                return [
+                    'disk' => 'uploads',
+                    'path' => $candidate,
+                ];
+            }
+
+            if (Storage::disk('public')->exists($candidate)) {
+                return [
+                    'disk' => 'public',
+                    'path' => $candidate,
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    private static function buildDiskPathCandidates(string $file, string $legacyDirectory = ''): array
+    {
+        $candidates = [];
+        $appendCandidate = static function (?string $path) use (&$candidates): void {
+            $path = trim((string) $path, '/');
+            if ($path !== '' && !in_array($path, $candidates, true)) {
+                $candidates[] = $path;
+            }
+        };
+
+        if (str_contains($file, '/')) {
+            $appendCandidate($file);
+            $appendCandidate(self::stripUnifiedPrefix($file));
+
+            return $candidates;
+        }
+
+        if ($legacyDirectory !== '') {
+            $appendCandidate($legacyDirectory . '/' . $file);
+        }
+
+        $appendCandidate($file);
+
+        return $candidates;
     }
 }

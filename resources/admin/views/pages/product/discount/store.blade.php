@@ -239,8 +239,8 @@
                 image: ['', []],
             }),
             selected_products: [],
-            baseUrl: "{{ asset('storage/discount') }}/",
-            baseStorageUrl: "{{ asset('storage') }}/",
+            baseLegacyUrl: "{{ asset('storage/discount') }}/",
+            baseUploadUrl: "{{ asset('uploads') }}/",
             image_url: null,
             dialogData: null,
             validate: null,
@@ -319,8 +319,11 @@
                 if (!file) return null;
                 if (file instanceof File) return URL.createObjectURL(file);
                 if (file.startsWith('http') || file.startsWith('blob:')) return file;
-                if (file.includes('/')) return this.baseStorageUrl + file;
-                return this.baseUrl + file;
+                const normalized = file.replace(/^\/+/, '');
+                if (normalized.includes('/')) {
+                    return this.baseUploadUrl + normalized.replace(/^uploads\//, '');
+                }
+                return this.baseLegacyUrl + normalized;
             },
             onPreviewImage(el) {
                 const profile = URL.createObjectURL(el.files[0]);

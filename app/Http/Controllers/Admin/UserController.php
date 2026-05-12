@@ -115,7 +115,6 @@ class UserController extends Controller
                 'error' => false,
             ]);
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
             return response()->json([
                 'status' => 'error',

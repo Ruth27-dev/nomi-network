@@ -89,7 +89,6 @@ class BankAccountController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            dd($e);
             return response()->json([
                 'status' => 'error',
                 'message' => __('form.message.error'),

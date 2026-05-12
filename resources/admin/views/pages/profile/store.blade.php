@@ -90,7 +90,6 @@
                 profile: [null, []],
                 tmp_file: [null, []],
             }),
-            baseUrl: "{{ asset('storage/user') }}/",
             disabled: true,
             dialogData: null,
             validate: null,
@@ -99,12 +98,10 @@
             init() {
                 this.dialogData = this.$store.profileStoreDialog.data;
                 if (this.dialogData?.id) {
-                    console.log(this.dialogData);
                     this.form.patchValue(this.dialogData ?? {});
                     feather.replace();
-                    this.profile_url = this?.dialogData?.profile ? this.dialogData?.profile :
-                        null;
-                    this.form.tmp_file=this?.dialogData?.profile;
+                    this.profile_url = this.dialogData?.profile_url ?? null;
+                    this.form.tmp_file = this.dialogData?.profile ?? null;
                 }
             },
             onPreviewProfile(el) {
