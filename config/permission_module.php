@@ -27,8 +27,8 @@ return [
             'km' => 'បដា',
         ],
         'achievement_summary' => [
-            'en' => 'Highlight',
-            'km' => 'គន្លឹះ',
+            'en' => 'Our Impact',
+            'km' => 'ផលប៉ះពាល់របស់យើង',
         ],
         'page_management' => [
             'en' => 'Page Management',

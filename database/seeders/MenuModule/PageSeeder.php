@@ -37,8 +37,8 @@ class PageSeeder extends Seeder
         Menu::create([
             'parent_id' => $page->id,
             'name' => json_encode([
-                'en' => 'Highlight',
-                'km' => 'គន្លឹះ',
+                'en' => 'Our Impact',
+                'km' => 'ផលប៉ះពាល់របស់យើង',
             ]),
             'path' => 'admin/page/achievement-summary/list',
             'active' => 'admin/page/achievement-summary/*',
@@ -68,6 +68,7 @@ class PageSeeder extends Seeder
             'active' => 'admin/page/our-impact/*',
             'ordering' => 4,
             'permission' => array('our-impact-view'),
+            'disabled_at' => now(),
         ]);
 
         Menu::create([
