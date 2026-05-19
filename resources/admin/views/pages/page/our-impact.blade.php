@@ -3,10 +3,10 @@
     <link rel="stylesheet" href="{{ asset('plugin/css/form.css') }}">
 @endsection
 @section('layout')
-    <div class="form-admin" x-data="OurProgram">
+    <div class="form-admin" x-data="OurImpact">
         @include('admin::shared.header', [
-            'title' => __('form.name.what_we_do'),
-            'header_name' => __('form.name.what_we_do'),
+            'title' => __('form.name.our_impact'),
+            'header_name' => __('form.name.our_impact'),
         ])
         <form id="form" class="form-wrapper">
             <div class="form-header"></div>
@@ -30,16 +30,16 @@
                     </div>
                     <div class="form-row" x-show="locale == arrayLangLocale.en">
                         <label>@lang('form.body.label.description_en')<span>*</span> </label>
-                        <textarea id="op-header-en" x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                        <textarea id="oi-header-en" x-model="form.short_detail_en" rows="1" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
                         <span class="error" x-show="validate?.short_detail_en" x-text="validate?.short_detail_en"></span>
                     </div>
                     <div class="form-row" x-show="locale == arrayLangLocale.km">
                         <label>@lang('form.body.label.description_km')<span>*</span> </label>
-                        <textarea id="op-header-km" x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                        <textarea id="oi-header-km" x-model="form.short_detail_km" rows="1" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
                         <span class="error" x-show="validate?.short_detail_km" x-text="validate?.short_detail_km"></span>
                     </div>
                     <div class="form-button mt-3">
-                        @can('our-program-update')
+                        @can('our-impact-update')
                             <button type="button" @click="onSave()" :disabled="form.disabled || loading" color="primary"
                                 class="!rounded-[50px]">
                                 <span class="material-icons mr-1">save</span>
@@ -53,7 +53,7 @@
                 <fieldset class="border-[#d8dce5] border rounded p-3 mb-3">
                     <legend>@lang('table.option.detail')</legend>
                     <div class="form-button mb-3">
-                        @can('our-program-update')
+                        @can('our-impact-update')
                             <button type="button" color="primary" class="!rounded-[50px]"
                                 @click="openCreateDetailDialog()">
                                 <span class="material-icons mr-1">add</span>
@@ -136,7 +136,7 @@
                                             </template>
                                         </td>
                                         <td style="padding: 12px;">
-                                            @can('our-program-update')
+                                            @can('our-impact-update')
                                                 <div class="flex justify-center gap-2">
                                                     <button type="button"
                                                         class="h-[35px] w-[35px] rounded-md border border-gray-200 grid place-items-center"
@@ -200,13 +200,13 @@
                     </div>
                     <div class="form-row" x-show="detailLocale == arrayLangLocale.en">
                         <label>@lang('form.body.label.description_en') <span>*</span></label>
-                        <textarea id="op-detail-en" rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
+                        <textarea id="oi-detail-en" rows="3" x-model="detailForm.description_en" placeholder="@lang('form.body.placeholder.description_en')"></textarea>
                         <span class="error" x-show="detailValidate?.description_en"
                             x-text="detailValidate?.description_en"></span>
                     </div>
                     <div class="form-row" x-show="detailLocale == arrayLangLocale.km">
                         <label>@lang('form.body.label.description_km') <span>*</span></label>
-                        <textarea id="op-detail-km" rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
+                        <textarea id="oi-detail-km" rows="3" x-model="detailForm.description_km" placeholder="@lang('form.body.placeholder.description_km')"></textarea>
                         <span class="error" x-show="detailValidate?.description_km"
                             x-text="detailValidate?.description_km"></span>
                     </div>
@@ -273,7 +273,7 @@
                         </div>
                     </div>
                 </div>
-                    <div class="form-footer"
+                <div class="form-footer"
                     style="height: auto; padding: 12px 20px; border-top: 1px solid #edf0f5; background: #f9fafb;">
                     <div class="form-button" style="padding-top: 0;">
                         <button type="button" @click="closeDetailDialog()" :disabled="detailLoading">
@@ -293,11 +293,11 @@
 @section('script')
     <script src="{{ asset('plugin/tinymce/tinymce.min.js') }}" referrerpolicy="origin"></script>
     <script type="module">
-        Alpine.data('OurProgram', () => ({
+        Alpine.data('OurImpact', () => ({
             locale: @json(config('dummy.locale.en')),
             detailLocale: @json(config('dummy.locale.en')),
             form: new FormGroup({
-                page: ['our_program', ['required']],
+                page: ['our_impact', ['required']],
                 title_en: [null, ['required']],
                 title_km: [null, ['required']],
                 short_detail_en: [null, ['required']],
@@ -339,10 +339,10 @@
             async initHeaderTinymce() {
                 const contentEn = this.form.short_detail_en ?? '';
                 const contentKm = this.form.short_detail_km ?? '';
-                tinymce.remove('#op-header-en, #op-header-km');
+                tinymce.remove('#oi-header-en, #oi-header-km');
                 await tinymce.init({
                     relative_urls: false,
-                    selector: 'textarea#op-header-en,textarea#op-header-km',
+                    selector: 'textarea#oi-header-en,textarea#oi-header-km',
                     height: 300,
                     plugins: [
                         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
@@ -373,14 +373,14 @@
                         });
                     },
                 });
-                tinymce.get('op-header-en')?.setContent(contentEn);
-                tinymce.get('op-header-km')?.setContent(contentKm);
+                tinymce.get('oi-header-en')?.setContent(contentEn);
+                tinymce.get('oi-header-km')?.setContent(contentKm);
             },
             async initDetailTinymce(descEn, descKm) {
-                tinymce.remove('#op-detail-en, #op-detail-km');
+                tinymce.remove('#oi-detail-en, #oi-detail-km');
                 await tinymce.init({
                     relative_urls: false,
-                    selector: 'textarea#op-detail-en,textarea#op-detail-km',
+                    selector: 'textarea#oi-detail-en,textarea#oi-detail-km',
                     height: 300,
                     plugins: [
                         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
@@ -411,12 +411,11 @@
                         });
                     },
                 });
-                tinymce.get('op-detail-en')?.setContent(descEn ?? '');
-                tinymce.get('op-detail-km')?.setContent(descKm ?? '');
+                tinymce.get('oi-detail-en')?.setContent(descEn ?? '');
+                tinymce.get('oi-detail-km')?.setContent(descKm ?? '');
             },
             applySavedPage(data) {
                 if (!data) return;
-
                 this.id = data.id ?? this.id;
                 this.form.status = data?.status ?? this.form.status;
                 const detailList = data?.content?.dataDetail || [];
@@ -440,7 +439,6 @@
             normalizeDetail(item = {}) {
                 const image = item.image || item.tmp_image || null;
                 const icon = item.icon || item.tmp_icon || null;
-
                 return {
                     title_en: item.title_en ?? null,
                     title_km: item.title_km ?? null,
@@ -473,9 +471,7 @@
                 return this.baseLegacyUrl + normalized;
             },
             cloneDetail(item) {
-                return {
-                    ...item
-                };
+                return { ...item };
             },
             getNextOrdering() {
                 return this.dataDetail.reduce((max, item) => {
@@ -484,12 +480,8 @@
             },
             resetDetailFileInputs() {
                 this.$nextTick(() => {
-                    if (this.$refs.detailImageInput) {
-                        this.$refs.detailImageInput.value = '';
-                    }
-                    if (this.$refs.detailIconInput) {
-                        this.$refs.detailIconInput.value = '';
-                    }
+                    if (this.$refs.detailImageInput) this.$refs.detailImageInput.value = '';
+                    if (this.$refs.detailIconInput) this.$refs.detailIconInput.value = '';
                     feather.replace();
                 });
             },
@@ -497,10 +489,7 @@
                 this.detailEditIndex = null;
                 this.detailValidate = null;
                 this.detailLocale = arrayLangLocale.en;
-                this.detailForm = {
-                    ...this.emptyDetail(),
-                    ordering: this.getNextOrdering(),
-                };
+                this.detailForm = { ...this.emptyDetail(), ordering: this.getNextOrdering() };
                 this.detailDialogOpen = true;
                 this.resetDetailFileInputs();
                 this.$nextTick(async () => {
@@ -523,14 +512,13 @@
             },
             closeDetailDialog() {
                 if (this.detailLoading) return;
-                tinymce.remove('#op-detail-en, #op-detail-km');
+                tinymce.remove('#oi-detail-en, #oi-detail-km');
                 this.detailDialogOpen = false;
                 this.detailValidate = null;
             },
             validateDetailForm() {
                 const required = '{{ __('validate.attributes.required') }}';
                 const errors = {};
-
                 if (!this.detailForm.title_en) errors.title_en = required;
                 if (!this.detailForm.title_km) errors.title_km = required;
                 if (!this.detailForm.description_en) errors.description_en = required;
@@ -538,13 +526,12 @@
                 if (this.detailForm.ordering === null || this.detailForm.ordering === '') {
                     errors.ordering = required;
                 }
-
                 this.detailValidate = errors;
                 return Object.keys(errors).length === 0;
             },
             onSaveDetail() {
-                this.detailForm.description_en = tinymce.get('op-detail-en')?.getContent() ?? this.detailForm.description_en;
-                this.detailForm.description_km = tinymce.get('op-detail-km')?.getContent() ?? this.detailForm.description_km;
+                this.detailForm.description_en = tinymce.get('oi-detail-en')?.getContent() ?? this.detailForm.description_en;
+                this.detailForm.description_km = tinymce.get('oi-detail-km')?.getContent() ?? this.detailForm.description_km;
                 if (!this.validateDetailForm()) {
                     const enErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_en'));
                     const kmErrors = Object.keys(this.detailValidate || {}).filter(k => k.includes('_km'));
@@ -552,14 +539,12 @@
                     else if (kmErrors.length > 0) this.detailLocale = arrayLangLocale.km;
                     return;
                 }
-
                 const detail = this.normalizeDetail(this.detailForm);
                 if (this.detailEditIndex === null) {
                     this.dataDetail.push(detail);
                 } else {
                     this.dataDetail.splice(this.detailEditIndex, 1, detail);
                 }
-
                 this.detailDialogOpen = false;
                 this.detailValidate = null;
                 Toast({ message: "@lang('dialog.toast.save.msg.success')", status: 'success', size: 'small' });
@@ -589,9 +574,7 @@
                 this.detailForm.image = null;
                 this.detailForm.image_url = null;
                 this.detailForm.tmp_image = null;
-                if (this.$refs.detailImageInput) {
-                    this.$refs.detailImageInput.value = '';
-                }
+                if (this.$refs.detailImageInput) this.$refs.detailImageInput.value = '';
             },
             onPreviewDetailIcon(event) {
                 const file = event.target.files[0];
@@ -604,32 +587,22 @@
                 this.detailForm.icon = null;
                 this.detailForm.icon_url = null;
                 this.detailForm.tmp_icon = null;
-                if (this.$refs.detailIconInput) {
-                    this.$refs.detailIconInput.value = '';
-                }
+                if (this.$refs.detailIconInput) this.$refs.detailIconInput.value = '';
             },
             onViewImage(path) {
-                Fancybox.show([{
-                    src: path,
-                    type: "image",
-                }, ], {
+                Fancybox.show([{ src: path, type: "image" }], {
                     on: {
-                        ready: (fancybox) => {
-                            document.querySelector('.fancybox__container').style.zIndex = this
-                                .$store.libs.getLastIndex() + 1;
+                        ready: () => {
+                            document.querySelector('.fancybox__container').style.zIndex = this.$store.libs.getLastIndex() + 1;
                         },
                     }
                 });
             },
             onViewIcon(path) {
-                Fancybox.show([{
-                    src: path,
-                    type: "image",
-                }, ], {
+                Fancybox.show([{ src: path, type: "image" }], {
                     on: {
-                        ready: (fancybox) => {
-                            document.querySelector('.fancybox__container').style.zIndex = this
-                                .$store.libs.getLastIndex() + 1;
+                        ready: () => {
+                            document.querySelector('.fancybox__container').style.zIndex = this.$store.libs.getLastIndex() + 1;
                         },
                     }
                 });
@@ -637,15 +610,12 @@
             buildFormData() {
                 const formData = new FormData();
                 const formValue = this.form.value();
-
                 for (const key in formValue) {
                     formData.append(key, formValue[key]);
                 }
-
                 if (this.id !== null && this.id !== 'null') {
                     formData.append('id', this.id);
                 }
-
                 this.dataDetail.forEach((item, index) => {
                     formData.append(`dataDetail[${index}][title_en]`, item.title_en ?? '');
                     formData.append(`dataDetail[${index}][title_km]`, item.title_km ?? '');
@@ -665,52 +635,38 @@
                         formData.append(`dataDetail[${index}][tmp_icon]`, item.tmp_icon);
                     }
                 });
-
                 return formData;
             },
             getDetailServerErrors(errors, index) {
                 if (index === null || !errors) return {};
-
                 return ['title_en', 'title_km', 'description_en', 'description_km', 'ordering', 'image', 'icon']
                     .reduce((carry, field) => {
                         const key = `dataDetail.${index}.${field}`;
                         if (errors[key]) {
                             carry[field] = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
                         }
-
                         return carry;
                     }, {});
             },
-            async submitProgram(useDetailLoading = false, detailIndex = null) {
+            async submitImpact(useDetailLoading = false, detailIndex = null) {
                 if (useDetailLoading) {
                     this.detailLoading = true;
                 } else {
                     this.form.disable();
                     this.loading = true;
                 }
-
                 try {
-                    const res = await Axios.post(`{{ route('admin-page-our-program-save') }}`, this.buildFormData(), {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
+                    const res = await Axios.post(`{{ route('admin-page-our-impact-save') }}`, this.buildFormData(), {
+                        headers: { 'Content-Type': 'multipart/form-data' }
                     });
-
                     this.id = res.data.id;
                     this.validate = null;
                     this.applySavedPage(res.data.data);
-
-                    Toast({
-                        message: res.data.message,
-                        status: res.data.status,
-                        size: 'small',
-                    });
-
+                    Toast({ message: res.data.message, status: res.data.status, size: 'small' });
                     return true;
                 } catch (e) {
                     const errors = e.response?.data?.errors;
                     this.validate = errors;
-
                     if (useDetailLoading) {
                         const detailErrors = this.getDetailServerErrors(errors, detailIndex);
                         if (Object.keys(detailErrors).length > 0) {
@@ -726,7 +682,6 @@
                         if (enErrors.length > 0) this.locale = arrayLangLocale.en;
                         else if (kmErrors.length > 0) this.locale = arrayLangLocale.km;
                     }
-
                     return false;
                 } finally {
                     if (useDetailLoading) {
@@ -747,9 +702,9 @@
                     },
                     afterClosed: async (result) => {
                         if (!result) return;
-                        this.form.short_detail_en = tinymce.get('op-header-en')?.getContent() ?? this.form.short_detail_en;
-                        this.form.short_detail_km = tinymce.get('op-header-km')?.getContent() ?? this.form.short_detail_km;
-                        await this.submitProgram();
+                        this.form.short_detail_en = tinymce.get('oi-header-en')?.getContent() ?? this.form.short_detail_en;
+                        this.form.short_detail_km = tinymce.get('oi-header-km')?.getContent() ?? this.form.short_detail_km;
+                        await this.submitImpact();
                     }
                 });
             }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\Pages\MissionVisionController;
 use App\Http\Controllers\Admin\Pages\OurCoreValueController;
 use App\Http\Controllers\Admin\Pages\ReportDocumentCategoryController;
 use App\Http\Controllers\Admin\Pages\ReportDocumentController;
+use App\Http\Controllers\Admin\Pages\OurImpactController;
 use App\Http\Controllers\Admin\Pages\OurProgramController;
 use App\Http\Controllers\Admin\Pages\OurStoryController;
 use App\Http\Controllers\Admin\Pages\PrivacyPolicyController;
@@ -312,6 +313,12 @@ Route::middleware(['locale'])->group(function () {
 
             // our program
             Route::controller(OurProgramController::class)->prefix('our-program')->name('our-program-')->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::post('save', 'save')->name('save');
+            });
+
+            // our impact
+            Route::controller(OurImpactController::class)->prefix('our-impact')->name('our-impact-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::post('save', 'save')->name('save');
             });

@@ -12,6 +12,7 @@ use App\Http\Resources\Web\ListOfValue\CompanyResource;
 use App\Http\Resources\Web\ListOfValue\ContactUsResource;
 use App\Http\Resources\Web\ListOfValue\MissionVisionCollection;
 use App\Http\Resources\Web\ListOfValue\OurCoreValueResource;
+use App\Http\Resources\Web\ListOfValue\OurImpactResource;
 use App\Http\Resources\Web\ListOfValue\OurProgramResource;
 use App\Http\Resources\Web\ListOfValue\OurStoryResource;
 use App\Http\Resources\Web\ListOfValue\PrivacyPolicyResource;
@@ -100,6 +101,24 @@ class ListOfValueController extends Controller
             }
 
             return $this->responseSuccess(new OurProgramResource($data));
+        } catch (Exception $e) {
+            return $this->responseError();
+        }
+    }
+
+    public function ourImpact()
+    {
+        try {
+            $data = Page::query()
+                ->where('page', 'our_impact')
+                ->where('status', $this->active)
+                ->first();
+
+            if (!$data) {
+                return response()->json(['message' => 'Data not found'], 200);
+            }
+
+            return $this->responseSuccess(new OurImpactResource($data));
         } catch (Exception $e) {
             return $this->responseError();
         }

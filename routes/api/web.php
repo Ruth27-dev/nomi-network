@@ -39,6 +39,7 @@ Route::prefix('web')->group(function () {
         Route::post('/banner', [Web\ListOfValueController::class, 'banner']);
         Route::post('/achievement-summary', [Web\ListOfValueController::class, 'achievementSummary']);
         Route::post('/our-program', [Web\ListOfValueController::class, 'ourProgram']);
+        Route::post('/our-impact', [Web\ListOfValueController::class, 'ourImpact']);
         Route::post('/upcoming-event', [Web\ListOfValueController::class, 'upcomingEvent']);
         Route::post('/privacy-policy', [Web\ListOfValueController::class, 'privacyPolicy']);
         Route::post('/contact-us', [Web\ListOfValueController::class, 'contactUs']);

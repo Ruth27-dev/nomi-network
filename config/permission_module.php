@@ -27,8 +27,8 @@ return [
             'km' => 'បដា',
         ],
         'achievement_summary' => [
-            'en' => 'Achievement Summary',
-            'km' => 'សេចក្តីសង្ខេបសមិទ្ធផល',
+            'en' => 'Highlight',
+            'km' => 'គន្លឹះ',
         ],
         'page_management' => [
             'en' => 'Page Management',
@@ -47,16 +47,20 @@ return [
             'km' => 'អំពីពួកយើង',
         ],
         'our_program' => [
-            'en' => 'Our Programs',
-            'km' => 'កម្មវិធីរបស់យើង',
+            'en' => 'What We Do',
+            'km' => 'What We Do',
+        ],
+        'our_impact' => [
+            'en' => 'Our Impact',
+            'km' => 'Our Impact',
         ],
         'production' => [
             'en' => 'Production',
             'km' => 'ផលិតកម្ម',
         ],
         'upcoming_event' => [
-            'en' => 'Upcoming Events',
-            'km' => 'ព្រឹត្តិការណ៍ខាងមុខ',
+            'en' => 'Events',
+            'km' => 'ព្រឹត្តិការណ៍',
         ],
         'our_core_value' => [
             'en' => 'Our Core Values',

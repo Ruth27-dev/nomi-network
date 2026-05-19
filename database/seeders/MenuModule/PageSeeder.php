@@ -19,7 +19,7 @@ class PageSeeder extends Seeder
             'icon'  => 'folder',
             'active' => 'admin/page/*',
             'ordering' => 10,
-            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'production-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'about-us-view', 'our-story-view'),
+            'permission' => array('banner-view', 'achievement-summary-view', 'our-program-view', 'our-impact-view', 'production-view', 'upcoming-event-view', 'mission-vision-view', 'our-core-value-view', 'career-view', 'report-document-category-view', 'report-document-view', 'social-media-view', 'privacy-policy-view', 'contact-us-view', 'about-us-view', 'our-story-view'),
         ]);
 
         Menu::create([
@@ -37,8 +37,8 @@ class PageSeeder extends Seeder
         Menu::create([
             'parent_id' => $page->id,
             'name' => json_encode([
-                'en' => 'Achievement Summary',
-                'km' => 'សេចក្តីសង្ខេបសមិទ្ធផល',
+                'en' => 'Highlight',
+                'km' => 'គន្លឹះ',
             ]),
             'path' => 'admin/page/achievement-summary/list',
             'active' => 'admin/page/achievement-summary/*',
@@ -49,8 +49,8 @@ class PageSeeder extends Seeder
         Menu::create([
             'parent_id' => $page->id,
             'name' => json_encode([
-                'en' => 'Our Programs',
-                'km' => 'កម្មវិធីរបស់យើង',
+                'en' => 'What We Do',
+                'km' => 'What We Do',
             ]),
             'path' => 'admin/page/our-program/list',
             'active' => 'admin/page/our-program/*',
@@ -61,12 +61,24 @@ class PageSeeder extends Seeder
         Menu::create([
             'parent_id' => $page->id,
             'name' => json_encode([
-                'en' => 'Upcoming Events',
-                'km' => 'ព្រឹត្តិការណ៍ខាងមុខ',
+                'en' => 'Our Impact',
+                'km' => 'Our Impact',
+            ]),
+            'path' => 'admin/page/our-impact/list',
+            'active' => 'admin/page/our-impact/*',
+            'ordering' => 4,
+            'permission' => array('our-impact-view'),
+        ]);
+
+        Menu::create([
+            'parent_id' => $page->id,
+            'name' => json_encode([
+                'en' => 'Events',
+                'km' => 'ព្រឹត្តិការណ៍',
             ]),
             'path' => 'admin/page/upcoming-event/list',
             'active' => 'admin/page/upcoming-event/*',
-            'ordering' => 4,
+            'ordering' => 5,
             'permission' => array('upcoming-event-view'),
         ]);
 

@@ -119,6 +119,27 @@ class PageSeeder extends Seeder
             ],
         ]);
 
+        $ourImpact = ModulePermission::create([
+            'parent_id'     =>   $page->id,
+            'display_name'  => json_encode(config('permission_module.menu.our_impact')),
+            'sort_no'       => $this->increaseIndex(),
+        ]);
+
+        Permission::insert([
+            [
+                'display_name'  => json_encode(config('permission_module.action.view')),
+                'name'          => 'our-impact-view',
+                'guard_name'    => 'admin',
+                'module_id'     => $ourImpact->id,
+            ],
+            [
+                'display_name'  => json_encode(config('permission_module.action.update')),
+                'name'          => 'our-impact-update',
+                'guard_name'    => 'admin',
+                'module_id'     => $ourImpact->id,
+            ],
+        ]);
+
         $production = ModulePermission::create([
             'parent_id'     =>   $page->id,
             'display_name'  => json_encode(config('permission_module.menu.production')),

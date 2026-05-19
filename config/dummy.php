@@ -118,6 +118,9 @@ return [
         'our_program' => [
             'key'   => 'our_program',
         ],
+        'our_impact' => [
+            'key'   => 'our_impact',
+        ],
         'production' => [
             'key'   => 'production',
         ],

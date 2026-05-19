@@ -343,6 +343,7 @@
     <script type="module">
         Alpine.data('ProductionPage', () => ({
             locale: @json(config('dummy.locale.en')),
+            detailLocale: @json(config('dummy.locale.en')),
             form: new FormGroup({
                 page: ['production', ['required']],
                 status: ['ACTIVE', ['required']],

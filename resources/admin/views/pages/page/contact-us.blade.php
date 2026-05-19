@@ -347,6 +347,8 @@
                 await this.initHeaderTinymce();
             },
             async initHeaderTinymce() {
+                const contentEn = this.form.short_detail_en ?? '';
+                const contentKm = this.form.short_detail_km ?? '';
                 tinymce.remove('#cu-header-en, #cu-header-km');
                 await tinymce.init({
                     relative_urls: false,
@@ -381,6 +383,8 @@
                         });
                     },
                 });
+                tinymce.get('cu-header-en')?.setContent(contentEn);
+                tinymce.get('cu-header-km')?.setContent(contentKm);
             },
             async initDetailTinymce(descEn, descKm) {
                 tinymce.remove('#cu-detail-en, #cu-detail-km');
