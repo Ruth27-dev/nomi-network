@@ -46,7 +46,8 @@ class ProductCatalogController extends Controller
                 ])
                 ->where('is_active', true)
                 ->when(request('category_id'), function ($q) {
-                    $q->where('category_id', request('category_id'));
+                    $ids = Category::descendantIds((int) request('category_id'));
+                    $q->whereIn('category_id', $ids);
                 })
                 ->when(request()->has('is_feature') || request()->has('is_fature'), function ($q) {
                     $isFeature = request()->has('is_feature') ? request('is_feature') : request('is_fature');

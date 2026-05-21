@@ -47,7 +47,8 @@ class ProductController extends Controller
                 })
                 ->when(request('trash'), fn($q) => $q->onlyTrashed())
                 ->when(request('category_id'), function ($q) {
-                    $q->where('category_id', request('category_id'));
+                    $ids = Category::descendantIds((int) request('category_id'));
+                    $q->whereIn('category_id', $ids);
                 })
                 ->when(request('search'), function ($q) {
                     $q->where(function ($q) {

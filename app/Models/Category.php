@@ -48,4 +48,23 @@ class Category extends Model
     {
         return $this->hasMany(self::class, 'parent_id');
     }
+
+    /**
+     * Returns the given category ID plus all descendant IDs (recursive).
+     */
+    public static function descendantIds(int $parentId): array
+    {
+        $all = static::query()->select('id', 'parent_id')->get();
+        $byParent = $all->groupBy('parent_id');
+
+        $collect = function (int $id) use (&$collect, $byParent): array {
+            $ids = [$id];
+            foreach ($byParent->get($id) ?? [] as $child) {
+                $ids = array_merge($ids, $collect($child->id));
+            }
+            return $ids;
+        };
+
+        return $collect($parentId);
+    }
 }
