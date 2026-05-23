@@ -88,6 +88,14 @@ class OrderController extends Controller
             'shipping_fee' => 'nullable|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
             'user_address_id' => 'nullable|exists:user_addresses,id',
+            // manual one-time address fields
+            'recipient_name' => 'nullable|string|max:255',
+            'recipient_phone' => 'nullable|string|max:50',
+            'address_line' => 'nullable|string',
+            'province' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -96,11 +104,30 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            // 1. Use saved address by ID
+            // 2. Else fall back to user's default saved address
+            // 3. Else use one-time manual address fields from request
             $address = null;
+            $manualAddress = null;
+
             if ($request->user_address_id) {
                 $address = UserAddress::where('user_id', $user->id)->findOrFail($request->user_address_id);
             } else {
                 $address = UserAddress::where('user_id', $user->id)->where('is_default', true)->first();
+            }
+
+            if (!$address && $request->filled('recipient_name') && $request->filled('recipient_phone') && $request->filled('address_line')) {
+                $manualAddress = [
+                    'recipient_name' => $request->recipient_name,
+                    'recipient_phone' => $request->recipient_phone,
+                    'shipping_address' => trim(implode(', ', array_filter([
+                        $request->address_line,
+                        $request->district,
+                        $request->city,
+                        $request->province,
+                        $request->postal_code,
+                    ]))),
+                ];
             }
 
             $order = Order::create([
@@ -109,15 +136,15 @@ class OrderController extends Controller
                 'user_address_id' => $address?->id,
                 'shipping_method_id' => $request->shipping_method_id,
                 'shipping_method_title' => $request->shipping_method_title,
-                'recipient_name' => $address?->recipient_name,
-                'recipient_phone' => $address?->recipient_phone,
+                'recipient_name' => $address ? $address->recipient_name : ($manualAddress['recipient_name'] ?? null),
+                'recipient_phone' => $address ? $address->recipient_phone : ($manualAddress['recipient_phone'] ?? null),
                 'shipping_address' => $address ? trim(implode(', ', array_filter([
                     $address->address_line,
                     $address->district,
                     $address->city,
                     $address->province,
                     $address->postal_code,
-                ]))) : null,
+                ]))) : ($manualAddress['shipping_address'] ?? null),
                 'note' => $request->note,
                 'payment_method' => $request->payment_method ?? 'cod',
                 'payment_status' => 'unpaid',

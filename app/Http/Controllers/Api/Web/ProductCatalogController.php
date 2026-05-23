@@ -40,14 +40,14 @@ class ProductCatalogController extends Controller
         try {
             $query = Product::query()
                 ->with([
-                    'category:id,parent_id,title,slug,status',
+                    'categories:id,parent_id,title,slug,status',
                     'images:id,foreign_id,foreign_model,image',
                     'productVariations:id,product_id,sku,name,price,stock,is_active',
                 ])
                 ->where('is_active', true)
                 ->when(request('category_id'), function ($q) {
                     $ids = Category::descendantIds((int) request('category_id'));
-                    $q->whereIn('category_id', $ids);
+                    $q->whereHas('categories', fn($q) => $q->whereIn('categories.id', $ids));
                 })
                 ->when(request()->has('is_feature') || request()->has('is_fature'), function ($q) {
                     $isFeature = request()->has('is_feature') ? request('is_feature') : request('is_fature');

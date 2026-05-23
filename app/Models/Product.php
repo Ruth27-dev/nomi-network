@@ -42,11 +42,13 @@ class Product extends Model
 
     protected $appends = ['title', 'description', 'status', 'code'];
 
+    // Many-to-many: one product can belong to many categories
     public function categories()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsToMany(Category::class, 'product_categories', 'product_id', 'category_id');
     }
 
+    // Single primary category (kept for backward compatibility)
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');

@@ -48,7 +48,7 @@ class ProductController extends Controller
                 ->when(request('trash'), fn($q) => $q->onlyTrashed())
                 ->when(request('category_id'), function ($q) {
                     $ids = Category::descendantIds((int) request('category_id'));
-                    $q->whereIn('category_id', $ids);
+                    $q->whereHas('categories', fn($q) => $q->whereIn('categories.id', $ids));
                 })
                 ->when(request('search'), function ($q) {
                     $q->where(function ($q) {
@@ -75,9 +75,16 @@ class ProductController extends Controller
 
             /* ================= PRODUCT ================= */
 
-            $categoryId = is_array($request->category_ids)
-                ? ($request->category_ids[0] ?? null)
-                : $request->category_id;
+            // Collect all category IDs (support both category_ids[] array and single category_id)
+            $categoryIds = collect(is_array($request->category_ids) ? $request->category_ids : [$request->category_id])
+                ->filter()
+                ->map(fn($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+
+            // Keep category_id (first one) for backward compatibility
+            $primaryCategoryId = $categoryIds[0] ?? null;
 
             if (!$request->id) {
 
@@ -95,12 +102,15 @@ class ProductController extends Controller
                     'is_feature' => (bool) $request->is_feature,
                     'is_active' => $request->status === $this->active,
                     'has_variation' => is_array($request->product_variations) && count($request->product_variations) > 0,
-                    'category_id' => $categoryId,
+                    'category_id' => $primaryCategoryId,
                     'product_source_id' => $request->product_source_id ?: null,
                     'product_location_id' => $request->product_location_id ?: null,
                     'source_en' => $request->source_en ?: null,
                     'source_kh' => $request->source_kh ?: null,
                 ]);
+
+                // Sync all categories to the pivot table
+                $product->categories()->sync($categoryIds);
 
                 $this->createVariations($product, $request);
                 $this->syncImages($product, $request);
@@ -123,12 +133,15 @@ class ProductController extends Controller
                     'is_feature' => (bool) $request->is_feature,
                     'is_active' => $request->status === $this->active,
                     'has_variation' => is_array($request->product_variations) && count($request->product_variations) > 0,
-                    'category_id' => $categoryId,
+                    'category_id' => $primaryCategoryId,
                     'product_source_id' => $request->product_source_id ?: null,
                     'product_location_id' => $request->product_location_id ?: null,
                     'source_en' => $request->source_en ?: null,
                     'source_kh' => $request->source_kh ?: null,
                 ]);
+
+                // Sync all categories to the pivot table (removes old, adds new)
+                $product->categories()->sync($categoryIds);
 
                 /* ===== DELETE OLD VARIATIONS ===== */
 
