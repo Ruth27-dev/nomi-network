@@ -12,6 +12,9 @@ Route::prefix('web')->group(function () {
     Route::post('/reset-password', [Web\AuthController::class, 'resetPassword']);
     Route::post('/unique-phone', [Web\AuthController::class, 'checkUniquePhone']);
 
+    // PayWay callback — no auth, called directly by PayWay server
+    Route::post('/payment/payway-callback', [Web\PaymentController::class, 'callback']);
+
     Route::middleware('auth:api_web')->group(function () {
         Route::post('/logout', [Web\AuthController::class, 'logout']);
         Route::post('/profile', [Web\AuthController::class, 'profile']);
@@ -32,6 +35,11 @@ Route::prefix('web')->group(function () {
             Route::post('/list', [Web\OrderController::class, 'orders']);
             Route::post('/detail', [Web\OrderController::class, 'detail']);
             Route::post('/cancel', [Web\OrderController::class, 'cancel']);
+        });
+
+        Route::prefix('payment')->group(function () {
+            Route::post('/payway-checkout', [Web\PaymentController::class, 'checkout']);
+            Route::post('/donate', [Web\PaymentController::class, 'donate']);
         });
     });
 
