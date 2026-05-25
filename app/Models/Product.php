@@ -72,7 +72,7 @@ class Product extends Model
 
     public function scopeWithRelation($query)
     {
-        return $query->with(['category', 'images', 'productVariations.images', 'productAttributes.values']);
+        return $query->with(['category', 'categories', 'images', 'productVariations.images', 'productAttributes.values']);
     }
 
     public function productAttributes()

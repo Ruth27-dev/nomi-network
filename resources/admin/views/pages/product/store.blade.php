@@ -403,7 +403,15 @@
                     this.form.location_title = data.location?.name_en ?? '';
                 }
 
-                if (data?.category) {
+                if (data?.categories?.length) {
+                    this.selected_categories = data.categories.map(item => ({
+                        _id: item?.id,
+                        _title: item?.title?.en,
+                        _description: item?.description?.en ?? '',
+                    }));
+                    this.form.category_ids = this.selected_categories.map(item => item._id);
+                    this.form.category_title = this.selected_categories.map(item => item._title).join(', ');
+                } else if (data?.category) {
                     this.selected_categories = [{
                         _id: data.category?.id,
                         _title: data.category?.title?.en,
