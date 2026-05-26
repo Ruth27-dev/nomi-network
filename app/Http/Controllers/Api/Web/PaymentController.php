@@ -93,7 +93,8 @@ class PaymentController extends Controller
             $email     = $request->email     ?? $user->email ?? '';
             $phone     = $request->phone     ?? $user->phone ?? '';
 
-            $payload = $this->payWay->buildCheckoutPayload(
+            // Call ABA PayWay API directly from server
+            $result = $this->payWay->purchase(
                 $tranId,
                 $amount,
                 $firstName,
@@ -108,7 +109,7 @@ class PaymentController extends Controller
                 $order->update(['payment_method' => $request->payment_option]);
             }
 
-            return $this->responseSuccess($payload, 'Checkout params generated successfully.');
+            return $this->responseSuccess($result, 'Checkout initiated successfully.');
         } catch (Exception $e) {
             return $this->responseError($e->getMessage());
         }
@@ -174,8 +175,8 @@ class PaymentController extends Controller
                 'note'           => $request->note,
             ]);
 
-            // Build PayWay checkout params (phone not required for donation — pass empty string)
-            $payload = $this->payWay->buildCheckoutPayload(
+            // Call ABA PayWay API directly from server (phone not required for donation)
+            $result = $this->payWay->purchase(
                 $tranId,
                 $amount,
                 $firstName,
@@ -188,8 +189,8 @@ class PaymentController extends Controller
             DB::commit();
 
             return $this->responseSuccess(
-                array_merge($payload, ['donation_id' => $donation->id]),
-                'Donation checkout params generated successfully.'
+                array_merge($result, ['donation_id' => $donation->id]),
+                'Donation initiated successfully.'
             );
         } catch (Exception $e) {
             DB::rollBack();

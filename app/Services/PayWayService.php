@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Http;
+use Exception;
+
 class PayWayService
 {
     private string $merchantId;
@@ -53,9 +56,12 @@ class PayWayService
     }
 
     /**
-     * Build the full payload to return to mobile for checkout.
+     * Call ABA PayWay API directly from the server and return the response.
+     * Mobile receives the PayWay response (QR, deep-link, etc.) directly.
+     *
+     * @throws Exception
      */
-    public function buildCheckoutPayload(
+    public function purchase(
         string $tranId,
         string $amount,
         string $firstName,
@@ -77,18 +83,31 @@ class PayWayService
             $paymentOption
         );
 
-        return [
-            'api_url'        => $this->apiUrl,
-            'merchant_id'    => $this->merchantId,
-            'tran_id'        => $tranId,
-            'req_time'       => $reqTime,
+        $params = [
             'hash'           => $hash,
+            'tran_id'        => $tranId,
             'amount'         => $amount,
             'firstname'      => $firstName,
             'lastname'       => $lastName,
             'email'          => $email,
             'phone'          => $phone,
+            'req_time'       => $reqTime,
+            'merchant_id'    => $this->merchantId,
             'payment_option' => $paymentOption,
+        ];
+
+        $response = Http::timeout(30)
+            ->asForm()
+            ->post($this->apiUrl, $params);
+
+        if ($response->failed()) {
+            throw new Exception('PayWay API error: ' . $response->status() . ' — ' . $response->body());
+        }
+
+        return [
+            'status'   => $response->status(),
+            'response' => $response->json() ?? $response->body(),
+            'params'   => $params, // also return the params sent (useful for debugging)
         ];
     }
 }
