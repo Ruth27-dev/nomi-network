@@ -157,7 +157,12 @@ class PaymentController extends Controller
             'firstname'      => 'nullable|string|max:255',
             'lastname'       => 'nullable|string|max:255',
             'email'          => 'nullable|email|max:255',
+            'phone'          => 'nullable|string|max:50',
             'note'           => 'nullable|string|max:500',
+            'return_url'     => 'nullable|url|max:500',
+            'cancel_url'     => 'nullable|url|max:500',
+            'continue_success_url' => 'nullable|url|max:500',
+            'return_params'  => 'nullable|in:json',
         ]);
 
         if ($validator->fails()) {
@@ -169,6 +174,7 @@ class PaymentController extends Controller
             $firstName     = $request->firstname     ?? $user->name  ?? '';
             $lastName      = $request->lastname      ?? '';
             $email         = $request->email         ?? $user->email ?? '';
+            $phone         = $request->phone         ?? $user->phone ?? '';
             $donationType  = $request->donation_type ?? 'one_time';
             $amount        = number_format((float) $request->amount, 2, '.', '');
 
@@ -178,7 +184,7 @@ class PaymentController extends Controller
             // Save donation record
             $donation = Donation::create([
                 'tran_id'        => $tranId,
-                'user_id'        => $user->id,
+                'user_id'        => $user?->id,
                 'donation_type'  => $donationType,
                 'amount'         => $amount,
                 'firstname'      => $firstName,
@@ -189,16 +195,25 @@ class PaymentController extends Controller
                 'note'           => $request->note,
             ]);
 
-            // Generate PayWay params — mobile posts these directly to PayWay (WebView / SDK)
-            $result = $this->payWay->buildCheckoutPayload(
+            $params = $this->payWay->buildHostedPurchaseParams(
                 $tranId,
                 $amount,
                 $firstName,
                 $lastName,
                 $email,
-                '',
-                $request->payment_option,
+                $phone,
+                (string) $request->payment_option,
+                (string) $request->input('return_url', 'https://nomihandicraftandservice.org/api/web/payway-submit'),
+                (string) $request->input('cancel_url', 'https://nomihandicraftandservice.org/'),
+                (string) $request->input('continue_success_url', 'https://nomihandicraftandservice.org/'),
+                (string) $request->input('return_params', 'json'),
+                'legacy_purchase'
             );
+            $paywayResult = $this->payWay->purchase($params);
+            $result = [
+                'tran_id' => $tranId,
+                'payway' => $paywayResult,
+            ];
 
             PaywayTransaction::updateOrCreate(
                 ['tran_id' => $tranId],

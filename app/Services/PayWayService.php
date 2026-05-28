@@ -84,25 +84,43 @@ class PayWayService
         string $returnUrl,
         string $cancelUrl,
         string $continueSuccessUrl,
-        string $returnParams = 'json'
+        string $returnParams = 'json',
+        string $hashMode = 'default'
     ): array {
         $reqTime = $this->getReqTime();
         $encodedReturnUrl = base64_encode($returnUrl);
         $amount = number_format((float) $amount, 2, '.', '');
 
-        $concatParams = $reqTime
-            . $this->merchantId
-            . $tranId
-            . $amount
-            . $firstName
-            . $lastName
-            . $email
-            . $phone
-            . $paymentOption
-            . $encodedReturnUrl
-            . $cancelUrl
-            . $continueSuccessUrl
-            . $returnParams;
+        if ($hashMode === 'legacy_purchase') {
+            // DreamZone-compatible format:
+            // req_time + merchant_id + tran_id + amount + firstname + lastname + email + phone + 'purchase' + payment_option + return_url + continue_success_url
+            $concatParams = $reqTime
+                . $this->merchantId
+                . $tranId
+                . $amount
+                . $firstName
+                . $lastName
+                . $email
+                . $phone
+                . 'purchase'
+                . $paymentOption
+                . $encodedReturnUrl
+                . $continueSuccessUrl;
+        } else {
+            $concatParams = $reqTime
+                . $this->merchantId
+                . $tranId
+                . $amount
+                . $firstName
+                . $lastName
+                . $email
+                . $phone
+                . $paymentOption
+                . $encodedReturnUrl
+                . $cancelUrl
+                . $continueSuccessUrl
+                . $returnParams;
+        }
 
         $hash = base64_encode(hash_hmac('sha512', $concatParams, $this->apiKey, true));
 

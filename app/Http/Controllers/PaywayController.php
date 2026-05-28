@@ -39,6 +39,7 @@ class PaywayController extends Controller
             'cancel_url' => 'nullable|url|max:500',
             'continue_success_url' => 'nullable|url|max:500',
             'return_params' => 'nullable|in:json',
+            'hash_mode' => 'nullable|in:default,legacy_purchase',
             'order_id' => 'nullable|integer',
             'donation_id' => 'nullable|integer',
             'order_type' => 'nullable|string|max:30',
@@ -55,10 +56,11 @@ class PaywayController extends Controller
         $phone = (string) $request->input('phone');
         $email = (string) $request->input('email', '');
         $paymentOption = (string) $request->input('payment_option', 'abapay_khqr_deeplink');
-        $returnUrl = (string) $request->input('return_url', route('api-web-payway-submit'));
-        $cancelUrl = (string) $request->input('cancel_url', config('app.url'));
-        $continueSuccessUrl = (string) $request->input('continue_success_url', config('app.url'));
+        $returnUrl = (string) $request->input('return_url', 'https://nomihandicraftandservice.org/api/web/payway-submit');
+        $cancelUrl = (string) $request->input('cancel_url', 'https://nomihandicraftandservice.org/');
+        $continueSuccessUrl = (string) $request->input('continue_success_url', 'https://nomihandicraftandservice.org/');
         $returnParams = (string) $request->input('return_params', 'json');
+        $hashMode = (string) $request->input('hash_mode', 'default');
 
         $params = $this->payWay->buildHostedPurchaseParams(
             $tranId,
@@ -71,7 +73,8 @@ class PaywayController extends Controller
             $returnUrl,
             $cancelUrl,
             $continueSuccessUrl,
-            $returnParams
+            $returnParams,
+            $hashMode
         );
 
         PaywayTransaction::updateOrCreate(
