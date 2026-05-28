@@ -145,7 +145,26 @@ class PayWayService
 
     public function purchase(array $params): array
     {
-        return Http::post($this->apiUrl, $params)->json() ?? [];
+        try {
+            $response = Http::timeout(30)->post($this->apiUrl, $params);
+
+            return [
+                'ok' => $response->successful(),
+                'http_status' => $response->status(),
+                'json' => $response->json(),
+                'raw_body' => $response->body(),
+                'request_api_url' => $this->apiUrl,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'ok' => false,
+                'http_status' => null,
+                'json' => null,
+                'raw_body' => null,
+                'request_api_url' => $this->apiUrl,
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
