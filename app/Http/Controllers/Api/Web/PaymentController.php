@@ -50,7 +50,7 @@ class PaymentController extends Controller
             'order_id'       => 'nullable|integer|exists:orders,id',
             // Mode B — required only when no order_id
             'amount'         => 'nullable|numeric|min:0.01',
-            'tran_id'        => 'nullable|string|max:255',
+            'tran_id'        => 'nullable|string|max:20',
             // Customer info (optional in both modes — falls back to user profile)
             'firstname'      => 'nullable|string|max:255',
             'lastname'       => 'nullable|string|max:255',
@@ -73,7 +73,10 @@ class PaymentController extends Controller
                     return $this->responseError('This order is already paid.');
                 }
 
-                $tranId = $order->order_no;
+                $existingTran = PaywayTransaction::where('order_id', $order->id)
+                    ->where('order_type', 'order')
+                    ->value('tran_id');
+                $tranId = $existingTran ?: $this->generateShortTranId('ORD');
                 $amount = number_format((float) $order->grand_total, 2, '.', '');
             } else {
                 /* ── Mode B: raw params ── */
@@ -84,7 +87,7 @@ class PaymentController extends Controller
                     ], 422);
                 }
 
-                $tranId = $request->tran_id ?? ('TXN-' . now()->format('YmdHis') . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6)));
+                $tranId = $request->tran_id ?? $this->generateShortTranId('TXN');
                 $amount = number_format((float) $request->amount, 2, '.', '');
             }
 
@@ -179,7 +182,7 @@ class PaymentController extends Controller
             $amount        = number_format((float) $request->amount, 2, '.', '');
 
             // Unique transaction ID prefixed with DON- so callback can distinguish from orders
-            $tranId = 'DON-' . now()->format('YmdHis') . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6));
+            $tranId = $this->generateShortTranId('DON');
 
             // Save donation record
             $donation = Donation::create([
@@ -305,6 +308,14 @@ class PaymentController extends Controller
     private function handleOrderCallback(string $tranId, string $statusCode): void
     {
         $order = Order::where('order_no', $tranId)->first();
+        if (!$order) {
+            $paywayTxn = PaywayTransaction::where('tran_id', $tranId)
+                ->where('order_type', 'order')
+                ->first();
+            if ($paywayTxn?->order_id) {
+                $order = Order::find($paywayTxn->order_id);
+            }
+        }
 
         if (!$order) {
             Log::warning('PayWay callback: order not found', ['tran_id' => $tranId]);
@@ -352,5 +363,13 @@ class PaymentController extends Controller
                 }
                 break;
         }
+    }
+
+    private function generateShortTranId(string $prefix): string
+    {
+        // PayWay requires tran_id <= 20 chars.
+        // Format: PREFIX(3) + ymdHis(12) + rand(5) = 20 chars.
+        $p = strtoupper(substr($prefix, 0, 3));
+        return $p . now()->format('ymdHis') . strtoupper(substr(md5(uniqid('', true)), 0, 5));
     }
 }
