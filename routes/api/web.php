@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Web as Web;
+use App\Http\Controllers\PaywayController;
 
 Route::prefix('web')->group(function () {
 
@@ -14,6 +15,7 @@ Route::prefix('web')->group(function () {
 
     // PayWay callback — no auth, called directly by PayWay server
     Route::post('/payment/payway-callback', [Web\PaymentController::class, 'callback']);
+    Route::match(['get', 'post'], '/payway-submit', [PaywayController::class, 'paymentSubmit'])->name('api-web-payway-submit');
 
     Route::middleware('auth:api_web')->group(function () {
         Route::post('/logout', [Web\AuthController::class, 'logout']);
@@ -41,6 +43,9 @@ Route::prefix('web')->group(function () {
             Route::post('/payway-checkout', [Web\PaymentController::class, 'checkout']);
             Route::post('/donate', [Web\PaymentController::class, 'donate']);
         });
+
+        // Legacy-compatible PayWay endpoint from dreamzone-kh-v2
+        Route::match(['get', 'post'], '/payway-form', [PaywayController::class, 'payway_form']);
     });
 
     Route::prefix('list-of-value')->name('list-of-value-')->group(function () {

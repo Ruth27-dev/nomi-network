@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Exception;
 
 class PayWayService
 {
@@ -13,9 +13,24 @@ class PayWayService
 
     public function __construct()
     {
-        $this->merchantId = env('PAYWAY_MERCHANT_ID', '');
-        $this->apiKey     = env('PAYWAY_API_KEY', '');
-        $this->apiUrl     = env('PAYWAY_API_URL', '');
+        $this->merchantId = (string) config('payway.merchant_id', '');
+        $this->apiKey = (string) config('payway.api_key', '');
+        $this->apiUrl = (string) config('payway.api_url', '');
+    }
+
+    public function getMerchantId(): string
+    {
+        return $this->merchantId;
+    }
+
+    public function getApiUrl(): string
+    {
+        return $this->apiUrl;
+    }
+
+    public function getReqTime(): string
+    {
+        return (string) time();
     }
 
     /**
@@ -56,12 +71,70 @@ class PayWayService
     }
 
     /**
-     * Call ABA PayWay API directly from the server and return the response.
-     * Mobile receives the PayWay response (QR, deep-link, etc.) directly.
-     *
-     * @throws Exception
+     * Build PayWay hosted-view params compatible with legacy and current flows.
      */
-    public function purchase(
+    public function buildHostedPurchaseParams(
+        string $tranId,
+        string $amount,
+        string $firstName,
+        string $lastName,
+        string $email,
+        string $phone,
+        string $paymentOption,
+        string $returnUrl,
+        string $cancelUrl,
+        string $continueSuccessUrl,
+        string $returnParams = 'json'
+    ): array {
+        $reqTime = $this->getReqTime();
+        $encodedReturnUrl = base64_encode($returnUrl);
+        $amount = number_format((float) $amount, 2, '.', '');
+
+        $concatParams = $reqTime
+            . $this->merchantId
+            . $tranId
+            . $amount
+            . $firstName
+            . $lastName
+            . $email
+            . $phone
+            . $paymentOption
+            . $encodedReturnUrl
+            . $cancelUrl
+            . $continueSuccessUrl
+            . $returnParams;
+
+        $hash = base64_encode(hash_hmac('sha512', $concatParams, $this->apiKey, true));
+
+        return [
+            'hash' => $hash,
+            'req_time' => $reqTime,
+            'merchant_id' => $this->merchantId,
+            'tran_id' => $tranId,
+            'amount' => $amount,
+            'firstname' => $firstName,
+            'lastname' => $lastName,
+            'email' => $email,
+            'phone' => $phone,
+            'payment_option' => $paymentOption,
+            'view_type' => 'hosted_view',
+            'return_url' => $encodedReturnUrl,
+            'continue_success_url' => $continueSuccessUrl,
+            'cancel_url' => $cancelUrl,
+            'return_params' => $returnParams,
+        ];
+    }
+
+    public function purchase(array $params): array
+    {
+        return Http::post($this->apiUrl, $params)->json() ?? [];
+    }
+
+    /**
+     * Build checkout params, cache them, and return a checkout_url for mobile to open in WebView.
+     * Cache TTL: 10 minutes.
+     */
+    public function buildCheckoutPayload(
         string $tranId,
         string $amount,
         string $firstName,
@@ -70,7 +143,7 @@ class PayWayService
         string $phone,
         string $paymentOption
     ): array {
-        $reqTime = (string) time();
+        $reqTime = $this->getReqTime();
 
         $hash = $this->generateHash(
             $reqTime,
@@ -84,30 +157,25 @@ class PayWayService
         );
 
         $params = [
-            'hash'           => $hash,
+            'api_url'        => $this->apiUrl,
+            'merchant_id'    => $this->merchantId,
             'tran_id'        => $tranId,
+            'req_time'       => $reqTime,
+            'hash'           => $hash,
             'amount'         => $amount,
             'firstname'      => $firstName,
             'lastname'       => $lastName,
             'email'          => $email,
             'phone'          => $phone,
-            'req_time'       => $reqTime,
-            'merchant_id'    => $this->merchantId,
             'payment_option' => $paymentOption,
         ];
 
-        $response = Http::timeout(30)
-            ->asForm()
-            ->post($this->apiUrl, $params);
-
-        if ($response->failed()) {
-            throw new Exception('PayWay API error: ' . $response->status() . ' — ' . $response->body());
-        }
+        // Cache params for 10 minutes — the web checkout page reads from here
+        Cache::put('payway_checkout_' . $tranId, $params, now()->addMinutes(10));
 
         return [
-            'status'   => $response->status(),
-            'response' => $response->json() ?? $response->body(),
-            'params'   => $params, // also return the params sent (useful for debugging)
+            'tran_id'      => $tranId,
+            'checkout_url' => route('payway.checkout', ['tranId' => $tranId]),
         ];
     }
 }

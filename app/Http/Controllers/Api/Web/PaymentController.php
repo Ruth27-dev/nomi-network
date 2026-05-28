@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
 use App\Models\Order;
+use App\Models\PaywayTransaction;
 use App\Services\PayWayService;
 use Exception;
 use Illuminate\Http\Request;
@@ -93,8 +94,8 @@ class PaymentController extends Controller
             $email     = $request->email     ?? $user->email ?? '';
             $phone     = $request->phone     ?? $user->phone ?? '';
 
-            // Call ABA PayWay API directly from server
-            $result = $this->payWay->purchase(
+            // Generate PayWay params — mobile posts these directly to PayWay (WebView / SDK)
+            $result = $this->payWay->buildCheckoutPayload(
                 $tranId,
                 $amount,
                 $firstName,
@@ -109,7 +110,20 @@ class PaymentController extends Controller
                 $order->update(['payment_method' => $request->payment_option]);
             }
 
-            return $this->responseSuccess($result, 'Checkout initiated successfully.');
+            PaywayTransaction::updateOrCreate(
+                ['tran_id' => $tranId],
+                [
+                    'order_id'     => $order?->id,
+                    'donation_id'  => null,
+                    'tran_type'    => $request->payment_option,
+                    'order_type'   => 'order',
+                    'is_update'    => null,
+                    'status_code'  => null,
+                    'payment_status' => 'unpaid',
+                ]
+            );
+
+            return $this->responseSuccess($result, 'Checkout params generated successfully.');
         } catch (Exception $e) {
             return $this->responseError($e->getMessage());
         }
@@ -175,8 +189,8 @@ class PaymentController extends Controller
                 'note'           => $request->note,
             ]);
 
-            // Call ABA PayWay API directly from server (phone not required for donation)
-            $result = $this->payWay->purchase(
+            // Generate PayWay params — mobile posts these directly to PayWay (WebView / SDK)
+            $result = $this->payWay->buildCheckoutPayload(
                 $tranId,
                 $amount,
                 $firstName,
@@ -186,11 +200,24 @@ class PaymentController extends Controller
                 $request->payment_option,
             );
 
+            PaywayTransaction::updateOrCreate(
+                ['tran_id' => $tranId],
+                [
+                    'order_id'     => null,
+                    'donation_id'  => $donation->id,
+                    'tran_type'    => $request->payment_option,
+                    'order_type'   => 'donation',
+                    'is_update'    => null,
+                    'status_code'  => null,
+                    'payment_status' => 'unpaid',
+                ]
+            );
+
             DB::commit();
 
             return $this->responseSuccess(
                 array_merge($result, ['donation_id' => $donation->id]),
-                'Donation initiated successfully.'
+                'Donation checkout params generated successfully.'
             );
         } catch (Exception $e) {
             DB::rollBack();
@@ -231,6 +258,15 @@ class PaymentController extends Controller
             } else {
                 $this->handleOrderCallback($tranId, $statusCode);
             }
+
+            PaywayTransaction::updateOrCreate(
+                ['tran_id' => $tranId],
+                [
+                    'status_code'    => $statusCode,
+                    'payment_status' => (string) $request->input('payment_status', ''),
+                    'raw_callback'   => $request->all(),
+                ]
+            );
 
             DB::commit();
 
