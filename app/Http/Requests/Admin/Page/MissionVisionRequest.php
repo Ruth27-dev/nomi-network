@@ -21,7 +21,10 @@ class MissionVisionRequest extends FormRequest
             'description_km' => 'nullable|string',
             'sequence'       => 'required|integer',
             'status'         => 'required',
-            'image'          => 'required_without:tmp_file|image',
+            'images'         => 'nullable|array',
+            'images.*'       => 'nullable|image',
+            'tmp_images'     => 'nullable|array',
+            'tmp_images.*'   => 'nullable|string',
         ];
     }
 
@@ -34,7 +37,6 @@ class MissionVisionRequest extends FormRequest
             'sequence.required'       => __('validate.attributes.required'),
             'sequence.integer'        => __('validate.attributes.numeric'),
             'status.required'         => __('validate.attributes.required'),
-            'image.required_without'  => __('validate.attributes.required'),
         ];
     }
 }

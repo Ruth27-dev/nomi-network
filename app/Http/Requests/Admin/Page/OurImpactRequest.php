@@ -26,7 +26,8 @@ class OurImpactRequest extends FormRequest
             'dataDetail.*.description_km'    => 'required',
             'dataDetail.*.description_en'    => 'required',
             'dataDetail.*.ordering'          => 'required',
-            'dataDetail.*.image'             => 'nullable|image',
+            'dataDetail.*.images'            => 'nullable|array',
+            'dataDetail.*.images.*'          => 'nullable|image',
             'dataDetail.*.icon'              => 'nullable|image',
         ];
     }

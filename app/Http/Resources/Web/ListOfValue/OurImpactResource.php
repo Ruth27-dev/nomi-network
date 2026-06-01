@@ -18,15 +18,20 @@ class OurImpactResource extends JsonResource
             'dataDetail' => collect($this->content['dataDetail'] ?? [])
                 ->sortBy('ordering')
                 ->map(function ($item) {
+                    $imagePaths = $item['images'] ?? ($item['image'] ? [$item['image']] : []);
                     return [
-                        'title_en' => $item['title_en'] ?? null,
-                        'title_km' => $item['title_km'] ?? null,
+                        'title_en'       => $item['title_en'] ?? null,
+                        'title_km'       => $item['title_km'] ?? null,
                         'description_en' => $item['description_en'] ?? null,
                         'description_km' => $item['description_km'] ?? null,
-                        'ordering' => $item['ordering'] ?? null,
-                        'image' => $item['image'] ?? null,
-                        'image_url' => $this->resolveAssetUrl($item['image'] ?? null),
-                        'icon' => $item['icon'] ?? null,
+                        'ordering'       => $item['ordering'] ?? null,
+                        'image'          => $item['image'] ?? $imagePaths[0] ?? null,
+                        'image_url'      => $this->resolveAssetUrl($imagePaths[0] ?? $item['image'] ?? null),
+                        'images'         => array_values(array_filter(array_map(
+                            fn($img) => $this->resolveAssetUrl($img),
+                            $imagePaths
+                        ))),
+                        'icon'     => $item['icon'] ?? null,
                         'icon_url' => $this->resolveAssetUrl($item['icon'] ?? null),
                     ];
                 })

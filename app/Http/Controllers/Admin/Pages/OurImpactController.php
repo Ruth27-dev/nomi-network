@@ -46,22 +46,27 @@ class OurImpactController extends Controller
                 ],
                 'content' => [
                     'dataDetail' => collect($request->dataDetail)->map(function ($item, $index) use ($request) {
+                        $keptImages = array_values(array_filter((array) ($item['tmp_images'] ?? [])));
+                        $newImages = [];
+                        if ($request->hasFile("dataDetail.$index.images")) {
+                            foreach ((array) $request->file("dataDetail.$index.images") as $img) {
+                                if ($img && $img->isValid()) {
+                                    $newImages[] = UploadFile::uploadFile('/list-of-value', $img);
+                                }
+                            }
+                        }
+                        $allImages = array_merge($newImages, $keptImages);
+
                         $detail = [
                             'title_en'       => $item['title_en'] ?? null,
                             'title_km'       => $item['title_km'] ?? null,
                             'description_en' => $item['description_en'] ?? null,
                             'description_km' => $item['description_km'] ?? null,
                             'ordering'       => $item['ordering'] ?? null,
-                            'image'          => $item['tmp_image'] ?? null,
+                            'images'         => $allImages,
+                            'image'          => $allImages[0] ?? null,
                             'icon'           => $item['tmp_icon'] ?? null,
                         ];
-
-                        if ($request->hasFile("dataDetail.$index.image")) {
-                            $detail['image'] = UploadFile::uploadFile(
-                                '/list-of-value',
-                                $request->file("dataDetail.$index.image")
-                            );
-                        }
 
                         if ($request->hasFile("dataDetail.$index.icon")) {
                             $detail['icon'] = UploadFile::uploadFile(

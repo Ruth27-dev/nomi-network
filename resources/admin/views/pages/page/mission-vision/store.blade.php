@@ -65,37 +65,40 @@
                         <span class="error" x-show="validate?.status" x-text="validate?.status"></span>
                     </div>
                     <div class="form-row">
-                        <label>@lang('form.body.label.image')<span>*</span></label>
-                        <input type="file" :disabled="form.disabled" accept="image/*" id="mission_vision_image"
-                            class="!p-[12px]" @change="onPreviewImage($el)">
-                        <input type="hidden" x-model="form.tmp_file">
-                        <span class="error" x-show="validate?.image" x-text="validate?.image"></span>
-                    </div>
-                </div>
-                <template x-if="image_url">
-                    <div class="row">
-                        <div
-                            class="h-[220px] rounded-md border border-gray-100 overflow-hidden relative grid place-items-center group mt-2">
-                            <img class="w-full h-full object-contain" :src="image_url" alt="">
-                            <div class="absolute flex gap-2 opacity-0 group-hover:opacity-100 duration-[0.2s]">
-                                <button type="button"
-                                    class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                    @click="onViewImage(image_url)">
-                                    <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                        visibility_on
-                                    </span>
-                                </button>
-                                <button type="button"
-                                    class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                    @click="onRemoveImage()">
-                                    <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                        delete
-                                    </span>
-                                </button>
-                            </div>
+                        <label>@lang('form.body.label.image')</label>
+                        <input type="file" accept="image/*" style="display:none" x-ref="mvImageInput"
+                            :disabled="form.disabled" @change="onAddImage($event)">
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                            <template x-for="(img, imgIdx) in images" :key="imgIdx">
+                                <div style="position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0;"
+                                    @mouseenter="$el.querySelector('.img-actions').style.opacity='1'"
+                                    @mouseleave="$el.querySelector('.img-actions').style.opacity='0'">
+                                    <img style="width:100%;height:100%;object-fit:cover;" :src="img.url" alt="">
+                                    <div class="img-actions" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;gap:4px;opacity:0;transition:opacity 0.2s;">
+                                        <button type="button"
+                                            style="width:28px;height:28px;background:#fff;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+                                            @click="onViewImage(img.url)">
+                                            <span class="material-icons" style="font-size:15px;color:#374151;">visibility</span>
+                                        </button>
+                                        <button type="button"
+                                            style="width:28px;height:28px;background:#fff;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+                                            @click="removeImage(imgIdx)">
+                                            <span class="material-icons" style="font-size:15px;color:#ef4444;">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                            <button type="button" :disabled="form.disabled"
+                                style="width:80px;height:80px;border-radius:8px;border:2px dashed #d1d5db;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;flex-shrink:0;transition:border-color 0.2s,background 0.2s;"
+                                @mouseenter="$el.style.borderColor='#60a5fa';$el.style.background='#eff6ff'"
+                                @mouseleave="$el.style.borderColor='#d1d5db';$el.style.background='transparent'"
+                                @click="$refs.mvImageInput.click()">
+                                <span class="material-icons" style="font-size:22px;color:#9ca3af;">add</span>
+                                <span style="font-size:11px;color:#9ca3af;">Add</span>
+                            </button>
                         </div>
                     </div>
-                </template>
+                </div>
             </div>
             <div class="form-footer">
                 <div class="form-button">
@@ -120,10 +123,10 @@
                 description_km: [null, []],
                 sequence: [null, ['required']],
                 status: ['ACTIVE', ['required']],
-                image: [null, []],
-                tmp_file: [null, []],
             }),
-            image_url: null,
+            images: [],
+            baseLegacyUrl: "{{ asset('storage/list-of-value') }}/",
+            baseUploadUrl: "{{ asset('uploads') }}/",
             dialogData: null,
             validate: null,
             loading: false,
@@ -138,8 +141,13 @@
                     this.form.description_km = this.dialogData?.description?.km ?? null;
                     this.form.sequence = this.dialogData?.sequence ?? null;
                     this.form.status = this.dialogData?.status ?? 'ACTIVE';
-                    this.form.tmp_file = this.dialogData?.image ?? null;
-                    this.image_url = this.dialogData?.image_url ?? null;
+                    const existingPaths = this.dialogData?.add_on?.images
+                        || (this.dialogData?.image ? [this.dialogData.image] : []);
+                    this.images = existingPaths.map(path => ({
+                        file: null,
+                        tmp: path,
+                        url: this.resolveImageUrl(path),
+                    }));
                 } else {
                     await this.getMaxOrdering((res) => {
                         this.form.sequence = res.max_ordering;
@@ -196,9 +204,24 @@
                     },
                 });
             },
-            onPreviewImage(el) {
-                if (!el.files[0]) return;
-                this.image_url = URL.createObjectURL(el.files[0]);
+            resolveImageUrl(file) {
+                if (!file) return null;
+                if (file instanceof File) return URL.createObjectURL(file);
+                if (file.startsWith('http') || file.startsWith('blob:')) return file;
+                const normalized = file.replace(/^\/+/, '');
+                if (normalized.includes('/')) {
+                    return this.baseUploadUrl + normalized.replace(/^uploads\//, '');
+                }
+                return this.baseLegacyUrl + normalized;
+            },
+            onAddImage(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                this.images.push({ file, url: URL.createObjectURL(file), tmp: null });
+                event.target.value = '';
+            },
+            removeImage(index) {
+                this.images.splice(index, 1);
             },
             onViewImage(path) {
                 Fancybox.show([{
@@ -212,11 +235,6 @@
                         },
                     }
                 });
-            },
-            onRemoveImage() {
-                this.form.tmp_file = null;
-                this.image_url = null;
-                document.querySelector('#mission_vision_image').value = '';
             },
             onSave() {
                 this.$store.confirmDialog.open({
@@ -232,19 +250,28 @@
                             this.form.description_km = tinymce.get('mv-desc-km')?.getContent() ?? '';
                             this.form.disable();
                             this.loading = true;
-                            let file = document.querySelector('#mission_vision_image');
-                            this.form.image = file.files[0] ?? '';
+
+                            const formData = new FormData();
                             const data = this.form.value();
-                            Axios({
-                                url: `{{ route('admin-page-mission-vision-save') }}`,
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'multipart/form-data',
-                                },
-                                data: {
-                                    ...data,
-                                    id: this.dialogData?.id,
+                            for (const key in data) {
+                                if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+                                    formData.append(key, data[key]);
                                 }
+                            }
+                            if (this.dialogData?.id) {
+                                formData.append('id', this.dialogData.id);
+                            }
+                            let newIdx = 0, tmpIdx = 0;
+                            this.images.forEach(img => {
+                                if (img.file instanceof File) {
+                                    formData.append(`images[${newIdx++}]`, img.file);
+                                } else if (img.tmp) {
+                                    formData.append(`tmp_images[${tmpIdx++}]`, img.tmp);
+                                }
+                            });
+
+                            Axios.post(`{{ route('admin-page-mission-vision-save') }}`, formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' },
                             }).then((res) => {
                                 if (res.data.error == false) {
                                     this.form.reset();

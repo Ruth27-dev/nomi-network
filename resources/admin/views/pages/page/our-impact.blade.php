@@ -112,14 +112,17 @@
                                         <td class="text-sm text-gray-600" style="padding: 12px;"
                                             x-text="item.ordering || '-'"></td>
                                         <td style="padding: 12px;">
-                                            <template x-if="item.image_url">
-                                                <button type="button" class="h-[50px] w-[50px] rounded-md overflow-hidden"
-                                                    @click="onViewImage(item.image_url)">
-                                                    <img class="w-full h-full object-contain" :src="item.image_url"
-                                                        alt="">
-                                                </button>
+                                            <template x-if="item.imageList && item.imageList.length > 0">
+                                                <div class="flex flex-wrap gap-1">
+                                                    <template x-for="(img, imgIdx) in item.imageList" :key="imgIdx">
+                                                        <button type="button" class="h-[50px] w-[50px] rounded-md overflow-hidden"
+                                                            @click="onViewImage(img.url)">
+                                                            <img class="w-full h-full object-contain" :src="img.url" alt="">
+                                                        </button>
+                                                    </template>
+                                                </div>
                                             </template>
-                                            <template x-if="!item.image_url">
+                                            <template x-if="!item.imageList || item.imageList.length === 0">
                                                 <span class="text-sm text-gray-400">-</span>
                                             </template>
                                         </td>
@@ -219,57 +222,73 @@
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.image')</label>
-                            <input type="file" accept="image/*" class="!p-[12px]" x-ref="detailImageInput"
-                                @change="onPreviewDetailImage($event)">
-                            <template x-if="detailForm.image_url">
-                                <div
-                                    class="h-[110px] rounded-md border border-gray-100 overflow-hidden relative grid place-items-center group mt-2">
-                                    <img class="w-full h-full object-contain" :src="detailForm.image_url" alt="">
-                                    <div class="absolute flex gap-2 opacity-0 group-hover:opacity-100 duration-[0.2s]">
-                                        <button type="button"
-                                            class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                            @click="onViewImage(detailForm.image_url)">
-                                            <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                visibility_on
-                                            </span>
-                                        </button>
-                                        <button type="button"
-                                            class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                            @click="onRemoveDetailImage()">
-                                            <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                delete
-                                            </span>
-                                        </button>
+                            <input type="file" accept="image/*" style="display:none" x-ref="detailImageInput"
+                                @change="onAddDetailImage($event)">
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                                <template x-for="(img, imgIdx) in detailForm.imageList" :key="imgIdx">
+                                    <div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0;"
+                                        @mouseenter="$el.querySelector('.img-actions').style.opacity='1'"
+                                        @mouseleave="$el.querySelector('.img-actions').style.opacity='0'">
+                                        <img style="width:100%;height:100%;object-fit:cover;" :src="img.url" alt="">
+                                        <div class="img-actions" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;gap:4px;opacity:0;transition:opacity 0.2s;">
+                                            <button type="button"
+                                                style="width:26px;height:26px;background:#fff;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+                                                @click="onViewImage(img.url)">
+                                                <span class="material-icons" style="font-size:14px;color:#374151;">visibility</span>
+                                            </button>
+                                            <button type="button"
+                                                style="width:26px;height:26px;background:#fff;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+                                                @click="removeDetailImage(imgIdx)">
+                                                <span class="material-icons" style="font-size:14px;color:#ef4444;">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </template>
+                                </template>
+                                <button type="button"
+                                    style="width:64px;height:64px;border-radius:8px;border:2px dashed #d1d5db;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;flex-shrink:0;transition:border-color 0.2s,background 0.2s;"
+                                    @mouseenter="$el.style.borderColor='#60a5fa';$el.style.background='#eff6ff'"
+                                    @mouseleave="$el.style.borderColor='#d1d5db';$el.style.background='transparent'"
+                                    @click="$refs.detailImageInput.click()">
+                                    <span class="material-icons" style="font-size:20px;color:#9ca3af;">add</span>
+                                    <span style="font-size:10px;color:#9ca3af;">Add</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-row">
                             <label>@lang('form.body.label.icon')</label>
-                            <input type="file" accept="image/*" class="!p-[12px]" x-ref="detailIconInput"
+                            <input type="file" accept="image/*" style="display:none" x-ref="detailIconInput"
                                 @change="onPreviewDetailIcon($event)">
-                            <template x-if="detailForm.icon_url">
-                                <div
-                                    class="h-[110px] rounded-md border border-gray-100 overflow-hidden relative grid place-items-center group mt-2">
-                                    <img class="w-full h-full object-contain" :src="detailForm.icon_url" alt="">
-                                    <div class="absolute flex gap-2 opacity-0 group-hover:opacity-100 duration-[0.2s]">
-                                        <button type="button"
-                                            class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                            @click="onViewIcon(detailForm.icon_url)">
-                                            <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                visibility_on
-                                            </span>
-                                        </button>
-                                        <button type="button"
-                                            class="bg-black/80 w-[50px] h-[50px] border border-white rounded-full grid place-items-center"
-                                            @click="onRemoveDetailIcon()">
-                                            <span class="material-icons-outlined text-white text-2xl w-[24px]">
-                                                delete
-                                            </span>
-                                        </button>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                                <template x-if="detailForm.icon_url">
+                                    <div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0;"
+                                        @mouseenter="$el.querySelector('.icon-actions').style.opacity='1'"
+                                        @mouseleave="$el.querySelector('.icon-actions').style.opacity='0'">
+                                        <img style="width:100%;height:100%;object-fit:cover;" :src="detailForm.icon_url" alt="">
+                                        <div class="icon-actions" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;gap:4px;opacity:0;transition:opacity 0.2s;">
+                                            <button type="button"
+                                                style="width:26px;height:26px;background:#fff;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+                                                @click="onViewIcon(detailForm.icon_url)">
+                                                <span class="material-icons" style="font-size:14px;color:#374151;">visibility</span>
+                                            </button>
+                                            <button type="button"
+                                                style="width:26px;height:26px;background:#fff;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+                                                @click="onRemoveDetailIcon()">
+                                                <span class="material-icons" style="font-size:14px;color:#ef4444;">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </template>
+                                </template>
+                                <template x-if="!detailForm.icon_url">
+                                    <button type="button"
+                                        style="width:64px;height:64px;border-radius:8px;border:2px dashed #d1d5db;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;flex-shrink:0;transition:border-color 0.2s,background 0.2s;"
+                                        @mouseenter="$el.style.borderColor='#60a5fa';$el.style.background='#eff6ff'"
+                                        @mouseleave="$el.style.borderColor='#d1d5db';$el.style.background='transparent'"
+                                        @click="$refs.detailIconInput.click()">
+                                        <span class="material-icons" style="font-size:20px;color:#9ca3af;">add</span>
+                                        <span style="font-size:10px;color:#9ca3af;">Add</span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -428,26 +447,38 @@
                     description_en: null,
                     description_km: null,
                     ordering: null,
-                    image: null,
-                    image_url: null,
-                    tmp_image: null,
+                    imageList: [],
                     icon: null,
                     icon_url: null,
                     tmp_icon: null,
                 };
             },
             normalizeDetail(item = {}) {
-                const image = item.image || item.tmp_image || null;
                 const icon = item.icon || item.tmp_icon || null;
+                let imageList = [];
+                if (item.imageList && Array.isArray(item.imageList)) {
+                    imageList = item.imageList;
+                } else if (item.images && Array.isArray(item.images)) {
+                    imageList = item.images.map(img => ({
+                        file: null,
+                        tmp: img instanceof File ? null : img,
+                        url: img instanceof File ? URL.createObjectURL(img) : this.resolveFileUrl(img),
+                    }));
+                } else if (item.image) {
+                    const img = item.image;
+                    imageList = [{
+                        file: img instanceof File ? img : null,
+                        tmp: img instanceof File ? null : img,
+                        url: item.image_url || this.resolveFileUrl(img instanceof File ? null : img),
+                    }];
+                }
                 return {
                     title_en: item.title_en ?? null,
                     title_km: item.title_km ?? null,
                     description_en: item.description_en ?? null,
                     description_km: item.description_km ?? null,
                     ordering: item.ordering ?? null,
-                    image: item.image instanceof File ? item.image : null,
-                    tmp_image: image instanceof File ? null : image,
-                    image_url: item.image_url || this.resolveFileUrl(image),
+                    imageList,
                     icon: item.icon instanceof File ? item.icon : null,
                     tmp_icon: icon instanceof File ? null : icon,
                     icon_url: item.icon_url || this.resolveFileUrl(icon),
@@ -480,7 +511,6 @@
             },
             resetDetailFileInputs() {
                 this.$nextTick(() => {
-                    if (this.$refs.detailImageInput) this.$refs.detailImageInput.value = '';
                     if (this.$refs.detailIconInput) this.$refs.detailIconInput.value = '';
                     feather.replace();
                 });
@@ -563,18 +593,15 @@
                     }
                 });
             },
-            onPreviewDetailImage(event) {
+            onAddDetailImage(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-                this.detailForm.image = file;
-                this.detailForm.tmp_image = null;
-                this.detailForm.image_url = URL.createObjectURL(file);
+                if (!Array.isArray(this.detailForm.imageList)) this.detailForm.imageList = [];
+                this.detailForm.imageList.push({ file, url: URL.createObjectURL(file), tmp: null });
+                event.target.value = '';
             },
-            onRemoveDetailImage() {
-                this.detailForm.image = null;
-                this.detailForm.image_url = null;
-                this.detailForm.tmp_image = null;
-                if (this.$refs.detailImageInput) this.$refs.detailImageInput.value = '';
+            removeDetailImage(index) {
+                this.detailForm.imageList.splice(index, 1);
             },
             onPreviewDetailIcon(event) {
                 const file = event.target.files[0];
@@ -622,12 +649,14 @@
                     formData.append(`dataDetail[${index}][description_en]`, item.description_en ?? '');
                     formData.append(`dataDetail[${index}][description_km]`, item.description_km ?? '');
                     formData.append(`dataDetail[${index}][ordering]`, item.ordering ?? '');
-                    if (item.image instanceof File) {
-                        formData.append(`dataDetail[${index}][image]`, item.image);
-                    }
-                    if (item.tmp_image) {
-                        formData.append(`dataDetail[${index}][tmp_image]`, item.tmp_image);
-                    }
+                    let newImgIdx = 0, tmpImgIdx = 0;
+                    (item.imageList || []).forEach(img => {
+                        if (img.file instanceof File) {
+                            formData.append(`dataDetail[${index}][images][${newImgIdx++}]`, img.file);
+                        } else if (img.tmp) {
+                            formData.append(`dataDetail[${index}][tmp_images][${tmpImgIdx++}]`, img.tmp);
+                        }
+                    });
                     if (item.icon instanceof File) {
                         formData.append(`dataDetail[${index}][icon]`, item.icon);
                     }
@@ -639,7 +668,7 @@
             },
             getDetailServerErrors(errors, index) {
                 if (index === null || !errors) return {};
-                return ['title_en', 'title_km', 'description_en', 'description_km', 'ordering', 'image', 'icon']
+                return ['title_en', 'title_km', 'description_en', 'description_km', 'ordering', 'images', 'icon']
                     .reduce((carry, field) => {
                         const key = `dataDetail.${index}.${field}`;
                         if (errors[key]) {

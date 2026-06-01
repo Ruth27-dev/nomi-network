@@ -64,7 +64,18 @@ class MissionVisionController extends Controller
 
         DB::beginTransaction();
         try {
-            $image = UploadFile::uploadFile('/list-of-value', $request->file('image'), $request->tmp_file);
+            $newImages = [];
+            if ($request->hasFile('images')) {
+                foreach ((array) $request->file('images') as $img) {
+                    if ($img && $img->isValid()) {
+                        $newImages[] = UploadFile::uploadFile('/list-of-value', $img);
+                    }
+                }
+            }
+
+            $keptImages = array_values(array_filter((array) $request->input('tmp_images', [])));
+            $allImages = array_merge($newImages, $keptImages);
+
             $input = [
                 'type' => $this->type,
                 'title' => [
@@ -76,37 +87,40 @@ class MissionVisionController extends Controller
                     'km' => $request->description_km,
                 ],
                 'add_on' => [
-                    'type' => $request->type,
+                    'type'   => $request->type,
+                    'images' => $allImages,
                 ],
                 'sequence' => $request->sequence,
-                'status' => $request->status,
-                'image' => $image,
-                'user_id' => Auth::guard('admin')->id(),
+                'status'   => $request->status,
+                'image'    => $allImages[0] ?? null,
+                'user_id'  => Auth::guard('admin')->id(),
             ];
 
             if (!$request->id) {
                 ListOfValue::create($input);
             } else {
                 $data = ListOfValue::where('type', $this->type)->findOrFail($request->id);
-                if ($request->file('image') || !$request->tmp_file) {
-                    UploadFile::deleteFile('/list-of-value', $data->image);
+                $oldImages = data_get($data->add_on, 'images', $data->image ? [$data->image] : []);
+                foreach ($oldImages as $oldImg) {
+                    if (!in_array($oldImg, $keptImages, true)) {
+                        UploadFile::deleteFile('/list-of-value', $oldImg);
+                    }
                 }
-                $input['image'] = $image ?? $request->tmp_file;
                 $data->update($input);
             }
 
             DB::commit();
             return response()->json([
-                'status' => 'success',
+                'status'  => 'success',
                 'message' => $request->id ? __('form.message.update.success') : __('form.message.create.success'),
-                'error' => false,
+                'error'   => false,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => __('form.message.error'),
-                'error' => true,
+                'error'   => true,
             ]);
         }
     }
@@ -170,7 +184,10 @@ class MissionVisionController extends Controller
     {
         try {
             $data = ListOfValue::onlyTrashed()->where('type', $this->type)->findOrFail($request->id);
-            UploadFile::deleteFile('/list-of-value', $data->image);
+            $allImages = data_get($data->add_on, 'images', $data->image ? [$data->image] : []);
+            foreach ($allImages as $img) {
+                UploadFile::deleteFile('/list-of-value', $img);
+            }
             $data->forceDelete();
 
             return response()->json([
