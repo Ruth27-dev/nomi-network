@@ -115,7 +115,7 @@ class PaywayController extends Controller
 
             return response()->json([
                 'tran_id' => $tran_id,
-                'payway'  => $paywayResponse,
+                'data'    => $paywayResponse,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
