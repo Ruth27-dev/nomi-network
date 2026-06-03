@@ -142,7 +142,7 @@ class PayWayService
             'email' => $email,
             'phone' => $phone,
             'payment_option' => $paymentOption,
-            'view_type' => 'hosted_view',
+            'view_type' => 'popup', //hosted_view
             'return_url' => $encodedReturnUrl,
             'continue_success_url' => $continueSuccessUrl,
             'cancel_url' => $cancelUrl,
