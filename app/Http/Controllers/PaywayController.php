@@ -2,115 +2,253 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PaywayTransaction;
+use App\Http\Controllers\Controller;
+use App\Models\Donation;
+use App\Models\Order;
 use App\Services\PayWayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class PaywayController extends Controller
 {
-    public function __construct(private PayWayService $payWay)
-    {
-    }
+    private PayWayService $payWay;
 
-    protected array $requiredFields = ['tran_id', 'amount', 'firstname', 'lastname', 'phone'];
+    public function __construct(PayWayService $payWay)
+    {
+        $this->payWay = $payWay;
+    }
 
     public function index()
     {
-        return response()->json([
-            'message' => 'PayWay endpoint is ready.',
-            'api_url' => $this->payWay->getApiUrl(),
-            'merchant_id' => $this->payWay->getMerchantId(),
-        ]);
+        return view('pages.payway.viewData');
     }
 
+    /**
+     * POST /api/web/create-payment
+     *
+     * For donation (no order_id):
+     *   { "amount", "firstname", "lastname", "phone", "donation_type", "note" }
+     *
+     * For order (with order_id):
+     *   { "order_id", "firstname", "lastname", "phone" }
+     *   amount is read from orders.grand_total — not accepted from input.
+     */
     public function payway_form(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'tran_id' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'phone' => 'required|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'payment_option' => 'nullable|in:abapay_khqr,cards,abapay_khqr_deeplink',
-            'return_url' => 'nullable|url|max:500',
-            'cancel_url' => 'nullable|url|max:500',
-            'continue_success_url' => 'nullable|url|max:500',
-            'return_params' => 'nullable|in:json',
-            'hash_mode' => 'nullable|in:default,legacy_purchase',
-            'order_id' => 'nullable|integer',
-            'donation_id' => 'nullable|integer',
-            'order_type' => 'nullable|string|max:30',
-        ]);
+        $input     = $request->all();
+        $orderId   = $input['order_id'] ?? null;
+        $required  = $orderId
+            ? ['order_id', 'firstname', 'lastname', 'phone', 'payment_option']
+            : ['amount', 'firstname', 'lastname', 'phone', 'payment_option'];
 
-        if ($validator->fails()) {
-            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        $allowedOptions = ['cards', 'abapay_khqr_deeplink'];
+        if (isset($input['payment_option']) && !in_array($input['payment_option'], $allowedOptions)) {
+            return response()->json(['message' => 'payment_option must be one of: ' . implode(', ', $allowedOptions)], 422);
         }
 
-        $tranId = (string) $request->input('tran_id');
-        $amount = (string) $request->input('amount');
-        $firstname = (string) $request->input('firstname');
-        $lastname = (string) $request->input('lastname');
-        $phone = (string) $request->input('phone');
-        $email = (string) $request->input('email', '');
-        $paymentOption = (string) $request->input('payment_option', 'abapay_khqr_deeplink');
-        $returnUrl = (string) $request->input('return_url', 'https://nomihandicraftandservice.org/api/web/payway-submit');
-        $cancelUrl = (string) $request->input('cancel_url', 'https://nomihandicraftandservice.org/');
-        $continueSuccessUrl = (string) $request->input('continue_success_url', 'https://nomihandicraftandservice.org/');
-        $returnParams = (string) $request->input('return_params', 'json');
-        $hashMode = (string) $request->input('hash_mode', 'default');
+        foreach ($required as $field) {
+            if (!array_key_exists($field, $input)) {
+                return response()->json(['message' => "Missing required field: $field"], 422);
+            }
+        }
 
-        $params = $this->payWay->buildHostedPurchaseParams(
-            $tranId,
-            $amount,
-            $firstname,
-            $lastname,
-            $email,
-            $phone,
-            $paymentOption,
-            $returnUrl,
-            $cancelUrl,
-            $continueSuccessUrl,
-            $returnParams,
-            $hashMode
-        );
+        DB::beginTransaction();
+        try {
+            $tran_id       = $this->payWay->generateTranId();
+            $firstname     = $input['firstname'];
+            $lastname      = $input['lastname'];
+            $phone         = $input['phone'];
+            $paymentOption = $input['payment_option'];
+            $returnUrl     = 'https://admin.nomihandicraftandservice.org/api/web/payway-webhook';
+            $cancelUrl     = 'https://nomihandicraftandservice.org';
+            $successUrl    = 'https://nomihandicraftandservice.org/support/success';
 
-        PaywayTransaction::updateOrCreate(
-            ['tran_id' => $tranId],
-            [
-                'order_id' => $request->input('order_id'),
-                'donation_id' => $request->input('donation_id'),
-                'tran_type' => $paymentOption,
-                'order_type' => (string) $request->input('order_type', 'order'),
-                'payment_status' => 'unpaid',
-            ]
-        );
+            if ($orderId) {
+                $order = Order::findOrFail($orderId);
 
-        return response()->json($this->payWay->purchase($params));
+                if ($order->payment_status === 'paid') {
+                    return response()->json(['message' => 'Order is already paid.'], 422);
+                }
+
+                // Use actual grand_total — never trust client-sent amount for orders
+                $amount = number_format((float) $order->grand_total, 2, '.', '');
+
+                // Store tran_id on order so webhook can look it up
+                $order->update([
+                    'order_no'       => $tran_id,
+                    'payment_method' => $paymentOption,
+                    'payment_status' => 'pending',
+                ]);
+            } else {
+                $amount = $input['amount'];
+
+                Donation::create([
+                    'tran_id'        => $tran_id,
+                    'user_id'        => null,
+                    'donation_type'  => $input['donation_type'] ?? 'one_time',
+                    'amount'         => $amount,
+                    'firstname'      => $firstname,
+                    'lastname'       => $lastname,
+                    'payment_option' => $paymentOption,
+                    'payment_status' => 'pending',
+                    'note'           => $input['note'] ?? null,
+                ]);
+            }
+
+            $params = $this->payWay->buildHostedPurchaseParams(
+                $tran_id,
+                $amount,
+                $firstname,
+                $lastname,
+                '',
+                $phone,
+                $paymentOption,
+                $returnUrl,
+                $cancelUrl,
+                $successUrl,
+            );
+
+            $paywayResponse = $this->payWay->purchase($params);
+
+            DB::commit();
+
+            return response()->json([
+                'tran_id' => $tran_id,
+                'payway'  => $paywayResponse,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
-    public function paymentSubmit(Request $request)
+    public function generateTranId()
     {
-        // Compatibility endpoint for legacy payway-submit route.
-        // Normal callback processing remains in Api/Web/PaymentController@callback.
+        return response()->json(['tran_id' => $this->payWay->generateTranId()]);
+    }
+
+    public function webhook(Request $req)
+    {
+        Log::info('[webhook] raw payload', $req->all());
+
+        DB::beginTransaction();
         try {
-            $tranId = (string) $request->input('tran_id');
-            if ($tranId !== '') {
-                PaywayTransaction::updateOrCreate(
-                    ['tran_id' => $tranId],
-                    [
-                        'status_code' => (string) $request->input('status_code', ''),
-                        'payment_status' => (string) $request->input('payment_status', ''),
-                        'raw_callback' => $request->all(),
-                    ]
-                );
-            }
-        } catch (\Throwable $e) {
-            Log::warning('PaywayController paymentSubmit failed', ['message' => $e->getMessage()]);
+            $dataCallback = $req->data ? (object) json_decode($req->data) : null;
+
+            Log::info('[webhook] decoded callback', (array) $dataCallback);
+
+            $tranId     = $dataCallback->transaction_id ?? $dataCallback->tran_id ?? null;
+            $statusCode = (int) ($dataCallback->payment_status_code ?? -1);
+
+            $result = $this->applyPaymentStatus($tranId, $statusCode);
+
+            DB::commit();
+            Log::info('[webhook] done', ['tran_id' => $tranId, 'status_code' => $statusCode]);
+            return $result ? 'payment_success' : 'payment_fail';
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('[webhook] exception: ' . $e->getMessage());
+            return 'payment_fail';
+        }
+    }
+
+    public function checkTransaction(Request $request)
+    {
+        $tranId = $request->input('tran_id');
+
+        if (!$tranId) {
+            return response()->json(['message' => 'tran_id is required'], 422);
         }
 
-        return response()->json(['message' => 'OK']);
+        $detail = $this->payWay->getTransactionDetail($tranId);
+
+        if (!$detail['ok']) {
+            return response()->json(['message' => 'Failed to fetch transaction from PayWay', 'detail' => $detail], 502);
+        }
+
+        $data       = $detail['data']['data'] ?? null;
+        $statusCode = (int) ($data['payment_status_code'] ?? -1);
+
+        DB::beginTransaction();
+        try {
+            $this->applyPaymentStatus($tranId, $statusCode);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('[checkTransaction] exception: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'tran_id'     => $tranId,
+            'status_code' => $statusCode,
+            'detail'      => $detail['data'],
+        ]);
+    }
+
+    private function applyPaymentStatus(string $tranId, int $statusCode): bool
+    {
+        // --- Donation ---
+        $donation = Donation::where('tran_id', $tranId)->first();
+        if ($donation) {
+            if ($donation->payment_status === 'paid') {
+                Log::info('[applyPaymentStatus] donation already paid, skip', ['tran_id' => $tranId]);
+                return true;
+            }
+
+            $status = match ($statusCode) {
+                0       => 'paid',
+                2       => 'pending',
+                3       => 'failed',
+                4       => 'refunded',
+                7       => 'failed',
+                default => 'failed',
+            };
+
+            $donation->update(['payment_status' => $status]);
+            Log::info('[applyPaymentStatus] donation updated', ['tran_id' => $tranId, 'status' => $status]);
+            return $statusCode === 0;
+        }
+
+        // --- Order ---
+        $order = Order::where('order_no', $tranId)->first();
+        if ($order) {
+            if ($order->payment_status === 'paid') {
+                Log::info('[applyPaymentStatus] order already paid, skip', ['tran_id' => $tranId]);
+                return true;
+            }
+
+            $paymentStatus = match ($statusCode) {
+                0       => 'paid',
+                2       => 'pending',
+                3       => 'failed',
+                4       => 'refunded',
+                7       => 'failed',
+                default => 'failed',
+            };
+
+            $orderStatus = match ($statusCode) {
+                0       => 'confirmed',
+                7       => 'cancelled',
+                default => $order->status, // keep existing status for pending/declined
+            };
+
+            $order->update([
+                'payment_status' => $paymentStatus,
+                'status'         => $orderStatus,
+            ]);
+
+            Log::info('[applyPaymentStatus] order updated', [
+                'order_id'       => $order->id,
+                'payment_status' => $paymentStatus,
+                'status'         => $orderStatus,
+            ]);
+
+            return $statusCode === 0;
+        }
+
+        Log::warning('[applyPaymentStatus] tran_id not found in donations or orders', ['tran_id' => $tranId]);
+        return false;
     }
 }

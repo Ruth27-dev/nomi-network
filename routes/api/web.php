@@ -16,7 +16,9 @@ Route::prefix('web')->group(function () {
     // PayWay callback — no auth, called directly by PayWay server
     Route::post('/payment/payway-callback', [Web\PaymentController::class, 'callback']);
     Route::post('/payment/donate', [Web\PaymentController::class, 'donate']);
-    Route::match(['get', 'post'], '/payway-submit', [PaywayController::class, 'paymentSubmit'])->name('api-web-payway-submit');
+    Route::match(['get', 'post'], '/payway-webhook', [PaywayController::class, 'webhook'])->name('api-web-payway-webhook');
+    Route::post('/create-payment', [PaywayController::class, 'payway_form']);
+    Route::get('/check-transaction', [PaywayController::class, 'checkTransaction']);
 
     Route::middleware('auth:api_web')->group(function () {
         Route::post('/logout', [Web\AuthController::class, 'logout']);

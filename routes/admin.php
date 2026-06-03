@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\LOV\SocialMediaController;
+use App\Http\Controllers\Admin\DonationController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\Pages\AboutUsController;
 use App\Http\Controllers\Admin\Pages\AchievementSummaryController;
@@ -219,6 +220,14 @@ Route::middleware(['locale'])->group(function () {
                 Route::get('data', 'data')->name('data');
                 Route::get('detail', 'detail')->name('detail');
                 Route::post('status', 'updateStatus')->name('status');
+            });
+        });
+
+        Route::prefix('donation')->name('donation-')->group(function () {
+            Route::controller(DonationController::class)->group(function () {
+                Route::get('list', 'index')->name('list');
+                Route::get('data', 'data')->name('data');
+                Route::get('detail', 'detail')->name('detail');
             });
         });
 

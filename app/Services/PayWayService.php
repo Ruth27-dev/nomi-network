@@ -10,17 +10,24 @@ class PayWayService
     private string $merchantId;
     private string $apiKey;
     private string $apiUrl;
+    private string $checkoutBaseUrl;
 
     public function __construct()
     {
-        $this->merchantId = (string) config('payway.merchant_id', '');
-        $this->apiKey = (string) config('payway.api_key', '');
-        $this->apiUrl = (string) config('payway.api_url', '');
+        $this->merchantId      = (string) config('payway.merchant_id', '');
+        $this->apiKey          = (string) config('payway.api_key', '');
+        $this->apiUrl          = (string) config('payway.api_url', '');
+        $this->checkoutBaseUrl = (string) config('payway.checkout_url', '');
     }
 
     public function getMerchantId(): string
     {
         return $this->merchantId;
+    }
+
+    public function generateTranId(): string
+    {
+        return now()->format('ymdHis') . strtoupper(substr(md5(uniqid('', true)), 0, 8));
     }
 
     public function getApiUrl(): string
@@ -141,6 +148,34 @@ class PayWayService
             'cancel_url' => $cancelUrl,
             'return_params' => $returnParams,
         ];
+    }
+
+    public function getTransactionDetail(string $tranId): array
+    {
+        $reqTime = now()->format('YmdHis');
+        $hash    = base64_encode(hash_hmac('sha512', $reqTime . $this->merchantId . $tranId, $this->apiKey, true));
+
+        $url = rtrim($this->checkoutBaseUrl, '/') . '/api/payment-gateway/v1/payments/transaction-detail';
+
+        try {
+            $response = Http::timeout(30)->post($url, [
+                'req_time'    => $reqTime,
+                'merchant_id' => $this->merchantId,
+                'tran_id'     => $tranId,
+                'hash'        => $hash,
+            ]);
+
+            return [
+                'ok'   => $response->successful(),
+                'data' => $response->json(),
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'ok'    => false,
+                'data'  => null,
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 
     public function purchase(array $params): array
