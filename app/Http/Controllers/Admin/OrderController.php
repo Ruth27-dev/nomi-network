@@ -56,7 +56,10 @@ class OrderController extends Controller
     {
         try {
             $data = Order::query()
-                ->with(['user:id,name,phone', 'items'])
+                ->with([
+                    'user:id,name,phone,email',
+                    'items.product.images' => fn($q) => $q->select('id', 'foreign_id', 'foreign_model', 'image')->limit(1),
+                ])
                 ->findOrFail(request('id'));
 
             $stocks = collect();
@@ -119,6 +122,33 @@ class OrderController extends Controller
 
             return $this->responseSuccess($data);
         } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function updatePaymentStatus()
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::findOrFail(request('id'));
+            $paymentStatus = strtolower((string) request('payment_status'));
+
+            if (!in_array($paymentStatus, ['unpaid', 'pending', 'paid', 'failed', 'refunded'], true)) {
+                return $this->responseError('Invalid payment status.');
+            }
+
+            $update = ['payment_status' => $paymentStatus];
+
+            if ($paymentStatus === 'paid' && $order->status === 'pending') {
+                $update['status'] = 'confirmed';
+            }
+
+            $order->update($update);
+
+            DB::commit();
+            return $this->responseSuccess($order->only(['status', 'payment_status']), 'Payment status updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
             return $this->responseError($e->getMessage());
         }
     }
