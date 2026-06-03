@@ -219,6 +219,7 @@ Route::middleware(['locale'])->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
                 Route::get('detail', 'detail')->name('detail');
+                Route::get('list/detail', 'detailPage')->name('detail-page');
                 Route::post('status', 'updateStatus')->name('status');
             });
         });

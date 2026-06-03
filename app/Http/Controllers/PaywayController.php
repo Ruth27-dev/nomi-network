@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
 use App\Models\Order;
+use App\Models\UserCartItem;
 use App\Services\PayWayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -244,6 +245,11 @@ class PaywayController extends Controller
                 'payment_status' => $paymentStatus,
                 'status'         => $orderStatus,
             ]);
+
+            if ($statusCode === 0 && $order->user_id) {
+                UserCartItem::where('user_id', $order->user_id)->delete();
+                Log::info('[applyPaymentStatus] cart cleared', ['user_id' => $order->user_id]);
+            }
 
             return $statusCode === 0;
         }

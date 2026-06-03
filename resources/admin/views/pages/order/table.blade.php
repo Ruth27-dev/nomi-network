@@ -51,15 +51,11 @@
                                 <div class="w-10/100 grid place-items-center text-gray-700">
                                     <span class="text-xs uppercase" x-text="item.status ?? '-'"></span>
                                 </div>
-                                <div class="w-10/100 grid place-items-center">
-                                    <select class="text-xs border border-gray-300 rounded px-1 py-1"
-                                        @change="onUpdateStatus(item.id, $event.target.value)">
-                                        <option value="pending" :selected="item.status === 'pending'">Pending</option>
-                                        <option value="confirmed" :selected="item.status === 'confirmed'">Confirmed</option>
-                                        <option value="shipping" :selected="item.status === 'shipping'">Shipping</option>
-                                        <option value="completed" :selected="item.status === 'completed'">Completed</option>
-                                        <option value="cancelled" :selected="item.status === 'cancelled'">Cancelled</option>
-                                    </select>
+                                <div class="w-10/100 grid place-items-center gap-1">
+                                    <a :href="`{{ route('admin-order-list') }}/detail?id=${item.id}`"
+                                        class="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                                        <i data-feather="eye" class="w-3 h-3"></i> View
+                                    </a>
                                 </div>
                             </div>
                         </div>

@@ -22,6 +22,11 @@ class OrderController extends Controller
         return view('admin::pages.order.index');
     }
 
+    public function detailPage()
+    {
+        return view('admin::pages.order.detail');
+    }
+
     public function data()
     {
         try {

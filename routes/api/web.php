@@ -17,6 +17,7 @@ Route::prefix('web')->group(function () {
     Route::post('/payment/payway-callback', [Web\PaymentController::class, 'callback']);
     Route::post('/payment/donate', [Web\PaymentController::class, 'donate']);
     Route::match(['get', 'post'], '/payway-webhook', [PaywayController::class, 'webhook'])->name('api-web-payway-webhook');
+    Route::get('/order/track', [Web\OrderController::class, 'track']);
     Route::post('/create-payment', [PaywayController::class, 'payway_form']);
     Route::get('/check-transaction', [PaywayController::class, 'checkTransaction']);
 
@@ -37,6 +38,7 @@ Route::prefix('web')->group(function () {
             Route::post('/address-list', [Web\OrderController::class, 'addressList']);
             Route::post('/address-save', [Web\OrderController::class, 'saveAddress']);
             Route::post('/create', [Web\OrderController::class, 'create']);
+            Route::post('/create-with-payment', [Web\OrderController::class, 'createWithPayment']);
             Route::post('/list', [Web\OrderController::class, 'orders']);
             Route::post('/detail', [Web\OrderController::class, 'detail']);
             Route::post('/cancel', [Web\OrderController::class, 'cancel']);

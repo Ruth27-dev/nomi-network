@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\ListOfValue;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -85,10 +86,9 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.product_variation_id' => 'nullable|exists:product_variations,id',
             'items.*.quantity' => 'required|integer|min:1',
-            'shipping_fee' => 'nullable|numeric|min:0',
+            'shipping_method_id' => 'required|exists:list_of_values,id',
             'discount_amount' => 'nullable|numeric|min:0',
             'user_address_id' => 'nullable|exists:user_addresses,id',
-            // manual one-time address fields
             'recipient_name' => 'nullable|string|max:255',
             'recipient_phone' => 'nullable|string|max:50',
             'address_line' => 'nullable|string',
@@ -104,9 +104,9 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Use saved address by ID
-            // 2. Else fall back to user's default saved address
-            // 3. Else use one-time manual address fields from request
+            $shippingMethod = ListOfValue::findOrFail($request->shipping_method_id);
+            $shippingFee    = (float) data_get($shippingMethod->add_on, 'price', 0);
+
             $address = null;
             $manualAddress = null;
 
@@ -134,8 +134,8 @@ class OrderController extends Controller
                 'order_no' => 'ORD-' . now()->format('YmdHis') . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6)),
                 'user_id' => $user->id,
                 'user_address_id' => $address?->id,
-                'shipping_method_id' => $request->shipping_method_id,
-                'shipping_method_title' => $request->shipping_method_title,
+                'shipping_method_id'    => $shippingMethod->id,
+                'shipping_method_title' => $shippingMethod->title,
                 'recipient_name' => $address ? $address->recipient_name : ($manualAddress['recipient_name'] ?? null),
                 'recipient_phone' => $address ? $address->recipient_phone : ($manualAddress['recipient_phone'] ?? null),
                 'shipping_address' => $address ? trim(implode(', ', array_filter([
@@ -203,7 +203,6 @@ class OrderController extends Controller
                 $subTotal += $lineTotal;
             }
 
-            $shippingFee = (float) ($request->shipping_fee ?? 0);
             $discount = (float) ($request->discount_amount ?? 0);
             $grandTotal = max(0, $subTotal + $shippingFee - $discount);
 
@@ -226,7 +225,7 @@ class OrderController extends Controller
     {
         try {
             $user = Auth::guard('api_web')->user();
-            $pag = request('per_page', 20);
+            $pag  = request('per_page', 20);
             $data = Order::query()
                 ->withCount('items')
                 ->where('user_id', $user->id)
@@ -242,15 +241,76 @@ class OrderController extends Controller
     public function detail()
     {
         try {
-            $user = Auth::guard('api_web')->user();
+            $user  = Auth::guard('api_web')->user();
             $order = Order::query()
                 ->with('items')
                 ->where('user_id', $user->id)
                 ->findOrFail(request('id'));
-            return $this->responseSuccess($order);
+
+            return $this->responseSuccess($this->formatOrderWithTracking($order));
         } catch (Exception $e) {
             return $this->responseError($e->getMessage());
         }
+    }
+
+    public function track()
+    {
+        try {
+            $tranId = request('tran_id');
+            if (!$tranId) {
+                return response()->json(['message' => 'tran_id is required'], 422);
+            }
+
+            $order = Order::query()
+                ->with('items')
+                ->where('order_no', $tranId)
+                ->first();
+
+            if (!$order) {
+                return response()->json(['message' => 'Order not found.'], 404);
+            }
+
+            return $this->responseSuccess($this->formatOrderWithTracking($order));
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    private function formatOrderWithTracking(Order $order): array
+    {
+        $steps = ['pending', 'confirmed', 'shipping', 'completed'];
+        $currentIndex = array_search($order->status, $steps);
+
+        $tracking = collect($steps)->map(function ($step, $i) use ($currentIndex, $order) {
+            $done = $currentIndex !== false && $i <= $currentIndex;
+            return [
+                'status' => $step,
+                'label'  => ucfirst($step),
+                'done'   => $done,
+                'active' => $step === $order->status,
+            ];
+        });
+
+        return [
+            'id'                    => $order->id,
+            'order_no'              => $order->order_no,
+            'status'                => $order->status,
+            'payment_status'        => $order->payment_status,
+            'payment_method'        => $order->payment_method,
+            'sub_total'             => (float) $order->sub_total,
+            'shipping_fee'          => (float) $order->shipping_fee,
+            'discount_amount'       => (float) $order->discount_amount,
+            'grand_total'           => (float) $order->grand_total,
+            'recipient_name'        => $order->recipient_name,
+            'recipient_phone'       => $order->recipient_phone,
+            'shipping_address'      => $order->shipping_address,
+            'shipping_method_title' => $order->shipping_method_title,
+            'note'                  => $order->note,
+            'created_at'            => $order->created_at,
+            'completed_at'          => $order->completed_at,
+            'items'                 => $order->items,
+            'tracking'              => $tracking,
+        ];
     }
 
     public function cancel()
