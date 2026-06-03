@@ -183,21 +183,20 @@ class PayWayService
         try {
             $response = Http::timeout(30)->post($this->apiUrl, $params);
 
+            $json = $response->json();
+
             return [
-                'ok' => $response->successful(),
-                'http_status' => $response->status(),
-                'json' => $response->json(),
-                'raw_body' => $response->body(),
-                'request_api_url' => $this->apiUrl,
+                'status'          => $json['status']          ?? null,
+                'qr_string'       => $json['qr_string']       ?? null,
+                'abapay_deeplink' => $json['abapay_deeplink'] ?? null,
+                'checkout_qr_url' => $json['checkout_qr_url'] ?? null,
             ];
         } catch (\Throwable $e) {
             return [
-                'ok' => false,
-                'http_status' => null,
-                'json' => null,
-                'raw_body' => null,
-                'request_api_url' => $this->apiUrl,
-                'error' => $e->getMessage(),
+                'status'          => ['code' => '99', 'message' => $e->getMessage()],
+                'qr_string'       => null,
+                'abapay_deeplink' => null,
+                'checkout_qr_url' => null,
             ];
         }
     }
