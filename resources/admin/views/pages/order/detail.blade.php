@@ -6,6 +6,14 @@
             @include('admin::components.progress-bar', ['top' => true])
         </template>
 
+        <template x-if="!loading && !order">
+            <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+                <i data-feather="alert-circle" class="w-10 h-10 mb-3"></i>
+                <p class="text-sm">Order not found or failed to load.</p>
+                <a href="{{ route('admin-order-list') }}" class="mt-4 text-sm text-blue-500 hover:underline">Back to Orders</a>
+            </div>
+        </template>
+
         <template x-if="!loading && order">
             <div>
                 {{-- Top Header --}}
@@ -197,12 +205,21 @@
 
         init() {
             const id = new URLSearchParams(location.search).get('id');
+            if (!id) {
+                this.loading = false;
+                return;
+            }
             Axios.get("{{ route('admin-order-detail') }}", { params: { id } })
                 .then(res => {
-                    this.order            = res.data.data;
-                    this.newStatus        = this.order.status;
-                    this.newPaymentStatus = this.order.payment_status;
+                    this.order = res.data?.data ?? null;
+                    if (this.order) {
+                        this.newStatus        = this.order.status ?? 'pending';
+                        this.newPaymentStatus = this.order.payment_status ?? 'unpaid';
+                    }
                     this.$nextTick(() => feather.replace());
+                })
+                .catch(e => {
+                    toastr.error(e?.response?.data?.message ?? 'Failed to load order.', { progressBar: true, timeOut: 3000 });
                 })
                 .finally(() => { this.loading = false; });
         },
