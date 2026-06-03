@@ -209,6 +209,7 @@ class CartController extends Controller
         $items = UserCartItem::query()
             ->with([
                 'product:id,sku,name_en,name_kh,description_en,description_kh,price,stock,is_active',
+                'product.images' => fn($q) => $q->select('id', 'foreign_id', 'foreign_model', 'image')->limit(1),
                 'variation:id,product_id,sku,barcode,name,price,stock,image_url,is_active',
             ])
             ->where('user_id', $userId)
@@ -236,10 +237,7 @@ class CartController extends Controller
                     'price' => (float) $item->product->price,
                     'stock' => (int) ($item->product->stock ?? 0),
                     'is_active' => (bool) $item->product->is_active,
-                    'title' => $item->product->title,
-                    'description' => $item->product->description,
-                    'status' => $item->product->status,
-                    'code' => $item->product->code,
+                    'image' => $item->product->images->first()?->url,
                 ] : null,
                 'product_variation' => $item->variation ? [
                     'id' => $item->variation->id,

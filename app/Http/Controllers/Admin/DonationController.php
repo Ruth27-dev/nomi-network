@@ -24,7 +24,7 @@ class DonationController extends Controller
         try {
             $pag = request('pag') ?? 50;
 
-            $data = Donation::query()
+            $query = Donation::query()
                 ->with('user:id,name,phone')
                 ->when(request('payment_status'), fn($q) => $q->where('payment_status', request('payment_status')))
                 ->when(request('donation_type'),  fn($q) => $q->where('donation_type',  request('donation_type')))
@@ -38,11 +38,18 @@ class DonationController extends Controller
                     });
                 })
                 ->when(request('date_from'), fn($q) => $q->whereDate('created_at', '>=', request('date_from')))
-                ->when(request('date_to'),   fn($q) => $q->whereDate('created_at', '<=', request('date_to')))
-                ->orderByDesc('id')
-                ->paginate($pag);
+                ->when(request('date_to'),   fn($q) => $q->whereDate('created_at', '<=', request('date_to')));
 
-            return $data;
+            $totalAmount = (clone $query)->where('payment_status', 'paid')->sum('amount');
+
+            $data = $query->orderByDesc('id')->paginate($pag);
+
+            return response()->json([
+                ...$data->toArray(),
+                'otherData' => [
+                    'total_amount' => number_format((float) $totalAmount, 2, '.', ''),
+                ],
+            ]);
         } catch (Exception $e) {
             return $this->responseError($e->getMessage());
         }

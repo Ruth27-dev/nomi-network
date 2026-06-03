@@ -66,6 +66,10 @@
             <div class="table-footer">
                 @include('admin::components.pagination')
             </div>
+            <div class="flex justify-end items-center px-4 py-3 border-t border-gray-200 bg-gray-50">
+                <span class="text-sm text-gray-500 mr-2">Total Paid Amount:</span>
+                <span class="text-sm font-bold text-green-700" x-text="'$' + (table.otherData?.total_amount ?? '0.00')"></span>
+            </div>
         </div>
     </template>
     <template x-if="table && table?.empty()">
