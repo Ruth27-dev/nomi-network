@@ -6,6 +6,10 @@
                 <span @click="$dialog('adjustStockDialog').close()"><i data-feather="x"></i></span>
             </div>
             <div class="form-body flex-auto overflow-y-auto">
+                <div class="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 mb-3 text-xs text-blue-700 leading-5">
+                    Enter the quantity change, not the final stock number. Use a positive number to add stock and a negative number to remove stock.
+                </div>
+
                 <div class="form-row">
                     <label>Product</label>
                     <input type="text" x-model="form.product_name" disabled>
@@ -33,8 +37,30 @@
                 </div>
 
                 <div class="form-row">
-                    <label>Adjust Qty<span>*</span></label>
-                    <input type="number" x-model="form.adjust_qty" placeholder="Use + or - number (e.g. 10, -5)" :disabled="loading">
+                    <label>Quantity Change<span>*</span></label>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button type="button"
+                            class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700"
+                            @click="setAdjustmentMode('add')"
+                            :disabled="loading">
+                            + Add Stock
+                        </button>
+                        <button type="button"
+                            class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
+                            @click="setAdjustmentMode('remove')"
+                            :disabled="loading">
+                            - Remove Stock
+                        </button>
+                    </div>
+                    <input type="number" x-model="form.adjust_qty" placeholder="Example: 10 to add, -5 to remove" :disabled="loading">
+                    <div class="text-xs text-gray-400 mt-1">
+                        Current on hand will change from
+                        <span class="font-semibold text-gray-600" x-text="form.stock_on_hand"></span>
+                        to
+                        <span class="font-semibold"
+                            :class="newOnHand() < 0 ? 'text-red-600' : 'text-gray-700'"
+                            x-text="newOnHand()"></span>.
+                    </div>
                     <span class="error" x-show="validate?.adjust_qty" x-text="validate?.adjust_qty"></span>
                 </div>
 
@@ -46,7 +72,7 @@
                             : 'border-blue-100 bg-blue-50'">
                         <div class="text-[11px] font-medium uppercase tracking-wide mb-2"
                             :class="(Number(form.stock_on_hand) + Number(form.adjust_qty || 0)) < 0 ? 'text-red-400' : 'text-blue-400'">
-                            After Adjustment
+                            Preview After Save
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
@@ -55,8 +81,8 @@
                                     <span class="text-sm text-gray-400" x-text="form.stock_on_hand"></span>
                                     <i data-feather="arrow-right" class="w-3 h-3 text-gray-400"></i>
                                     <span class="text-sm font-bold"
-                                        :class="(Number(form.stock_on_hand) + Number(form.adjust_qty || 0)) < 0 ? 'text-red-600' : 'text-gray-700'"
-                                        x-text="Number(form.stock_on_hand) + Number(form.adjust_qty || 0)"></span>
+                                        :class="newOnHand() < 0 ? 'text-red-600' : 'text-gray-700'"
+                                        x-text="newOnHand()"></span>
                                 </div>
                             </div>
                             <div>
@@ -65,7 +91,7 @@
                                     <span class="text-sm text-gray-400" x-text="form.stock_available"></span>
                                     <i data-feather="arrow-right" class="w-3 h-3 text-gray-400"></i>
                                     <span class="text-sm font-bold text-gray-700"
-                                        x-text="Math.max(0, Number(form.stock_on_hand) + Number(form.adjust_qty || 0) - Number(form.stock_reserved))"></span>
+                                        x-text="newAvailable()"></span>
                                 </div>
                             </div>
                         </div>
@@ -109,6 +135,16 @@
                 this.form.stock_reserved = stock?.stock_reserved ?? 0;
                 this.form.stock_available = stock?.stock_available ?? 0;
                 feather.replace();
+            },
+            newOnHand() {
+                return Number(this.form.stock_on_hand) + Number(this.form.adjust_qty || 0);
+            },
+            newAvailable() {
+                return Math.max(0, this.newOnHand() - Number(this.form.stock_reserved));
+            },
+            setAdjustmentMode(mode) {
+                const currentValue = Math.abs(Number(this.form.adjust_qty || 1));
+                this.form.adjust_qty = mode === 'remove' ? -currentValue : currentValue;
             },
             onSave() {
                 this.validate = null;

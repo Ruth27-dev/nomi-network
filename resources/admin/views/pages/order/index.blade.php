@@ -1,4 +1,26 @@
 @extends('admin::shared.layout')
+@section('style')
+    <style>
+        .order-filter-row {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .order-filter-row .form-row select {
+            border: 0;
+            color: #4b5563;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .order-filter-row .form-row select:focus {
+            outline: none;
+        }
+    </style>
+@stop
 @section('layout')
     <div class="content-wrapper" x-data="orderPage">
         @include('admin::shared.header', [
@@ -13,11 +35,21 @@
                     </span>
                 </div>
                 <div class="content-action-button">
-                    <div class="filter">
+                    <div class="filter order-filter-row">
                         <div class="form-row search-inline">
-                            <input type="text" x-model="formFilter.search" placeholder="Search order..."
+                            <input type="text" x-model="formFilter.search" placeholder="Search Order No..."
                                 autocomplete="off" @keydown.enter="onFilter()">
                             <button @click="onFilter()"><i data-feather="search"></i></button>
+                        </div>
+                        <div class="form-row">
+                            <select x-model="formFilter.status" @change="onFilter()">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="shipping">Shipping</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
                         </div>
                     </div>
                     <button @click="onReset()">
@@ -46,7 +78,7 @@
             },
             onReset() {
                 this.formFilter.reset();
-                this.table.reset();
+                this.table.init(this.formFilter.value());
             },
             onUpdateStatus(id, status) {
                 this.$store.confirmDialog.open({
@@ -75,4 +107,3 @@
         }));
     </script>
 @stop
-

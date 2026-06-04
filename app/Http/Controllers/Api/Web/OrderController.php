@@ -106,6 +106,9 @@ class OrderController extends Controller
         try {
             $shippingMethod = ListOfValue::findOrFail($request->shipping_method_id);
             $shippingFee    = (float) data_get($shippingMethod->add_on, 'price', 0);
+            $shippingTitle  = is_array($shippingMethod->title)
+                ? ($shippingMethod->title[app()->getLocale()] ?? $shippingMethod->title['en'] ?? collect($shippingMethod->title)->first() ?? '')
+                : (string) $shippingMethod->title;
 
             $address = null;
             $manualAddress = null;
@@ -135,7 +138,7 @@ class OrderController extends Controller
                 'user_id' => $user->id,
                 'user_address_id' => $address?->id,
                 'shipping_method_id'    => $shippingMethod->id,
-                'shipping_method_title' => $shippingMethod->title,
+                'shipping_method_title' => $shippingTitle,
                 'recipient_name' => $address ? $address->recipient_name : ($manualAddress['recipient_name'] ?? null),
                 'recipient_phone' => $address ? $address->recipient_phone : ($manualAddress['recipient_phone'] ?? null),
                 'shipping_address' => $address ? trim(implode(', ', array_filter([
