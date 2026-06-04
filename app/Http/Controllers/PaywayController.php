@@ -61,10 +61,6 @@ class PaywayController extends Controller
             $lastname      = $input['lastname'];
             $phone         = $input['phone'];
             $paymentOption = $input['payment_option'];
-            $returnUrl     = 'https://admin.nomihandicraftandservice.org/api/web/payway-webhook';
-            $cancelUrl     = 'https://nomihandicraftandservice.org';
-            $successUrl    = 'https://nomihandicraftandservice.org/support/success';
-
             if ($orderId) {
                 $order = Order::findOrFail($orderId);
 
@@ -82,7 +78,7 @@ class PaywayController extends Controller
                     'payment_status' => 'pending',
                 ]);
             } else {
-                $amount = $input['amount'];
+                $amount = number_format((float) $input['amount'], 2, '.', '');
 
                 Donation::create([
                     'tran_id'        => $tran_id,
@@ -97,26 +93,21 @@ class PaywayController extends Controller
                 ]);
             }
 
-            $params = $this->payWay->buildHostedPurchaseParams(
+            $checkoutPayload = $this->payWay->buildCheckoutPayload(
                 $tran_id,
                 $amount,
                 $firstname,
                 $lastname,
                 '',
                 $phone,
-                $paymentOption,
-                $returnUrl,
-                $cancelUrl,
-                $successUrl,
+                $paymentOption
             );
-
-            $paywayResponse = $this->payWay->purchase($params);
 
             DB::commit();
 
             return response()->json([
                 'tran_id' => $tran_id,
-                'data'    => $paywayResponse,
+                'data'    => $checkoutPayload,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
