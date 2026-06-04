@@ -186,6 +186,7 @@ Route::middleware(['locale'])->group(function () {
             Route::controller(ProductStockController::class)->prefix('stock')->name('product-stock-')->group(function () {
                 Route::get('list', 'index')->name('list');
                 Route::get('data', 'data')->name('data');
+                Route::get('summary', 'summary')->name('summary');
                 Route::get('history', 'history')->name('history');
                 Route::get('report', 'report')->name('report');
                 Route::get('report-data', 'reportData')->name('report-data');

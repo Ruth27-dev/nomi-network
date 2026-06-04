@@ -10,25 +10,73 @@
                     <label>Product</label>
                     <input type="text" x-model="form.product_name" disabled>
                 </div>
-                <div class="row-3">
-                    <div class="form-row">
-                        <label>On Hand</label>
-                        <input type="number" x-model="form.stock_on_hand" disabled>
-                    </div>
-                    <div class="form-row">
-                        <label>Reserved</label>
-                        <input type="number" x-model="form.stock_reserved" disabled>
-                    </div>
-                    <div class="form-row">
-                        <label>Available</label>
-                        <input type="number" x-model="form.stock_available" disabled>
+
+                {{-- Current stock overview --}}
+                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 mb-1">
+                    <div class="text-[11px] text-gray-400 uppercase tracking-wide font-medium mb-2">Current Stock</div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="text-center">
+                            <div class="text-[11px] text-gray-400 mb-0.5">On Hand</div>
+                            <div class="text-lg font-bold text-gray-700" x-text="form.stock_on_hand"></div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-[11px] text-gray-400 mb-0.5">Reserved</div>
+                            <div class="text-lg font-bold text-gray-500" x-text="form.stock_reserved"></div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-[11px] text-gray-400 mb-0.5">Available</div>
+                            <div class="text-lg font-bold"
+                                :class="(form.stock_available ?? 0) <= 0 ? 'text-red-500' : ((form.stock_available ?? 0) <= 5 ? 'text-amber-500' : 'text-emerald-600')"
+                                x-text="form.stock_available"></div>
+                        </div>
                     </div>
                 </div>
+
                 <div class="form-row">
                     <label>Adjust Qty<span>*</span></label>
                     <input type="number" x-model="form.adjust_qty" placeholder="Use + or - number (e.g. 10, -5)" :disabled="loading">
                     <span class="error" x-show="validate?.adjust_qty" x-text="validate?.adjust_qty"></span>
                 </div>
+
+                {{-- Live preview --}}
+                <template x-if="form.adjust_qty !== '' && Number(form.adjust_qty) !== 0">
+                    <div class="rounded-lg border px-3 py-3 mt-1"
+                        :class="(Number(form.stock_on_hand) + Number(form.adjust_qty || 0)) < 0
+                            ? 'border-red-200 bg-red-50'
+                            : 'border-blue-100 bg-blue-50'">
+                        <div class="text-[11px] font-medium uppercase tracking-wide mb-2"
+                            :class="(Number(form.stock_on_hand) + Number(form.adjust_qty || 0)) < 0 ? 'text-red-400' : 'text-blue-400'">
+                            After Adjustment
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="text-[11px] text-gray-400 mb-0.5">On Hand</div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-sm text-gray-400" x-text="form.stock_on_hand"></span>
+                                    <i data-feather="arrow-right" class="w-3 h-3 text-gray-400"></i>
+                                    <span class="text-sm font-bold"
+                                        :class="(Number(form.stock_on_hand) + Number(form.adjust_qty || 0)) < 0 ? 'text-red-600' : 'text-gray-700'"
+                                        x-text="Number(form.stock_on_hand) + Number(form.adjust_qty || 0)"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-[11px] text-gray-400 mb-0.5">Available</div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-sm text-gray-400" x-text="form.stock_available"></span>
+                                    <i data-feather="arrow-right" class="w-3 h-3 text-gray-400"></i>
+                                    <span class="text-sm font-bold text-gray-700"
+                                        x-text="Math.max(0, Number(form.stock_on_hand) + Number(form.adjust_qty || 0) - Number(form.stock_reserved))"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <template x-if="(Number(form.stock_on_hand) + Number(form.adjust_qty || 0)) < 0">
+                            <div class="mt-2 text-xs text-red-500 flex items-center gap-1">
+                                <i data-feather="alert-circle" class="w-3 h-3"></i>
+                                Stock on hand cannot go below zero.
+                            </div>
+                        </template>
+                    </div>
+                </template>
             </div>
             <div class="form-footer sticky bottom-0 bg-white z-10">
                 <div class="form-button">
@@ -85,4 +133,3 @@
         }));
     </script>
 </template>
-

@@ -47,9 +47,6 @@ Route::prefix('web')->group(function () {
         Route::prefix('payment')->group(function () {
             Route::post('/payway-checkout', [Web\PaymentController::class, 'checkout']);
         });
-
-        // Legacy-compatible PayWay endpoint from dreamzone-kh-v2
-        // Route::match(['get', 'post'], '/payway-form', [PaywayController::class, 'payway_form']);
     });
 
     Route::prefix('list-of-value')->name('list-of-value-')->group(function () {
