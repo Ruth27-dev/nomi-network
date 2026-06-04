@@ -208,7 +208,7 @@ class PaymentController extends Controller
                 (string) $request->payment_option,
                 (string) $request->input('return_url', 'https://nomihandicraftandservice.org/api/web/payway-submit'),
                 (string) $request->input('cancel_url', 'https://nomihandicraftandservice.org/'),
-                (string) $request->input('continue_success_url', 'https://nomihandicraftandservice.org/'),
+                (string) $request->input('continue_success_url', 'https://nomihandicraftandservice.org/support/success'),
                 (string) $request->input('return_params', 'json'),
                 'legacy_purchase'
             );

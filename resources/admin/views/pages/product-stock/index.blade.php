@@ -1,4 +1,113 @@
 @extends('admin::shared.layout')
+@section('style')
+    <style>
+        .stock-stats-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 16px;
+        }
+
+        .stock-stat-card {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            gap: 12px;
+            min-height: 72px;
+            padding: 12px 16px;
+        }
+
+        .stock-stat-card.is-danger {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .stock-stat-card.is-warning {
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .stock-stat-card.is-success {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .stock-table-scroll {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .stock-inventory-grid,
+        .stock-summary-grid {
+            align-items: center;
+            column-gap: 12px;
+            display: grid;
+            min-width: 980px;
+            width: 100%;
+        }
+
+        .stock-inventory-grid {
+            grid-template-columns: 56px minmax(240px, 1.7fr) 110px 110px 120px 150px 190px 100px;
+        }
+
+        .stock-summary-grid {
+            grid-template-columns: 56px minmax(240px, 1.5fr) minmax(200px, 1.2fr) 130px 190px 110px;
+        }
+
+        .stock-table-head {
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 700;
+            height: 44px;
+            padding: 0 12px;
+        }
+
+        .stock-table-row {
+            border-bottom: 1px solid #e5e7eb;
+            min-height: 72px;
+            padding: 0 12px;
+            transition: background-color 0.15s ease;
+        }
+
+        .stock-table-row:hover {
+            background: #f9fafb;
+        }
+
+        .stock-cell-center {
+            display: grid;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .stock-cell-text {
+            min-width: 0;
+        }
+
+        .stock-cell-text span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1200px) {
+            .stock-stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stock-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+@stop
 @section('layout')
     <div class="content-wrapper" x-data="productStockPage">
         @include('admin::shared.header', [
@@ -7,8 +116,8 @@
         ])
         <div class="content-body">
             {{-- Stat cards --}}
-            <div class="grid grid-cols-4 gap-3 mb-4">
-                <div class="rounded-xl border border-gray-200 bg-white px-4 py-3 flex items-center gap-3">
+            <div class="stock-stats-grid">
+                <div class="stock-stat-card">
                     <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
                         <i data-feather="box" class="w-4 h-4 text-blue-500"></i>
                     </div>
@@ -17,7 +126,7 @@
                         <div class="text-xl font-bold text-gray-700" x-text="stats.total ?? '-'"></div>
                     </div>
                 </div>
-                <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 flex items-center gap-3">
+                <div class="stock-stat-card is-danger">
                     <div class="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center">
                         <i data-feather="alert-circle" class="w-4 h-4 text-red-500"></i>
                     </div>
@@ -26,7 +135,7 @@
                         <div class="text-xl font-bold text-red-600" x-text="stats.out_of_stock ?? '-'"></div>
                     </div>
                 </div>
-                <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 flex items-center gap-3">
+                <div class="stock-stat-card is-warning">
                     <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">
                         <i data-feather="alert-triangle" class="w-4 h-4 text-amber-500"></i>
                     </div>
@@ -35,7 +144,7 @@
                         <div class="text-xl font-bold text-amber-600" x-text="stats.low_stock ?? '-'"></div>
                     </div>
                 </div>
-                <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 flex items-center gap-3">
+                <div class="stock-stat-card is-success">
                     <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center">
                         <i data-feather="check-circle" class="w-4 h-4 text-emerald-500"></i>
                     </div>
