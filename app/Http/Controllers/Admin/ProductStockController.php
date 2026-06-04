@@ -35,6 +35,22 @@ class ProductStockController extends Controller
         return view('admin::pages.product-stock.report');
     }
 
+    public function summary()
+    {
+        try {
+            $stats = ProductStock::selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN stock_available <= 0 THEN 1 ELSE 0 END) as out_of_stock,
+                SUM(CASE WHEN stock_available > 0 AND stock_available <= 5 THEN 1 ELSE 0 END) as low_stock,
+                SUM(CASE WHEN stock_available > 5 THEN 1 ELSE 0 END) as in_stock
+            ')->first();
+
+            return response()->json($stats);
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+    }
+
     public function data()
     {
         try {
