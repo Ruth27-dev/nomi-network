@@ -214,7 +214,7 @@ class OrderController extends Controller
             ]);
 
             DB::commit();
-            return $this->responseSuccess($order->load('items'), 'Order created successfully.');
+            return $this->responseSuccess($this->formatOrderWithTracking($order->load('items')), 'Order created successfully.');
         } catch (Exception $e) {
             DB::rollBack();
             return $this->responseError($e->getMessage());
@@ -227,10 +227,13 @@ class OrderController extends Controller
             $user = Auth::guard('api_web')->user();
             $pag  = request('per_page', 20);
             $data = Order::query()
+                ->with('items')
                 ->withCount('items')
                 ->where('user_id', $user->id)
                 ->orderByDesc('id')
                 ->paginate($pag);
+
+            $data->getCollection()->transform(fn($order) => $this->formatOrderWithTracking($order));
 
             return $this->responseSuccess($data);
         } catch (Exception $e) {
@@ -289,7 +292,7 @@ class OrderController extends Controller
                 'done'   => $done,
                 'active' => $step === $order->status,
             ];
-        });
+        })->values();
 
         return [
             'id'                    => $order->id,
@@ -308,9 +311,74 @@ class OrderController extends Controller
             'note'                  => $order->note,
             'created_at'            => $order->created_at,
             'completed_at'          => $order->completed_at,
-            'items'                 => $order->items,
+            'items_count'           => $order->items_count ?? $order->items->count(),
+            'items'                 => $this->formatOrderItems($order),
             'tracking'              => $tracking,
         ];
+    }
+
+    private function formatOrderItems(Order $order): array
+    {
+        return $order->items->map(function (OrderItem $item) {
+            $events = collect($item->tracking_events ?? [])
+                ->filter(fn($event) => is_array($event))
+                ->sortByDesc(fn($event) => $event['tracked_at'] ?? '')
+                ->values()
+                ->map(function ($event, $index) {
+                    $status = $event['status'] ?? null;
+
+                    return [
+                        'status' => $status,
+                        'label' => $this->trackingStatusLabel($status),
+                        'description' => $event['description'] ?? null,
+                        'location' => $event['location'] ?? null,
+                        'tracked_at' => $event['tracked_at'] ?? null,
+                        'active' => $index === 0,
+                        'done' => true,
+                    ];
+                });
+            $latestEvent = $events->first();
+            $eventList = $events->values()->all();
+
+            return [
+                'id' => $item->id,
+                'order_id' => $item->order_id,
+                'product_id' => $item->product_id,
+                'product_variation_id' => $item->product_variation_id,
+                'product_name' => $item->product_name,
+                'product_sku' => $item->product_sku,
+                'variation_name' => $item->variation_name,
+                'variation_sku' => $item->variation_sku,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => (float) $item->unit_price,
+                'line_total' => (float) $item->line_total,
+                'shipping_carrier' => $item->shipping_carrier,
+                'tracking_number' => $item->tracking_number,
+                'tracking_status' => $latestEvent['status'] ?? null,
+                'tracking_label' => $latestEvent['label'] ?? null,
+                'tracking_events' => $eventList,
+                'shipping_tracking' => [
+                    'carrier' => $item->shipping_carrier,
+                    'tracking_number' => $item->tracking_number,
+                    'current_status' => $latestEvent['status'] ?? null,
+                    'current_label' => $latestEvent['label'] ?? null,
+                    'events' => $eventList,
+                ],
+            ];
+        })->values()->all();
+    }
+
+    private function trackingStatusLabel(?string $status): ?string
+    {
+        return [
+            'created' => 'Created',
+            'picked_up' => 'Picked Up',
+            'in_transit' => 'In Transit',
+            'out_for_delivery' => 'Out for Delivery',
+            'delivered' => 'Delivered',
+            'failed' => 'Delivery Failed',
+            'returned' => 'Returned',
+        ][$status] ?? $status;
     }
 
     public function cancel()

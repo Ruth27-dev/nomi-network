@@ -222,6 +222,7 @@ Route::middleware(['locale'])->group(function () {
                 Route::get('list/detail', 'detailPage')->name('detail-page');
                 Route::post('status', 'updateStatus')->name('status');
                 Route::post('payment-status', 'updatePaymentStatus')->name('payment-status');
+                Route::post('item-tracking', 'updateItemTracking')->name('item-tracking');
             });
         });
 

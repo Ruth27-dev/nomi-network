@@ -21,11 +21,15 @@ class OrderItem extends Model
         'quantity',
         'unit_price',
         'line_total',
+        'shipping_carrier',
+        'tracking_number',
+        'tracking_events',
     ];
 
     protected $casts = [
         'unit_price' => 'float',
         'line_total' => 'float',
+        'tracking_events' => 'array',
     ];
 
     public function order()
@@ -43,4 +47,3 @@ class OrderItem extends Model
         return $this->belongsTo(ProductVariation::class, 'product_variation_id');
     }
 }
-

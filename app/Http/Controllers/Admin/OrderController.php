@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\ProductStock;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ class OrderController extends Controller
     {
         parent::__construct();
         $this->middleware('permission:order-view', ['only' => ['index', 'data', 'detail']]);
-        $this->middleware('permission:order-update', ['only' => ['updateStatus']]);
+        $this->middleware('permission:order-update', ['only' => ['updateStatus', 'updatePaymentStatus', 'updateItemTracking']]);
     }
 
     public function index()
@@ -184,6 +185,63 @@ class OrderController extends Controller
 
             DB::commit();
             return $this->responseSuccess(null, 'Order status updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError($e->getMessage());
+        }
+    }
+
+    public function updateItemTracking()
+    {
+        $status = strtolower(trim((string) request('status')));
+        $description = trim((string) request('description'));
+        $location = trim((string) request('location'));
+        $trackedAt = request('tracked_at') ?: now()->format('Y-m-d H:i:s');
+
+        if ($status || $description || $location) {
+            if (!$status) {
+                return $this->responseError('Tracking status is required.');
+            }
+
+            if (!$description) {
+                return $this->responseError('Tracking description is required.');
+            }
+
+            if (!in_array($status, ['created', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed', 'returned'], true)) {
+                return $this->responseError('Invalid tracking status.');
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            $item = OrderItem::query()
+                ->where('order_id', request('order_id'))
+                ->findOrFail(request('order_item_id'));
+
+            $events = collect($item->tracking_events ?? [])
+                ->filter(fn($event) => is_array($event))
+                ->values();
+
+            if ($status || $description || $location) {
+                $events->push([
+                    'status' => $status,
+                    'description' => $description,
+                    'location' => $location ?: null,
+                    'tracked_at' => $trackedAt,
+                ]);
+            }
+
+            $item->update([
+                'shipping_carrier' => request('shipping_carrier'),
+                'tracking_number' => request('tracking_number'),
+                'tracking_events' => $events
+                    ->sortByDesc(fn($event) => $event['tracked_at'] ?? '')
+                    ->values()
+                    ->all(),
+            ]);
+
+            DB::commit();
+            return $this->responseSuccess($item->fresh(), 'Tracking updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
             return $this->responseError($e->getMessage());
