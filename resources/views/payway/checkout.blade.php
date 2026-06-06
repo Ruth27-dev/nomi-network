@@ -43,7 +43,7 @@
             @endif
 
             <input type="hidden" name="hash" value="{{ $params['hash'] }}" id="hash">
-            <div style="width: 100%; text-align: end; margin-top: 5px;">
+            <div id="checkout_fallback" style="display: none; width: 100%; text-align: end; margin-top: 5px;">
                 <input type="button" id="checkout_button" value="Checkout Now">
             </div>
         </form>
@@ -53,10 +53,25 @@
 
     <script>
         $(document).ready(function(){
-            $('#checkout_button').click(function(){
+            function openAbaCheckout() {
                 $('#aba_merchant_request').append($(".payment_option:checked"));
                 AbaPayway.checkout();
-            });
+            }
+
+            $('#checkout_button').click(openAbaCheckout);
+
+            var startedAt = Date.now();
+            var waitForPayWay = setInterval(function () {
+                if (window.AbaPayway && typeof window.AbaPayway.checkout === 'function') {
+                    clearInterval(waitForPayWay);
+                    openAbaCheckout();
+                }
+
+                if (Date.now() - startedAt > 6000) {
+                    clearInterval(waitForPayWay);
+                    $('#checkout_fallback').show();
+                }
+            }, 100);
         });
     </script>
 </body>
