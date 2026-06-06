@@ -62,7 +62,7 @@
 
             var startedAt = Date.now();
             var waitForPayWay = setInterval(function () {
-                if (window.AbaPayway && typeof window.AbaPayway.checkout === 'function') {
+                if (typeof AbaPayway !== 'undefined' && typeof AbaPayway.checkout === 'function') {
                     clearInterval(waitForPayWay);
                     openAbaCheckout();
                 }
