@@ -107,6 +107,7 @@ class PaymentController extends Controller
                 $phone,
                 $request->payment_option,
             );
+            $tranId = $result['tran_id'];
 
             // Update order payment_method if order exists
             if ($order) {
@@ -203,6 +204,7 @@ class PaymentController extends Controller
                 $phone,
                 (string) $request->payment_option
             );
+            $tranId = $result['tran_id'];
             $result['payway'] = [
                 'checkout_url' => $result['checkout_url'],
                 'params'       => $result['params'],

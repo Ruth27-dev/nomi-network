@@ -102,6 +102,7 @@ class PaywayController extends Controller
                 $phone,
                 $paymentOption
             );
+            $tran_id = $checkoutPayload['tran_id'];
 
             DB::commit();
 

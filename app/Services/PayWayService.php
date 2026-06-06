@@ -214,6 +214,7 @@ class PayWayService
         string $phone,
         string $paymentOption
     ): array {
+        $tranId = trim($tranId, "/ \t\n\r\0\x0B");
         $reqTime = $this->getReqTime();
 
         $hash = $this->generateHash(
@@ -246,7 +247,7 @@ class PayWayService
 
         return [
             'tran_id'      => $tranId,
-            'checkout_url' => route('payway.checkout', ['tranId' => $tranId]),
+            'checkout_url' => url('payway/checkout/' . rawurlencode($tranId)),
             'params'       => $params,
         ];
     }
