@@ -8,30 +8,54 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 </head>
 <body>
-    <div id="aba_main_modal" class="aba-modal">
-        <div class="aba-modal-content">
-            <form id="aba_merchant_request" target="aba_webservice" action="{{ $params['api_url'] }}" method="POST">
-                <input type="hidden" name="hash" value="{{ $params['hash'] }}" id="hash">
-                <input type="hidden" name="tran_id" value="{{ $params['tran_id'] }}" id="tran_id">
-                <input type="hidden" name="amount" value="{{ $params['amount'] }}" id="amount">
-                <input type="hidden" name="firstname" value="{{ $params['firstname'] }}">
-                <input type="hidden" name="lastname" value="{{ $params['lastname'] }}">
-                <input type="hidden" name="email" value="{{ $params['email'] }}">
-                <input type="hidden" name="phone" value="{{ $params['phone'] }}">
-                <input type="hidden" name="req_time" value="{{ $params['req_time'] }}">
-                <input type="hidden" name="merchant_id" value="{{ $params['merchant_id'] }}">
-                <input type="hidden" name="payment_option" value="{{ $params['payment_option'] ?? 'abapay_khqr' }}">
-                <input type="hidden" name="view_type" value="{{ $params['view_type'] ?? 'popup' }}">
-            </form>
-        </div>
-    </div>
+    <div class="container" style="height: 80vh;">
+        <form id="aba_merchant_request" target="aba_webservice" action="{{ $params['api_url'] }}" method="POST" class="right" style="flex-direction: column; align-items: flex-start;">
+            <input type="hidden" name="req_time" value="{{ $params['req_time'] }}">
+            <input type="hidden" name="merchant_id" value="{{ $params['merchant_id'] }}">
+            <input type="hidden" name="tran_id" value="{{ $params['tran_id'] }}" id="tran_id">
+            <input type="hidden" name="amount" value="{{ $params['amount'] }}" id="amount">
 
-    <div class="container" style="height: 80vh;"></div>
+            @if (!empty($params['items']))
+                <input type="hidden" name="items" value="{{ $params['items'] }}">
+            @endif
+
+            <input type="hidden" name="firstname" value="{{ $params['firstname'] }}">
+            <input type="hidden" name="lastname" value="{{ $params['lastname'] }}">
+            <input type="hidden" name="email" value="{{ $params['email'] }}">
+            <input type="hidden" name="phone" value="{{ $params['phone'] }}">
+            <input type="hidden" name="payment_option" value="{{ $params['payment_option'] ?? 'abapay_khqr' }}">
+            <input type="hidden" name="view_type" value="{{ $params['view_type'] ?? 'popup' }}">
+            <input type="hidden" name="hosted_view" value="{{ $params['hosted_view'] ?? 'popup' }}">
+
+            @if (!empty($params['return_url']))
+                <input type="hidden" name="return_url" value="{{ $params['return_url'] }}">
+            @endif
+
+            @if (!empty($params['cancel_url']))
+                <input type="hidden" name="cancel_url" value="{{ $params['cancel_url'] }}">
+            @endif
+
+            @if (!empty($params['continue_success_url']))
+                <input type="hidden" name="continue_success_url" value="{{ $params['continue_success_url'] }}">
+            @endif
+
+            @if (!empty($params['return_params']))
+                <input type="hidden" name="return_params" value="{{ $params['return_params'] }}">
+            @endif
+
+            <input type="hidden" name="hash" value="{{ $params['hash'] }}" id="hash">
+            <div style="width: 100%; text-align: end; margin-top: 5px;">
+                <input type="button" id="checkout_button" value="Checkout Now">
+            </div>
+        </form>
+    </div>
 
     <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js"></script>
     <script>
         $(document).ready(function(){
-            AbaPayway.checkout();
+            $('#checkout_button').click(function(){
+                AbaPayway.checkout();
+            });
         });
     </script>
 </body>

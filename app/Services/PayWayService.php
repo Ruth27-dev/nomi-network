@@ -42,7 +42,7 @@ class PayWayService
 
     /**
      * Generate HMAC-SHA512 hash for PayWay checkout.
-     * Hash string: req_time + merchant_id + tran_id + amount + firstname + lastname + email + phone + payment_option
+     * Hash string follows the PayWay checkout payload order.
      */
     public function generateHash(
         string $reqTime,
@@ -52,17 +52,27 @@ class PayWayService
         string $lastName,
         string $email,
         string $phone,
-        string $paymentOption
+        string $paymentOption,
+        string $items = '',
+        string $returnUrl = '',
+        string $cancelUrl = '',
+        string $continueSuccessUrl = '',
+        string $returnParams = ''
     ): string {
         $hashStr = $reqTime
             . $this->merchantId
             . $tranId
             . $amount
+            . $items
             . $firstName
             . $lastName
             . $email
             . $phone
-            . $paymentOption;
+            . $paymentOption
+            . $returnUrl
+            . $cancelUrl
+            . $continueSuccessUrl
+            . $returnParams;
 
         return base64_encode(hash_hmac('sha512', $hashStr, $this->apiKey, true));
     }
@@ -216,6 +226,11 @@ class PayWayService
     ): array {
         $tranId = trim($tranId, "/ \t\n\r\0\x0B");
         $reqTime = $this->getReqTime();
+        $items = base64_encode(json_encode([]));
+        $returnUrl = base64_encode((string) config('payway.return_url'));
+        $cancelUrl = (string) config('payway.cancel_url');
+        $continueSuccessUrl = (string) config('payway.success_url');
+        $returnParams = 'json';
 
         $hash = $this->generateHash(
             $reqTime,
@@ -225,7 +240,12 @@ class PayWayService
             $lastName,
             $email,
             $phone,
-            $paymentOption
+            $paymentOption,
+            $items,
+            $returnUrl,
+            $cancelUrl,
+            $continueSuccessUrl,
+            $returnParams
         );
 
         $params = [
@@ -235,12 +255,18 @@ class PayWayService
             'req_time'       => $reqTime,
             'hash'           => $hash,
             'amount'         => $amount,
+            'items'          => $items,
             'firstname'      => $firstName,
             'lastname'       => $lastName,
             'email'          => $email,
             'phone'          => $phone,
             'payment_option' => $paymentOption,
             'view_type'      => 'popup',
+            'hosted_view'    => 'popup',
+            'return_url'     => $returnUrl,
+            'cancel_url'     => $cancelUrl,
+            'continue_success_url' => $continueSuccessUrl,
+            'return_params'  => $returnParams,
         ];
 
         // Cache params for 10 minutes — the web checkout page reads from here
