@@ -23,7 +23,6 @@
             <input type="hidden" name="lastname" value="{{ $params['lastname'] }}">
             <input type="hidden" name="email" value="{{ $params['email'] }}">
             <input type="hidden" name="phone" value="{{ $params['phone'] }}">
-            <input type="hidden" name="payment_option" value="{{ $params['payment_option'] ?? 'abapay_khqr' }}">
             <input type="hidden" name="view_type" value="{{ $params['view_type'] ?? 'popup' }}">
             <input type="hidden" name="hosted_view" value="{{ $params['hosted_view'] ?? 'popup' }}">
 
@@ -48,12 +47,15 @@
                 <input type="button" id="checkout_button" value="Checkout Now">
             </div>
         </form>
+
+        <input type="radio" name="payment_option" class="payment_option" checked value="{{ $params['payment_option'] ?? 'abapay_khqr' }}" style="display: none;">
     </div>
 
     <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js"></script>
     <script>
         $(document).ready(function(){
             $('#checkout_button').click(function(){
+                $('#aba_merchant_request').append($(".payment_option:checked"));
                 AbaPayway.checkout();
             });
         });
