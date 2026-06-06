@@ -43,6 +43,9 @@
             @endif
 
             <input type="hidden" name="hash" value="{{ $params['hash'] }}" id="hash">
+            <div style="width: 100%; text-align: end; margin-top: 5px;">
+                <input type="button" id="checkout_button" value="Checkout Now">
+            </div>
         </form>
     </div>
 
