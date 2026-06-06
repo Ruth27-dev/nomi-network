@@ -162,10 +162,6 @@ class PaymentController extends Controller
             'email'          => 'nullable|email|max:255',
             'phone'          => 'nullable|string|max:50',
             'note'           => 'nullable|string|max:500',
-            'return_url'     => 'nullable|url|max:500',
-            'cancel_url'     => 'nullable|url|max:500',
-            'continue_success_url' => 'nullable|url|max:500',
-            'return_params'  => 'nullable|in:json',
         ]);
 
         if ($validator->fails()) {
@@ -198,24 +194,18 @@ class PaymentController extends Controller
                 'note'           => $request->note,
             ]);
 
-            $params = $this->payWay->buildHostedPurchaseParams(
+            $result = $this->payWay->buildCheckoutPayload(
                 $tranId,
                 $amount,
                 $firstName,
                 $lastName,
                 $email,
                 $phone,
-                (string) $request->payment_option,
-                (string) $request->input('return_url', 'https://nomihandicraftandservice.org/api/web/payway-submit'),
-                (string) $request->input('cancel_url', 'https://nomihandicraftandservice.org/'),
-                (string) $request->input('continue_success_url', 'https://nomihandicraftandservice.org/support/success'),
-                (string) $request->input('return_params', 'json'),
-                'legacy_purchase'
+                (string) $request->payment_option
             );
-            $paywayResult = $this->payWay->purchase($params);
-            $result = [
-                'tran_id' => $tranId,
-                'payway' => $paywayResult,
+            $result['payway'] = [
+                'checkout_url' => $result['checkout_url'],
+                'params'       => $result['params'],
             ];
 
             PaywayTransaction::updateOrCreate(

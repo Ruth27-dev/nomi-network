@@ -181,7 +181,7 @@ class PayWayService
     public function purchase(array $params): array
     {
         try {
-            $response = Http::timeout(30)->post($this->apiUrl, $params);
+            $response = Http::asForm()->timeout(30)->post($this->apiUrl, $params);
 
             $json = $response->json();
 
@@ -247,6 +247,7 @@ class PayWayService
         return [
             'tran_id'      => $tranId,
             'checkout_url' => route('payway.checkout', ['tranId' => $tranId]),
+            'params'       => $params,
         ];
     }
 }
