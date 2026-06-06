@@ -1,6 +1,6 @@
 
     <div class="container" style="height: 80vh;">
-        <form id="aba_merchant_request" target="aba_webservice" action="{{ PayWayApiCheckout::getApiUrl() }}" method="POST" class="right" style="flex-direction: column; align-items: flex-start;">
+        <form id="aba_merchant_request" target="aba_webservice" action="{{ App\Http\ABA\PayWayApiCheckout::getApiUrl() }}" method="POST" class="right" style="flex-direction: column; align-items: flex-start;">
             {{ csrf_field() }}
             <input type="hidden" name="req_time" value="{{ $req_time }}">
             <input type="hidden" name="merchant_id" value="{{ $merchant_id }}">
