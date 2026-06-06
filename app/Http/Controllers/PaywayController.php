@@ -43,7 +43,7 @@ class PaywayController extends Controller
             ? ['order_id', 'firstname', 'lastname', 'phone', 'payment_option']
             : ['amount', 'firstname', 'lastname', 'phone', 'payment_option'];
 
-        $allowedOptions = ['cards', 'abapay_khqr_deeplink'];
+        $allowedOptions = ['cards', 'abapay_khqr', 'abapay_khqr_deeplink'];
         if (isset($input['payment_option']) && !in_array($input['payment_option'], $allowedOptions)) {
             return response()->json(['message' => 'payment_option must be one of: ' . implode(', ', $allowedOptions)], 422);
         }
