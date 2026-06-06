@@ -43,7 +43,7 @@
             @endif
 
             <input type="hidden" name="hash" value="{{ $params['hash'] }}" id="hash">
-            <div style="width: 100%; text-align: end; margin-top: 5px;">
+            <div id="checkout_retry" style="width: 100%; text-align: end; margin-top: 5px; display: none;">
                 <input type="button" id="checkout_button" value="Checkout Now">
             </div>
         </form>
@@ -54,10 +54,27 @@
     <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js"></script>
     <script>
         $(document).ready(function(){
-            $('#checkout_button').click(function(){
-                $('#aba_merchant_request').append($(".payment_option:checked"));
+            function openPaywayCheckout() {
+                if (!window.AbaPayway || typeof AbaPayway.checkout !== 'function') {
+                    return;
+                }
+
+                var selectedPaymentOption = $(".payment_option:checked");
+                if (selectedPaymentOption.length && !selectedPaymentOption.closest('#aba_merchant_request').length) {
+                    $('#aba_merchant_request').append(selectedPaymentOption);
+                }
+
                 AbaPayway.checkout();
+            }
+
+            $('#checkout_button').click(function(){
+                openPaywayCheckout();
             });
+
+            setTimeout(openPaywayCheckout, 300);
+            setTimeout(function () {
+                $('#checkout_retry').show();
+            }, 2000);
         });
     </script>
 </body>
