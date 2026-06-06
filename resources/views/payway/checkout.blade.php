@@ -54,24 +54,15 @@
     <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js"></script>
     <script>
         $(document).ready(function(){
-            function openPaywayCheckout() {
-                if (!window.AbaPayway || typeof AbaPayway.checkout !== 'function') {
-                    return;
-                }
-
-                var selectedPaymentOption = $(".payment_option:checked");
-                if (selectedPaymentOption.length && !selectedPaymentOption.closest('#aba_merchant_request').length) {
-                    $('#aba_merchant_request').append(selectedPaymentOption);
-                }
-
-                AbaPayway.checkout();
-            }
-
             $('#checkout_button').click(function(){
-                openPaywayCheckout();
+                $('#aba_merchant_request').append($(".payment_option:checked"));
+                AbaPayway.checkout();
             });
 
-            setTimeout(openPaywayCheckout, 300);
+            setTimeout(function () {
+                $('#checkout_button').trigger('click');
+            }, 300);
+
             setTimeout(function () {
                 $('#checkout_retry').show();
             }, 2000);
