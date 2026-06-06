@@ -23,8 +23,8 @@
             <input type="hidden" name="lastname" value="{{ $params['lastname'] }}">
             <input type="hidden" name="email" value="{{ $params['email'] }}">
             <input type="hidden" name="phone" value="{{ $params['phone'] }}">
+            <input type="hidden" name="payment_option" value="{{ $params['payment_option'] ?? 'abapay_khqr' }}">
             <input type="hidden" name="view_type" value="{{ $params['view_type'] ?? 'popup' }}">
-            <input type="hidden" name="hosted_view" value="{{ $params['hosted_view'] ?? 'popup' }}">
 
             @if (!empty($params['return_url']))
                 <input type="hidden" name="return_url" value="{{ $params['return_url'] }}">
@@ -43,29 +43,18 @@
             @endif
 
             <input type="hidden" name="hash" value="{{ $params['hash'] }}" id="hash">
-            <div id="checkout_retry" style="width: 100%; text-align: end; margin-top: 5px; display: none;">
+            <div style="width: 100%; text-align: end; margin-top: 5px;">
                 <input type="button" id="checkout_button" value="Checkout Now">
             </div>
         </form>
-
-        <input type="radio" name="payment_option" class="payment_option" checked value="{{ $params['payment_option'] ?? 'abapay_khqr' }}" style="display: none;">
     </div>
 
     <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js"></script>
     <script>
         $(document).ready(function(){
             $('#checkout_button').click(function(){
-                $('#aba_merchant_request').append($(".payment_option:checked"));
                 AbaPayway.checkout();
             });
-
-            setTimeout(function () {
-                $('#checkout_button').trigger('click');
-            }, 300);
-
-            setTimeout(function () {
-                $('#checkout_retry').show();
-            }, 2000);
         });
     </script>
 </body>

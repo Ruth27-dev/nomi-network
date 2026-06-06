@@ -262,7 +262,6 @@ class PayWayService
             'phone'          => $phone,
             'payment_option' => $paymentOption,
             'view_type'      => 'popup',
-            'hosted_view'    => 'popup',
             'return_url'     => $returnUrl,
             'cancel_url'     => $cancelUrl,
             'continue_success_url' => $continueSuccessUrl,
