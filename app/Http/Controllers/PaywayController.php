@@ -60,6 +60,7 @@ class PaywayController extends Controller
             $firstname     = $input['firstname'];
             $lastname      = $input['lastname'];
             $phone         = $input['phone'];
+            $email         = $input['email'] ?? '';
             $paymentOption = $input['payment_option'];
             if ($orderId) {
                 $order = Order::findOrFail($orderId);
@@ -98,7 +99,7 @@ class PaywayController extends Controller
                 $amount,
                 $firstname,
                 $lastname,
-                '',
+                $email,
                 $phone,
                 $paymentOption
             );
