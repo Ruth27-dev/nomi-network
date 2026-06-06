@@ -13,7 +13,7 @@
             <input type="hidden" name="phone" value="{{ $phone }}">
             <input type="hidden" name="payment_option" value="{{ $payment_option }}">
             <input type="hidden" name="view_type" value="popup">
-            <input type="hidden" name="return_url" value="{{ $return_url }}">
+            <!-- <input type="hidden" name="return_url" value="{{ $return_url }}"> -->
             <!-- <input type="hidden" name="cancel_url" value="{{ $cancel_url }}">
             <input type="hidden" name="continue_success_url" value="{{ $continue_success_url }}">
             <input type="hidden" name="return_params" value="{{ $return_params }}"> -->
