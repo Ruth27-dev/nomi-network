@@ -240,6 +240,7 @@ class PayWayService
             'email'          => $email,
             'phone'          => $phone,
             'payment_option' => $paymentOption,
+            'view_type'      => 'popup',
         ];
 
         // Cache params for 10 minutes — the web checkout page reads from here
