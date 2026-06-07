@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
 use App\Models\Order;
+use App\Models\PaywayTransaction;
 use App\Models\UserCartItem;
 use App\Services\PayWayService;
 use Illuminate\Http\Request;
@@ -85,17 +86,30 @@ class PaywayController extends Controller
             } else {
                 $amount = number_format((float) $input['amount'], 2, '.', '');
 
-                Donation::create([
-                    'tran_id'        => $tran_id,
-                    'user_id'        => null,
-                    'donation_type'  => $input['donation_type'] ?? 'one_time',
-                    'amount'         => $amount,
-                    'firstname'      => $firstname,
-                    'lastname'       => $lastname,
-                    'payment_option' => $paymentOption,
-                    'payment_status' => 'pending',
-                    'note'           => $input['note'] ?? null,
-                ]);
+                PaywayTransaction::updateOrCreate(
+                    ['tran_id' => $tran_id],
+                    [
+                        'order_id'       => null,
+                        'donation_id'    => null,
+                        'tran_type'      => $paymentOption,
+                        'order_type'     => 'donation',
+                        'is_update'      => null,
+                        'status_code'    => null,
+                        'payment_status' => 'unpaid',
+                        'raw_callback'   => [
+                            'pending_donation' => [
+                                'user_id'        => null,
+                                'donation_type'  => $input['donation_type'] ?? 'one_time',
+                                'amount'         => $amount,
+                                'firstname'      => $firstname,
+                                'lastname'       => $lastname,
+                                'email'          => $email,
+                                'payment_option' => $paymentOption,
+                                'note'           => $input['note'] ?? null,
+                            ],
+                        ],
+                    ]
+                );
             }
 
             $checkoutPayload = $this->payWay->buildCheckoutPayload(
@@ -247,6 +261,55 @@ class PaywayController extends Controller
                 UserCartItem::where('user_id', $order->user_id)->delete();
                 Log::info('[applyPaymentStatus] cart cleared', ['user_id' => $order->user_id]);
             }
+
+            return $statusCode === 0;
+        }
+
+        // --- Pending donation not yet inserted into donations table ---
+        $paywayTxn = PaywayTransaction::where('tran_id', $tranId)
+            ->where('order_type', 'donation')
+            ->first();
+
+        if ($paywayTxn) {
+            $status = match ($statusCode) {
+                0       => 'paid',
+                2       => 'pending',
+                3       => 'failed',
+                4       => 'refunded',
+                7       => 'failed',
+                default => 'failed',
+            };
+
+            $updates = [
+                'status_code'    => (string) $statusCode,
+                'payment_status' => $status,
+            ];
+
+            if ($statusCode === 0) {
+                $pending = $paywayTxn->raw_callback['pending_donation'] ?? [];
+                $donation = Donation::firstOrCreate(
+                    ['tran_id' => $tranId],
+                    [
+                        'user_id'        => $pending['user_id'] ?? null,
+                        'donation_type'  => $pending['donation_type'] ?? 'one_time',
+                        'amount'         => $pending['amount'] ?? 0,
+                        'firstname'      => $pending['firstname'] ?? '',
+                        'lastname'       => $pending['lastname'] ?? '',
+                        'email'          => $pending['email'] ?? '',
+                        'payment_option' => $pending['payment_option'] ?? $paywayTxn->tran_type,
+                        'payment_status' => 'paid',
+                        'note'           => $pending['note'] ?? null,
+                    ]
+                );
+
+                $updates['donation_id'] = $donation->id;
+            }
+
+            $paywayTxn->update($updates);
+            Log::info('[applyPaymentStatus] pending donation transaction updated', [
+                'tran_id' => $tranId,
+                'status'  => $status,
+            ]);
 
             return $statusCode === 0;
         }

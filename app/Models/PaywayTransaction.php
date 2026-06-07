@@ -16,6 +16,13 @@ class PaywayTransaction extends Model
         "tran_id",
         "is_update",
         "tran_type",
-        "order_type"
+        "order_type",
+        "status_code",
+        "payment_status",
+        "raw_callback",
+    ];
+
+    protected $casts = [
+        'raw_callback' => 'array',
     ];
 }

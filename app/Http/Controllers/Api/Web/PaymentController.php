@@ -140,7 +140,8 @@ class PaymentController extends Controller
     /**
      * POST /api/web/payment/donate
      *
-     * Creates a donation record and returns PayWay checkout params.
+     * Stores pending donation payment data and returns PayWay checkout params.
+     * The donation record is created only after PayWay confirms success.
      *
      * Payload:
      *   {
@@ -185,20 +186,6 @@ class PaymentController extends Controller
             // Unique transaction ID prefixed with DON- so callback can distinguish from orders
             $tranId = $this->generateShortTranId('DON');
 
-            // Save donation record
-            $donation = Donation::create([
-                'tran_id'        => $tranId,
-                'user_id'        => $user?->id,
-                'donation_type'  => $donationType,
-                'amount'         => $amount,
-                'firstname'      => $firstName,
-                'lastname'       => $lastName,
-                'email'          => $email,
-                'payment_option' => $request->payment_option,
-                'payment_status' => 'unpaid',
-                'note'           => $request->note,
-            ]);
-
             $result = $this->payWay->buildCheckoutPayload(
                 $tranId,
                 $amount,
@@ -221,19 +208,31 @@ class PaymentController extends Controller
                 ['tran_id' => $tranId],
                 [
                     'order_id'     => null,
-                    'donation_id'  => $donation->id,
+                    'donation_id'  => null,
                     'tran_type'    => $request->payment_option,
                     'order_type'   => 'donation',
                     'is_update'    => null,
                     'status_code'  => null,
                     'payment_status' => 'unpaid',
+                    'raw_callback' => [
+                        'pending_donation' => [
+                            'user_id'        => $user?->id,
+                            'donation_type'  => $donationType,
+                            'amount'         => $amount,
+                            'firstname'      => $firstName,
+                            'lastname'       => $lastName,
+                            'email'          => $email,
+                            'payment_option' => $request->payment_option,
+                            'note'           => $request->note,
+                        ],
+                    ],
                 ]
             );
 
             DB::commit();
 
             return $this->responseSuccess(
-                array_merge($result, ['donation_id' => $donation->id]),
+                $result,
                 'Donation checkout params generated successfully.'
             );
         } catch (Exception $e) {
@@ -276,12 +275,20 @@ class PaymentController extends Controller
                 $this->handleOrderCallback($tranId, $statusCode);
             }
 
+            $paywayTxn = PaywayTransaction::where('tran_id', $tranId)->first();
+            $rawCallback = [
+                'callback' => $request->all(),
+            ];
+            if ($paywayTxn && isset($paywayTxn->raw_callback['pending_donation'])) {
+                $rawCallback['pending_donation'] = $paywayTxn->raw_callback['pending_donation'];
+            }
+
             PaywayTransaction::updateOrCreate(
                 ['tran_id' => $tranId],
                 [
                     'status_code'    => $statusCode,
                     'payment_status' => (string) $request->input('payment_status', ''),
-                    'raw_callback'   => $request->all(),
+                    'raw_callback'   => $rawCallback,
                 ]
             );
 
@@ -343,7 +350,37 @@ class PaymentController extends Controller
         $donation = Donation::where('tran_id', $tranId)->first();
 
         if (!$donation) {
-            Log::warning('PayWay callback: donation not found', ['tran_id' => $tranId]);
+            $paywayTxn = PaywayTransaction::where('tran_id', $tranId)
+                ->where('order_type', 'donation')
+                ->first();
+
+            if ($statusCode !== '0' || !$paywayTxn) {
+                Log::warning('PayWay callback: donation not ready to create', [
+                    'tran_id' => $tranId,
+                    'status_code' => $statusCode,
+                ]);
+                return;
+            }
+
+            $pending = $paywayTxn->raw_callback['pending_donation'] ?? [];
+            $donation = Donation::create([
+                'tran_id'        => $tranId,
+                'user_id'        => $pending['user_id'] ?? null,
+                'donation_type'  => $pending['donation_type'] ?? 'one_time',
+                'amount'         => $pending['amount'] ?? 0,
+                'firstname'      => $pending['firstname'] ?? '',
+                'lastname'       => $pending['lastname'] ?? '',
+                'email'          => $pending['email'] ?? '',
+                'payment_option' => $pending['payment_option'] ?? $paywayTxn->tran_type,
+                'payment_status' => 'paid',
+                'note'           => $pending['note'] ?? null,
+            ]);
+
+            $paywayTxn->update([
+                'donation_id'    => $donation->id,
+                'status_code'    => $statusCode,
+                'payment_status' => 'paid',
+            ]);
             return;
         }
 
