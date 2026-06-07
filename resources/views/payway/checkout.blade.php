@@ -34,6 +34,10 @@
                 <input type="hidden" name="cancel_url" value="{{ $params['cancel_url'] }}">
             @endif
 
+            @if (!empty($params['skip_success_page']))
+                <input type="hidden" name="skip_success_page" value="{{ $params['skip_success_page'] }}">
+            @endif
+
             @if (!empty($params['continue_success_url']))
                 <input type="hidden" name="continue_success_url" value="{{ $params['continue_success_url'] }}">
             @endif
