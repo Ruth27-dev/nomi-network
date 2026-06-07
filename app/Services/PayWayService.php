@@ -222,13 +222,14 @@ class PayWayService
         string $lastName,
         string $email,
         string $phone,
-        string $paymentOption
+        string $paymentOption,
+        ?string $cancelUrl = null
     ): array {
         $tranId = trim($tranId, "/ \t\n\r\0\x0B");
         $reqTime = $this->getReqTime();
         $items = base64_encode(json_encode([]));
         $returnUrl = base64_encode((string) config('payway.return_url'));
-        $cancelUrl = (string) config('payway.cancel_url');
+        $cancelUrl = $cancelUrl ?? (string) config('payway.cancel_url');
         $continueSuccessUrl = (string) config('payway.success_url');
         $returnParams = 'json';
 

@@ -62,6 +62,10 @@ class PaywayController extends Controller
             $phone         = $input['phone'];
             $email         = $input['email'] ?? '';
             $paymentOption = $input['payment_option'];
+            $cancelUrl     = !empty($input['cancel_url']) && filter_var($input['cancel_url'], FILTER_VALIDATE_URL)
+                ? (string) $input['cancel_url']
+                : null;
+
             if ($orderId) {
                 $order = Order::findOrFail($orderId);
 
@@ -101,7 +105,8 @@ class PaywayController extends Controller
                 $lastname,
                 $email,
                 $phone,
-                $paymentOption
+                $paymentOption,
+                $cancelUrl
             );
 
             DB::commit();

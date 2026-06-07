@@ -96,6 +96,9 @@ class PaymentController extends Controller
             $lastName  = $request->lastname  ?? '';
             $email     = $request->email     ?? $user->email ?? '';
             $phone     = $request->phone     ?? $user->phone ?? '';
+            $cancelUrl = $request->filled('cancel_url') && filter_var($request->cancel_url, FILTER_VALIDATE_URL)
+                ? (string) $request->cancel_url
+                : null;
 
             // Generate PayWay params — mobile posts these directly to PayWay (WebView / SDK)
             $result = $this->payWay->buildCheckoutPayload(
@@ -106,6 +109,7 @@ class PaymentController extends Controller
                 $email,
                 $phone,
                 $request->payment_option,
+                $cancelUrl,
             );
             $tranId = $result['tran_id'];
 
@@ -202,7 +206,10 @@ class PaymentController extends Controller
                 $lastName,
                 $email,
                 $phone,
-                (string) $request->payment_option
+                (string) $request->payment_option,
+                $request->filled('cancel_url') && filter_var($request->cancel_url, FILTER_VALIDATE_URL)
+                    ? (string) $request->cancel_url
+                    : null
             );
             $tranId = $result['tran_id'];
             $result['payway'] = [
