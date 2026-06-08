@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\ProductAttributeController;
 use App\Http\Controllers\Admin\ProductDiscountController;
 use App\Http\Controllers\Admin\ProductLocationController;
 use App\Http\Controllers\Admin\ProductStockController;
+use App\Http\Controllers\Admin\SaleReportController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Requests\Admin as AdminRequest;
@@ -225,6 +226,13 @@ Route::middleware(['locale'])->group(function () {
                 Route::post('payment-status', 'updatePaymentStatus')->name('payment-status');
                 Route::post('item-tracking', 'updateItemTracking')->name('item-tracking');
             });
+        });
+
+        Route::controller(SaleReportController::class)->prefix('sale-report')->name('sale-report-')->group(function () {
+            Route::get('list',    'index')->name('list');
+            Route::get('summary', 'summary')->name('summary');
+            Route::get('data',    'data')->name('data');
+            Route::get('export',  'export')->name('export');
         });
 
         Route::prefix('donation')->name('donation-')->group(function () {
