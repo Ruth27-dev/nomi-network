@@ -31,5 +31,17 @@ class OrderSeeder extends Seeder
             'ordering'      => 1,
             'permission'    => array('order-view'),
         ]);
+
+        Menu::create([
+            'parent_id' => $order->id,
+            'name'      => json_encode([
+                'en'    => "Sale Report",
+                'km'    => "របាយការណ៍លក់",
+            ]),
+            'path'          => 'admin/sale-report/list',
+            'active'        => 'admin/sale-report/*',
+            'ordering'      => 2,
+            'permission'    => array('order-view'),
+        ]);
     }
 }
