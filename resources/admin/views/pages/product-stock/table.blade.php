@@ -8,9 +8,18 @@
                 <div class="stock-inventory-grid stock-table-head">
                     <div class="stock-cell-center">No</div>
                     <div>Item</div>
-                    <div class="stock-cell-center">On Hand</div>
-                    <div class="stock-cell-center">Reserved</div>
-                    <div class="stock-cell-center">Available</div>
+                    <div class="stock-cell-center flex flex-col gap-0">
+                        <span>On Hand</span>
+                        <span class="text-[10px] font-normal text-gray-400">in warehouse</span>
+                    </div>
+                    <div class="stock-cell-center flex flex-col gap-0">
+                        <span>Reserved</span>
+                        <span class="text-[10px] font-normal text-gray-400">pending orders</span>
+                    </div>
+                    <div class="stock-cell-center flex flex-col gap-0">
+                        <span>Available</span>
+                        <span class="text-[10px] font-normal text-gray-400">can be sold</span>
+                    </div>
                     <div class="stock-cell-center">Status</div>
                     <div class="stock-cell-center">Last Movement</div>
                     <div class="stock-cell-center">Action</div>

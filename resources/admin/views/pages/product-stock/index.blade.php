@@ -53,7 +53,7 @@
         }
 
         .stock-summary-grid {
-            grid-template-columns: 56px minmax(240px, 1.5fr) minmax(200px, 1.2fr) 130px 190px 110px;
+            grid-template-columns: 56px 150px minmax(200px, 1fr) 130px 100px 160px;
         }
 
         .stock-table-head {
@@ -171,7 +171,7 @@
                         ? 'background-color:#2563eb;color:#ffffff;border-color:#2563eb;'
                         : 'background-color:#ffffff;color:#4b5563;border-color:#d1d5db;'"
                     @click="switchTab('summary')">
-                    Movement Summary
+                    Stock History
                 </button>
             </div>
             <div class="content-tab">
@@ -200,6 +200,17 @@
             </div>
             <template x-if="activeTab === 'inventory'">
                 <div>
+                    <div class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 mb-3 text-xs text-blue-700 flex flex-wrap items-center gap-x-5 gap-y-1 leading-5">
+                        <span class="font-semibold text-blue-800 flex items-center gap-1">
+                            <i data-feather="info" class="w-3.5 h-3.5"></i>
+                            How stock works:
+                        </span>
+                        <span><strong>On Hand</strong> — total units physically in the warehouse</span>
+                        <span class="text-blue-300">·</span>
+                        <span><strong>Reserved</strong> — units locked for orders pending payment</span>
+                        <span class="text-blue-300">·</span>
+                        <span><strong>Available</strong> — what customers can still buy <em>(On Hand − Reserved)</em></span>
+                    </div>
                     @include('admin::pages.product-stock.table')
                 </div>
             </template>
@@ -238,7 +249,7 @@
                 this.activeTab = tab;
                 this.onReset();
                 if (tab === 'summary') {
-                    this.summaryTable.init({ summary: true });
+                    this.summaryTable.init();
                 } else {
                     this.inventoryTable.init();
                 }
@@ -246,7 +257,7 @@
             onFilter() {
                 const filter = this.formFilter.value();
                 if (this.activeTab === 'summary') {
-                    this.summaryTable.init({ ...filter, summary: true });
+                    this.summaryTable.init(filter);
                 } else {
                     this.inventoryTable.init(filter);
                 }
@@ -254,7 +265,7 @@
             onReset() {
                 this.formFilter.reset();
                 if (this.activeTab === 'summary') {
-                    this.summaryTable.init({ summary: true });
+                    this.summaryTable.reset();
                 } else {
                     this.inventoryTable.reset();
                 }

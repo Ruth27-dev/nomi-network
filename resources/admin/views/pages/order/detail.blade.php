@@ -177,6 +177,22 @@
         width: 100%;
     }
 
+    .order-tracking-form-grid button {
+        background-color: #facc15 !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 0 !important;
+        padding: 8px 12px !important;
+        white-space: nowrap;
+    }
+
+    .order-tracking-form-grid button:hover {
+        background-color: #eab308 !important;
+    }
+
     .order-tracking-empty {
         color: #9ca3af;
         font-size: 12px;
