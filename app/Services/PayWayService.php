@@ -223,14 +223,15 @@ class PayWayService
         string $email,
         string $phone,
         string $paymentOption,
-        ?string $cancelUrl = null
+        ?string $cancelUrl = null,
+        ?string $successUrl = null
     ): array {
         $tranId = trim($tranId, "/ \t\n\r\0\x0B");
         $reqTime = $this->getReqTime();
         $items = base64_encode(json_encode([]));
         $returnUrl = base64_encode((string) config('payway.return_url'));
         $cancelUrl = $cancelUrl ?? (string) config('payway.cancel_url');
-        $continueSuccessUrl = (string) config('payway.success_url');
+        $continueSuccessUrl = $successUrl ?? (string) config('payway.success_url');
         $returnParams = 'json';
 
         $hash = $this->generateHash(

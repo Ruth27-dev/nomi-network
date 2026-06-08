@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
+use App\Models\ListOfValue;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PaywayTransaction;
+use App\Models\Product;
+use App\Models\ProductStock;
+use App\Models\ProductVariation;
+use App\Models\UserAddress;
 use App\Models\UserCartItem;
 use App\Services\PayWayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -29,30 +36,38 @@ class PaywayController extends Controller
     /**
      * POST /api/web/create-payment
      *
-     * For donation (no order_id):
-     *   { "amount", "firstname", "lastname", "phone", "donation_type", "note" }
+     * For order (requires auth, pass items array):
+     *   { "items": [...], "shipping_method_id", "firstname", "lastname", "phone", "payment_option",
+     *     "user_address_id"?, "recipient_name"?, "recipient_phone"?, "address_line"?,
+     *     "province"?, "city"?, "district"?, "postal_code"?, "discount_amount"?, "note"? }
+     *   Order is created only after payment succeeds.
      *
-     * For order (with order_id):
-     *   { "order_id", "firstname", "lastname", "phone" }
-     *   amount is read from orders.grand_total — not accepted from input.
+     * For donation (no items, no auth required):
+     *   { "amount", "firstname", "lastname", "phone", "payment_option", "donation_type"?, "note"? }
      */
     public function payway_form(Request $request)
     {
-        $input     = $request->all();
-        $orderId   = $input['order_id'] ?? null;
-        $required  = $orderId
-            ? ['order_id', 'firstname', 'lastname', 'phone', 'payment_option']
-            : ['amount', 'firstname', 'lastname', 'phone', 'payment_option'];
+        $input         = $request->all();
+        $paymentOption = $input['payment_option'] ?? null;
+        $hasItems      = isset($input['items']) && is_array($input['items']) && count($input['items']) > 0;
 
         $allowedOptions = ['cards', 'abapay_khqr', 'abapay_khqr_deeplink'];
-        if (isset($input['payment_option']) && !in_array($input['payment_option'], $allowedOptions)) {
+        if (!in_array($paymentOption, $allowedOptions)) {
             return response()->json(['message' => 'payment_option must be one of: ' . implode(', ', $allowedOptions)], 422);
         }
 
-        foreach ($required as $field) {
+        foreach (['firstname', 'lastname', 'phone', 'payment_option'] as $field) {
             if (!array_key_exists($field, $input)) {
                 return response()->json(['message' => "Missing required field: $field"], 422);
             }
+        }
+
+        if (!$hasItems && !array_key_exists('amount', $input)) {
+            return response()->json(['message' => 'Missing required field: amount'], 422);
+        }
+
+        if ($hasItems && !array_key_exists('shipping_method_id', $input)) {
+            return response()->json(['message' => 'Missing required field: shipping_method_id'], 422);
         }
 
         DB::beginTransaction();
@@ -62,28 +77,148 @@ class PaywayController extends Controller
             $lastname      = $input['lastname'];
             $phone         = $input['phone'];
             $email         = $input['email'] ?? '';
-            $paymentOption = $input['payment_option'];
             $cancelUrl     = !empty($input['cancel_url']) && filter_var($input['cancel_url'], FILTER_VALIDATE_URL)
                 ? (string) $input['cancel_url']
                 : null;
 
-            if ($orderId) {
-                $order = Order::findOrFail($orderId);
-
-                if ($order->payment_status === 'paid') {
-                    return response()->json(['message' => 'Order is already paid.'], 422);
+            if ($hasItems) {
+                // ── Order flow: create order only after payment succeeds ──
+                $user = Auth::guard('api_web')->user();
+                if (!$user) {
+                    DB::rollBack();
+                    return response()->json(['message' => 'Authentication required.'], 401);
                 }
 
-                // Use actual grand_total — never trust client-sent amount for orders
-                $amount = number_format((float) $order->grand_total, 2, '.', '');
+                $shippingMethod = ListOfValue::findOrFail($input['shipping_method_id']);
+                $shippingFee    = (float) data_get($shippingMethod->add_on, 'price', 0);
+                $shippingTitle  = is_array($shippingMethod->title)
+                    ? ($shippingMethod->title[app()->getLocale()] ?? $shippingMethod->title['en'] ?? collect($shippingMethod->title)->first() ?? '')
+                    : (string) $shippingMethod->title;
 
-                // Store tran_id on order so webhook can look it up
-                $order->update([
-                    'order_no'       => $tran_id,
-                    'payment_method' => $paymentOption,
-                    'payment_status' => 'pending',
-                ]);
+                // Resolve address
+                $address = null;
+                if (!empty($input['user_address_id'])) {
+                    $address = UserAddress::where('user_id', $user->id)->findOrFail($input['user_address_id']);
+                } else {
+                    $address = UserAddress::where('user_id', $user->id)->where('is_default', true)->first();
+                }
+
+                $recipientName  = null;
+                $recipientPhone = null;
+                $shippingAddr   = null;
+                $userAddressId  = null;
+
+                if ($address) {
+                    $recipientName  = $address->recipient_name;
+                    $recipientPhone = $address->recipient_phone;
+                    $shippingAddr   = trim(implode(', ', array_filter([
+                        $address->address_line,
+                        $address->district,
+                        $address->city,
+                        $address->province,
+                        $address->postal_code,
+                    ])));
+                    $userAddressId  = $address->id;
+                } elseif (!empty($input['recipient_name']) && !empty($input['recipient_phone']) && !empty($input['address_line'])) {
+                    $recipientName  = $input['recipient_name'];
+                    $recipientPhone = $input['recipient_phone'];
+                    $shippingAddr   = trim(implode(', ', array_filter([
+                        $input['address_line'],
+                        $input['district'] ?? null,
+                        $input['city'] ?? null,
+                        $input['province'] ?? null,
+                        $input['postal_code'] ?? null,
+                    ])));
+                }
+
+                // Resolve items, compute totals, reserve stock
+                $pendingItems = [];
+                $subTotal     = 0;
+
+                foreach ($input['items'] as $row) {
+                    $product   = Product::findOrFail($row['product_id']);
+                    $variation = null;
+                    if (!empty($row['product_variation_id'])) {
+                        $variation = ProductVariation::where('product_id', $product->id)
+                            ->findOrFail($row['product_variation_id']);
+                    }
+
+                    $qty       = (int) $row['quantity'];
+                    $unitPrice = $variation ? (float) $variation->price : (float) $product->price;
+                    $lineTotal = $unitPrice * $qty;
+
+                    $stock = ProductStock::query()
+                        ->where('product_id', $product->id)
+                        ->where(function ($q) use ($variation) {
+                            $variation
+                                ? $q->where('product_variation_id', $variation->id)
+                                : $q->whereNull('product_variation_id');
+                        })
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$stock) {
+                        throw new \Exception("Stock record not found for {$product->name_en}");
+                    }
+                    if ((int) $stock->stock_available < $qty) {
+                        throw new \Exception("Insufficient stock for {$product->name_en}");
+                    }
+
+                    $stock->stock_reserved  = (int) $stock->stock_reserved + $qty;
+                    $stock->stock_available = (int) $stock->stock_on_hand - (int) $stock->stock_reserved;
+                    $stock->save();
+
+                    $pendingItems[] = [
+                        'product_id'           => $product->id,
+                        'product_variation_id' => $variation?->id,
+                        'product_name'         => $product->name_en,
+                        'product_sku'          => $product->sku,
+                        'variation_name'       => $variation?->name,
+                        'variation_sku'        => $variation?->sku,
+                        'quantity'             => $qty,
+                        'unit_price'           => $unitPrice,
+                        'line_total'           => $lineTotal,
+                    ];
+
+                    $subTotal += $lineTotal;
+                }
+
+                $discount   = (float) ($input['discount_amount'] ?? 0);
+                $grandTotal = max(0, $subTotal + $shippingFee - $discount);
+                $amount     = number_format($grandTotal, 2, '.', '');
+
+                PaywayTransaction::updateOrCreate(
+                    ['tran_id' => $tran_id],
+                    [
+                        'order_id'       => null,
+                        'donation_id'    => null,
+                        'tran_type'      => $paymentOption,
+                        'order_type'     => 'order',
+                        'is_update'      => null,
+                        'status_code'    => null,
+                        'payment_status' => 'unpaid',
+                        'raw_callback'   => [
+                            'pending_order' => [
+                                'user_id'               => $user->id,
+                                'user_address_id'       => $userAddressId,
+                                'shipping_method_id'    => $shippingMethod->id,
+                                'shipping_method_title' => $shippingTitle,
+                                'recipient_name'        => $recipientName,
+                                'recipient_phone'       => $recipientPhone,
+                                'shipping_address'      => $shippingAddr,
+                                'note'                  => $input['note'] ?? null,
+                                'payment_option'        => $paymentOption,
+                                'sub_total'             => $subTotal,
+                                'shipping_fee'          => $shippingFee,
+                                'discount_amount'       => $discount,
+                                'grand_total'           => $grandTotal,
+                                'items'                 => $pendingItems,
+                            ],
+                        ],
+                    ]
+                );
             } else {
+                // ── Donation flow ──
                 $amount = number_format((float) $input['amount'], 2, '.', '');
 
                 PaywayTransaction::updateOrCreate(
@@ -112,6 +247,10 @@ class PaywayController extends Controller
                 );
             }
 
+            $successUrl = $hasItems
+                ? 'https://nomihandicraftandservice.org/checkout/success'
+                : 'https://nomihandicraftandservice.org/support/success';
+
             $checkoutPayload = $this->payWay->buildCheckoutPayload(
                 $tran_id,
                 $amount,
@@ -120,7 +259,8 @@ class PaywayController extends Controller
                 $email,
                 $phone,
                 $paymentOption,
-                $cancelUrl
+                $cancelUrl,
+                $successUrl
             );
 
             DB::commit();
@@ -311,6 +451,100 @@ class PaywayController extends Controller
                 'status'  => $status,
             ]);
 
+            return $statusCode === 0;
+        }
+
+        // --- Pending order not yet inserted into orders table ---
+        $paywayTxn = PaywayTransaction::where('tran_id', $tranId)
+            ->where('order_type', 'order')
+            ->whereNull('order_id')
+            ->first();
+
+        if ($paywayTxn) {
+            $paymentStatus = match ($statusCode) {
+                0       => 'paid',
+                2       => 'pending',
+                3       => 'failed',
+                4       => 'refunded',
+                7       => 'failed',
+                default => 'failed',
+            };
+
+            $updates = [
+                'status_code'    => (string) $statusCode,
+                'payment_status' => $paymentStatus,
+            ];
+
+            if ($statusCode === 0) {
+                $pending = $paywayTxn->raw_callback['pending_order'] ?? [];
+
+                $order = Order::firstOrCreate(
+                    ['order_no' => $tranId],
+                    [
+                        'user_id'               => $pending['user_id'] ?? null,
+                        'user_address_id'       => $pending['user_address_id'] ?? null,
+                        'shipping_method_id'    => $pending['shipping_method_id'] ?? null,
+                        'shipping_method_title' => $pending['shipping_method_title'] ?? null,
+                        'recipient_name'        => $pending['recipient_name'] ?? null,
+                        'recipient_phone'       => $pending['recipient_phone'] ?? null,
+                        'shipping_address'      => $pending['shipping_address'] ?? null,
+                        'note'                  => $pending['note'] ?? null,
+                        'payment_method'        => $pending['payment_option'] ?? $paywayTxn->tran_type,
+                        'payment_status'        => 'paid',
+                        'status'                => 'confirmed',
+                        'sub_total'             => $pending['sub_total'] ?? 0,
+                        'shipping_fee'          => $pending['shipping_fee'] ?? 0,
+                        'discount_amount'       => $pending['discount_amount'] ?? 0,
+                        'grand_total'           => $pending['grand_total'] ?? 0,
+                    ]
+                );
+
+                if ($order->wasRecentlyCreated) {
+                    foreach ($pending['items'] ?? [] as $item) {
+                        OrderItem::create([
+                            'order_id'             => $order->id,
+                            'product_id'           => $item['product_id'],
+                            'product_variation_id' => $item['product_variation_id'] ?? null,
+                            'product_name'         => $item['product_name'] ?? '',
+                            'product_sku'          => $item['product_sku'] ?? null,
+                            'variation_name'       => $item['variation_name'] ?? null,
+                            'variation_sku'        => $item['variation_sku'] ?? null,
+                            'quantity'             => $item['quantity'],
+                            'unit_price'           => $item['unit_price'],
+                            'line_total'           => $item['line_total'],
+                        ]);
+                    }
+
+                    if ($order->user_id) {
+                        UserCartItem::where('user_id', $order->user_id)->delete();
+                        Log::info('[applyPaymentStatus] cart cleared for pending order', ['user_id' => $order->user_id]);
+                    }
+                }
+
+                $updates['order_id'] = $order->id;
+                Log::info('[applyPaymentStatus] pending order created', ['order_id' => $order->id, 'tran_id' => $tranId]);
+            } elseif (!in_array($statusCode, [0, 2])) {
+                // Release reserved stock on payment failure
+                foreach ($paywayTxn->raw_callback['pending_order']['items'] ?? [] as $item) {
+                    $stock = ProductStock::query()
+                        ->where('product_id', $item['product_id'])
+                        ->where(function ($q) use ($item) {
+                            !empty($item['product_variation_id'])
+                                ? $q->where('product_variation_id', $item['product_variation_id'])
+                                : $q->whereNull('product_variation_id');
+                        })
+                        ->first();
+
+                    if ($stock) {
+                        $stock->stock_reserved  = max(0, (int) $stock->stock_reserved - (int) $item['quantity']);
+                        $stock->stock_available = (int) $stock->stock_on_hand - (int) $stock->stock_reserved;
+                        $stock->save();
+                    }
+                }
+                Log::info('[applyPaymentStatus] pending order stock released', ['tran_id' => $tranId]);
+            }
+
+            $paywayTxn->update($updates);
             return $statusCode === 0;
         }
 
