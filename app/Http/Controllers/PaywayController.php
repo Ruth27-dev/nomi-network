@@ -49,7 +49,16 @@ class PaywayController extends Controller
     {
         $input         = $request->all();
         $paymentOption = $input['payment_option'] ?? null;
-        $hasItems      = isset($input['items']) && is_array($input['items']) && count($input['items']) > 0;
+
+        // Support items sent as a JSON string (e.g. from some mobile clients)
+        if (isset($input['items']) && is_string($input['items'])) {
+            $decoded = json_decode($input['items'], true);
+            if (is_array($decoded)) {
+                $input['items'] = $decoded;
+            }
+        }
+
+        $hasItems = isset($input['items']) && is_array($input['items']) && count($input['items']) > 0;
 
         $allowedOptions = ['cards', 'abapay_khqr', 'abapay_khqr_deeplink'];
         if (!in_array($paymentOption, $allowedOptions)) {
@@ -62,8 +71,17 @@ class PaywayController extends Controller
             }
         }
 
-        if (!$hasItems && !array_key_exists('amount', $input)) {
-            return response()->json(['message' => 'Missing required field: amount'], 422);
+        // For orders send "items" (array of {product_id, quantity}).
+        // For donations send "amount" (number).
+        if (!$hasItems) {
+            if (array_key_exists('items', $input)) {
+                return response()->json(['message' => 'items must be a non-empty array with product_id and quantity for each entry'], 422);
+            }
+            if (!array_key_exists('amount', $input)) {
+                return response()->json([
+                    'message' => 'Invalid request: send "items" (array) for an order payment, or "amount" (number) for a donation.',
+                ], 422);
+            }
         }
 
         if ($hasItems && !array_key_exists('shipping_method_id', $input)) {

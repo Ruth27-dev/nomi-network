@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\ListOfValue;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PaywayTransaction;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ProductVariation;
 use App\Models\UserAddress;
+use App\Services\PayWayService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,13 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
+    private PayWayService $payWay;
+
+    public function __construct(PayWayService $payWay)
+    {
+        parent::__construct();
+        $this->payWay = $payWay;
+    }
     public function addressList()
     {
         $user = Auth::guard('api_web')->user();
@@ -382,6 +391,200 @@ class OrderController extends Controller
             'failed' => 'Delivery Failed',
             'returned' => 'Returned',
         ][$status] ?? $status;
+    }
+
+    /**
+     * POST /api/web/order/create-with-payment  (auth required)
+     *
+     * Creates a pending PayWay transaction with reserved stock and returns
+     * checkout params. The Order record is created only after payment succeeds.
+     *
+     * Required: items (array), shipping_method_id, firstname, lastname, phone, payment_option
+     * Optional: user_address_id | (recipient_name, recipient_phone, address_line),
+     *           discount_amount, note, cancel_url
+     */
+    public function createWithPayment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'items'                => 'required|array|min:1',
+            'items.*.product_id'   => 'required|integer|exists:products,id',
+            'items.*.product_variation_id' => 'nullable|integer|exists:product_variations,id',
+            'items.*.quantity'     => 'required|integer|min:1',
+            'shipping_method_id'   => 'required|integer|exists:list_of_values,id',
+            'firstname'            => 'required|string|max:255',
+            'lastname'             => 'required|string|max:255',
+            'phone'                => 'required|string|max:50',
+            'payment_option'       => 'required|in:cards,abapay_khqr,abapay_khqr_deeplink',
+            'user_address_id'      => 'nullable|integer|exists:user_addresses,id',
+            'recipient_name'       => 'nullable|string|max:255',
+            'recipient_phone'      => 'nullable|string|max:50',
+            'address_line'         => 'nullable|string',
+            'province'             => 'nullable|string|max:255',
+            'city'                 => 'nullable|string|max:255',
+            'district'             => 'nullable|string|max:255',
+            'postal_code'          => 'nullable|string|max:20',
+            'discount_amount'      => 'nullable|numeric|min:0',
+            'note'                 => 'nullable|string|max:500',
+            'cancel_url'           => 'nullable|url',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        $user          = Auth::guard('api_web')->user();
+        $paymentOption = $request->payment_option;
+
+        DB::beginTransaction();
+        try {
+            $shippingMethod = ListOfValue::findOrFail($request->shipping_method_id);
+            $shippingFee    = (float) data_get($shippingMethod->add_on, 'price', 0);
+            $shippingTitle  = is_array($shippingMethod->title)
+                ? ($shippingMethod->title[app()->getLocale()] ?? $shippingMethod->title['en'] ?? collect($shippingMethod->title)->first() ?? '')
+                : (string) $shippingMethod->title;
+
+            // Resolve delivery address
+            $address = null;
+            if ($request->user_address_id) {
+                $address = UserAddress::where('user_id', $user->id)->findOrFail($request->user_address_id);
+            } else {
+                $address = UserAddress::where('user_id', $user->id)->where('is_default', true)->first();
+            }
+
+            $recipientName  = null;
+            $recipientPhone = null;
+            $shippingAddr   = null;
+            $userAddressId  = null;
+
+            if ($address) {
+                $recipientName  = $address->recipient_name;
+                $recipientPhone = $address->recipient_phone;
+                $shippingAddr   = trim(implode(', ', array_filter([
+                    $address->address_line, $address->district,
+                    $address->city, $address->province, $address->postal_code,
+                ])));
+                $userAddressId  = $address->id;
+            } elseif ($request->filled('recipient_name') && $request->filled('recipient_phone') && $request->filled('address_line')) {
+                $recipientName  = $request->recipient_name;
+                $recipientPhone = $request->recipient_phone;
+                $shippingAddr   = trim(implode(', ', array_filter([
+                    $request->address_line, $request->district,
+                    $request->city, $request->province, $request->postal_code,
+                ])));
+            }
+
+            // Resolve items, compute totals, reserve stock
+            $pendingItems = [];
+            $subTotal     = 0;
+
+            foreach ($request->items as $row) {
+                $product   = Product::findOrFail($row['product_id']);
+                $variation = null;
+                if (!empty($row['product_variation_id'])) {
+                    $variation = ProductVariation::where('product_id', $product->id)
+                        ->findOrFail($row['product_variation_id']);
+                }
+
+                $qty       = (int) $row['quantity'];
+                $unitPrice = $variation ? (float) $variation->price : (float) $product->price;
+                $lineTotal = $unitPrice * $qty;
+
+                $stock = ProductStock::query()
+                    ->where('product_id', $product->id)
+                    ->where(function ($q) use ($variation) {
+                        $variation
+                            ? $q->where('product_variation_id', $variation->id)
+                            : $q->whereNull('product_variation_id');
+                    })
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$stock) {
+                    throw new Exception("Stock record not found for {$product->name_en}");
+                }
+                if ((int) $stock->stock_available < $qty) {
+                    throw new Exception("Insufficient stock for {$product->name_en}");
+                }
+
+                $stock->stock_reserved  = (int) $stock->stock_reserved + $qty;
+                $stock->stock_available = (int) $stock->stock_on_hand - (int) $stock->stock_reserved;
+                $stock->save();
+
+                $pendingItems[] = [
+                    'product_id'           => $product->id,
+                    'product_variation_id' => $variation?->id,
+                    'product_name'         => $product->name_en,
+                    'product_sku'          => $product->sku,
+                    'variation_name'       => $variation?->name,
+                    'variation_sku'        => $variation?->sku,
+                    'quantity'             => $qty,
+                    'unit_price'           => $unitPrice,
+                    'line_total'           => $lineTotal,
+                ];
+
+                $subTotal += $lineTotal;
+            }
+
+            $discount   = (float) ($request->discount_amount ?? 0);
+            $grandTotal = max(0, $subTotal + $shippingFee - $discount);
+            $amount     = number_format($grandTotal, 2, '.', '');
+            $tranId     = $this->payWay->generateTranId();
+
+            PaywayTransaction::updateOrCreate(
+                ['tran_id' => $tranId],
+                [
+                    'order_id'       => null,
+                    'donation_id'    => null,
+                    'tran_type'      => $paymentOption,
+                    'order_type'     => 'order',
+                    'is_update'      => null,
+                    'status_code'    => null,
+                    'payment_status' => 'unpaid',
+                    'raw_callback'   => [
+                        'pending_order' => [
+                            'user_id'               => $user->id,
+                            'user_address_id'       => $userAddressId,
+                            'shipping_method_id'    => $shippingMethod->id,
+                            'shipping_method_title' => $shippingTitle,
+                            'recipient_name'        => $recipientName,
+                            'recipient_phone'       => $recipientPhone,
+                            'shipping_address'      => $shippingAddr,
+                            'note'                  => $request->note,
+                            'payment_option'        => $paymentOption,
+                            'sub_total'             => $subTotal,
+                            'shipping_fee'          => $shippingFee,
+                            'discount_amount'       => $discount,
+                            'grand_total'           => $grandTotal,
+                            'items'                 => $pendingItems,
+                        ],
+                    ],
+                ]
+            );
+
+            $cancelUrl = $request->filled('cancel_url') ? (string) $request->cancel_url : null;
+
+            $checkoutPayload = $this->payWay->buildCheckoutPayload(
+                $tranId,
+                $amount,
+                $request->firstname,
+                $request->lastname,
+                $request->email ?? '',
+                $request->phone,
+                $paymentOption,
+                $cancelUrl,
+                'https://nomihandicraftandservice.org/checkout/success'
+            );
+
+            DB::commit();
+
+            return $this->responseSuccess([
+                'tran_id' => $tranId,
+                'data'    => $checkoutPayload,
+            ], 'Checkout params generated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->responseError($e->getMessage());
+        }
     }
 
     public function cancel()
