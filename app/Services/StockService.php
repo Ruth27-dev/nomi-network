@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\ProductVariation;
 use Illuminate\Support\Facades\DB;
 
 class StockService
@@ -52,6 +54,8 @@ class StockService
             $stock->stock_available = max(0, $stock->stock_on_hand - $stock->stock_reserved);
             $stock->save();
 
+            $this->syncProductStock($item->product_id, $item->product_variation_id, $after);
+
             DB::table('stock_history')->insert([
                 'order_id'             => $order->id,
                 'product_id'           => $item->product_id,
@@ -97,6 +101,8 @@ class StockService
             $stock->stock_available = max(0, $stock->stock_on_hand - (int) $stock->stock_reserved);
             $stock->save();
 
+            $this->syncProductStock($item->product_id, $item->product_variation_id, $after);
+
             DB::table('stock_history')->insert([
                 'order_id'             => $order->id,
                 'product_id'           => $item->product_id,
@@ -108,6 +114,15 @@ class StockService
                 'created_at'           => now(),
                 'updated_at'           => now(),
             ]);
+        }
+    }
+
+    private function syncProductStock(int $productId, ?int $variationId, int $onHand): void
+    {
+        if ($variationId) {
+            ProductVariation::where('id', $variationId)->update(['stock' => $onHand]);
+        } else {
+            Product::where('id', $productId)->update(['stock' => $onHand]);
         }
     }
 }

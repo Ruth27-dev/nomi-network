@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\ProductVariation;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -182,9 +184,12 @@ class ProductStockController extends Controller
             $available = max(0, $after - $reserved);
 
             $stock->update([
-                'stock_on_hand' => $after,
+                'stock_on_hand'   => $after,
                 'stock_available' => $available,
             ]);
+
+            // Keep products.stock / product_variations.stock in sync
+            $this->syncProductStock($stock->product_id, $stock->product_variation_id, $after);
 
             if (Schema::hasTable('stock_history')) {
                 $payload = [
@@ -356,5 +361,14 @@ class ProductStockController extends Controller
             ->when(filter_var($request->get('low_stock_only', false), FILTER_VALIDATE_BOOLEAN), function ($q) use ($threshold) {
                 $q->where('ps.stock_available', '<=', $threshold);
             });
+    }
+
+    private function syncProductStock(int $productId, ?int $variationId, int $onHand): void
+    {
+        if ($variationId) {
+            ProductVariation::where('id', $variationId)->update(['stock' => $onHand]);
+        } else {
+            Product::where('id', $productId)->update(['stock' => $onHand]);
+        }
     }
 }
