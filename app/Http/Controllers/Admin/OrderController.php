@@ -6,14 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductStock;
+use App\Services\StockService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function __construct()
+    private StockService $stock;
+
+    public function __construct(StockService $stock)
     {
         parent::__construct();
+        $this->stock = $stock;
         $this->middleware('permission:order-view', ['only' => ['index', 'data', 'detail']]);
         $this->middleware('permission:order-update', ['only' => ['updateStatus', 'updatePaymentStatus', 'updateItemTracking']]);
     }
@@ -142,6 +146,8 @@ class OrderController extends Controller
 
             if ($paymentStatus === 'paid' && $order->status === 'pending') {
                 $update['status'] = 'confirmed';
+                $order->load('items');
+                $this->stock->deductForOrder($order);
             }
 
             $order->update($update);
@@ -170,13 +176,23 @@ class OrderController extends Controller
                 return $this->responseSuccess(null, 'No status change.');
             }
 
+            if ($newStatus === 'confirmed' && $order->status === 'pending') {
+                // Deduct stock_on_hand and release stock_reserved (idempotent — safe if already done via PayWay)
+                $this->stock->deductForOrder($order);
+            }
+
             if ($newStatus === 'cancelled' && in_array($order->status, ['pending', 'confirmed'], true)) {
-                $this->releaseReservedStock($order);
+                if ($order->status === 'confirmed') {
+                    // Stock was already deducted at confirmation — put it back
+                    $this->stock->returnForOrder($order);
+                } else {
+                    // Only reserved, not yet deducted — just release the reservation
+                    $this->releaseReservedStock($order);
+                }
             }
 
             if ($newStatus === 'completed' && $order->status !== 'completed') {
-                // Release reserved first; stock-on-hand deduction happens in DB trigger.
-                $this->releaseReservedStock($order);
+                // Stock was already deducted when the order was confirmed; nothing to do here.
                 $order->completed_at = now();
             }
 

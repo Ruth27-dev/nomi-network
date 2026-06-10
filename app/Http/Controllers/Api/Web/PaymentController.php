@@ -10,6 +10,7 @@ use App\Models\PaywayTransaction;
 use App\Models\ProductStock;
 use App\Models\UserCartItem;
 use App\Services\PayWayService;
+use App\Services\StockService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,11 +21,13 @@ use Illuminate\Support\Facades\Validator;
 class PaymentController extends Controller
 {
     private PayWayService $payWay;
+    private StockService  $stock;
 
-    public function __construct(PayWayService $payWay)
+    public function __construct(PayWayService $payWay, StockService $stock)
     {
         parent::__construct();
         $this->payWay = $payWay;
+        $this->stock  = $stock;
     }
 
     /**
@@ -384,6 +387,9 @@ class PaymentController extends Controller
                         UserCartItem::where('user_id', $order->user_id)->delete();
                     }
                 }
+
+                // Deduct stock_on_hand and release stock_reserved now that payment is confirmed
+                $this->stock->deductForOrder($order);
 
                 $paywayTxn->update(['order_id' => $order->id]);
                 Log::info('PayWay callback: pending order created', ['order_id' => $order->id, 'tran_id' => $tranId]);

@@ -527,8 +527,14 @@ class OrderController extends Controller
 
             $discount   = (float) ($request->discount_amount ?? 0);
             $grandTotal = max(0, $subTotal + $shippingFee - $discount);
-            $amount     = number_format($grandTotal, 2, '.', '');
-            $tranId     = $this->payWay->generateTranId();
+
+            if ($grandTotal <= 0) {
+                DB::rollBack();
+                return $this->responseError('Order total must be greater than 0.');
+            }
+
+            $amount = number_format($grandTotal, 2, '.', '');
+            $tranId = $this->payWay->generateTranId();
 
             PaywayTransaction::updateOrCreate(
                 ['tran_id' => $tranId],
@@ -578,8 +584,13 @@ class OrderController extends Controller
             DB::commit();
 
             return $this->responseSuccess([
-                'tran_id' => $tranId,
-                'data'    => $checkoutPayload,
+                'tran_id'         => $tranId,
+                'amount'          => (float) $amount,
+                'sub_total'       => round($subTotal, 2),
+                'shipping_fee'    => round($shippingFee, 2),
+                'discount_amount' => round($discount, 2),
+                'grand_total'     => round($grandTotal, 2),
+                'data'            => $checkoutPayload,
             ], 'Checkout params generated successfully.');
         } catch (Exception $e) {
             DB::rollBack();

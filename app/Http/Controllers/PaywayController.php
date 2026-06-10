@@ -14,6 +14,7 @@ use App\Models\ProductVariation;
 use App\Models\UserAddress;
 use App\Models\UserCartItem;
 use App\Services\PayWayService;
+use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,10 +23,12 @@ use Illuminate\Support\Facades\Log;
 class PaywayController extends Controller
 {
     private PayWayService $payWay;
+    private StockService  $stock;
 
-    public function __construct(PayWayService $payWay)
+    public function __construct(PayWayService $payWay, StockService $stock)
     {
         $this->payWay = $payWay;
+        $this->stock  = $stock;
     }
 
     public function index()
@@ -203,7 +206,13 @@ class PaywayController extends Controller
 
                 $discount   = (float) ($input['discount_amount'] ?? 0);
                 $grandTotal = max(0, $subTotal + $shippingFee - $discount);
-                $amount     = number_format($grandTotal, 2, '.', '');
+
+                if ($grandTotal <= 0) {
+                    DB::rollBack();
+                    return response()->json(['message' => 'Order total must be greater than 0.'], 422);
+                }
+
+                $amount = number_format($grandTotal, 2, '.', '');
 
                 PaywayTransaction::updateOrCreate(
                     ['tran_id' => $tran_id],
@@ -283,10 +292,20 @@ class PaywayController extends Controller
 
             DB::commit();
 
-            return response()->json([
+            $response = [
                 'tran_id' => $tran_id,
+                'amount'  => $amount,
                 'data'    => $checkoutPayload,
-            ]);
+            ];
+
+            if ($hasItems) {
+                $response['sub_total']       = round($subTotal, 2);
+                $response['shipping_fee']    = round($shippingFee, 2);
+                $response['discount_amount'] = round($discount, 2);
+                $response['grand_total']     = round($grandTotal, 2);
+            }
+
+            return response()->json($response);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 500);
@@ -538,6 +557,9 @@ class PaywayController extends Controller
                         Log::info('[applyPaymentStatus] cart cleared for pending order', ['user_id' => $order->user_id]);
                     }
                 }
+
+                // Deduct stock_on_hand and release stock_reserved now that payment is confirmed
+                $this->stock->deductForOrder($order);
 
                 $updates['order_id'] = $order->id;
                 Log::info('[applyPaymentStatus] pending order created', ['order_id' => $order->id, 'tran_id' => $tranId]);
