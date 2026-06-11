@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ProductVariation;
+use App\Services\StockService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -20,9 +21,12 @@ use PhpOffice\PhpSpreadsheet\Style\Font;
 
 class ProductStockController extends Controller
 {
-    public function __construct()
+    private StockService $stock;
+
+    public function __construct(StockService $stock)
     {
         parent::__construct();
+        $this->stock = $stock;
         $this->middleware('permission:product-stock-view', ['only' => ['index', 'data', 'history']]);
         $this->middleware('permission:product-stock-update', ['only' => ['adjust']]);
     }
@@ -183,7 +187,7 @@ class ProductStockController extends Controller
             // Recalculate true reserved from only genuinely-pending PayWay transactions.
             // Old confirmed orders may have left stock_reserved stuck at a high value
             // (pre-StockService bug), causing stock_available to stay 0 after adjustment.
-            $trueReserved = $this->calculateActiveReserved($stock->product_id, $stock->product_variation_id);
+            $trueReserved = $this->stock->computeActiveReserved($stock->product_id, $stock->product_variation_id);
             $available    = max(0, $after - $trueReserved);
 
             $stock->update([
@@ -376,35 +380,4 @@ class ProductStockController extends Controller
         }
     }
 
-    /**
-     * Return the qty currently reserved by PayWay transactions that are
-     * genuinely still pending (no order created, unpaid, within 30 min expiry).
-     * Ignores any stale reservations from old confirmed or failed orders.
-     */
-    private function calculateActiveReserved(int $productId, ?int $variationId): int
-    {
-        $rows = DB::table('payway_transactions')
-            ->whereNull('order_id')
-            ->where('payment_status', 'unpaid')
-            ->where('created_at', '>=', now()->subMinutes(30))
-            ->whereNotNull('raw_callback')
-            ->pluck('raw_callback');
-
-        $total = 0;
-        foreach ($rows as $raw) {
-            $data  = is_string($raw) ? json_decode($raw, true) : $raw;
-            $items = $data['pending_order']['items'] ?? [];
-            foreach ($items as $item) {
-                $itemProductId   = (int) ($item['product_id'] ?? 0);
-                $itemVariationId = isset($item['product_variation_id']) ? (int) $item['product_variation_id'] : null;
-
-                if ($itemProductId !== $productId) continue;
-                if ($variationId === null && $itemVariationId !== null) continue;
-                if ($variationId !== null && $itemVariationId !== $variationId) continue;
-
-                $total += (int) ($item['quantity'] ?? 0);
-            }
-        }
-        return $total;
-    }
 }

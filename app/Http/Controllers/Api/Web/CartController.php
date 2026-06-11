@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ProductVariation;
 use App\Models\UserCartItem;
+use App\Services\StockService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CartController extends Controller
 {
+    private StockService $stock;
+
+    public function __construct(StockService $stock)
+    {
+        parent::__construct();
+        $this->stock = $stock;
+    }
+
     public function add(Request $request)
     {
         $user = Auth::guard('api_web')->user();
@@ -186,6 +195,17 @@ class CartController extends Controller
                 'stock_reserved' => 0,
                 'stock_available' => max(0, $fallbackStock),
             ]);
+        }
+
+        // Self-heal: if stock_available is 0 but stock_on_hand is positive,
+        // stock_reserved may be stale from old orders that never properly released it.
+        // Recompute from only genuinely active pending PayWay reservations.
+        if ((int) $stock->stock_available <= 0 && (int) $stock->stock_on_hand > 0) {
+            $trueReserved  = $this->stock->computeActiveReserved($product->id, $variationId);
+            $trueAvailable = max(0, (int) $stock->stock_on_hand - $trueReserved);
+            $stock->stock_reserved  = $trueReserved;
+            $stock->stock_available = $trueAvailable;
+            $stock->save();
         }
 
         if ((int) $stock->stock_available < $quantity) {

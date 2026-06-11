@@ -117,6 +117,45 @@ class StockService
         }
     }
 
+    /**
+     * Sum the qty currently reserved by PayWay transactions that are
+     * genuinely still pending: no order created yet, unpaid, and within
+     * the 30-minute checkout window (older ones are abandoned/expired).
+     */
+    public function computeActiveReserved(int $productId, ?int $variationId): int
+    {
+        $rows = DB::table('payway_transactions')
+            ->whereNull('order_id')
+            ->where('payment_status', 'unpaid')
+            ->where('created_at', '>=', now()->subMinutes(30))
+            ->whereNotNull('raw_callback')
+            ->pluck('raw_callback');
+
+        $total = 0;
+        foreach ($rows as $raw) {
+            $data  = is_string($raw) ? json_decode($raw, true) : $raw;
+            $items = $data['pending_order']['items'] ?? [];
+            foreach ($items as $item) {
+                $itemProductId   = (int) ($item['product_id'] ?? 0);
+                $itemVariationId = isset($item['product_variation_id']) ? (int) $item['product_variation_id'] : null;
+
+                if ($itemProductId !== $productId) {
+                    continue;
+                }
+                if ($variationId === null && $itemVariationId !== null) {
+                    continue;
+                }
+                if ($variationId !== null && $itemVariationId !== $variationId) {
+                    continue;
+                }
+
+                $total += (int) ($item['quantity'] ?? 0);
+            }
+        }
+
+        return $total;
+    }
+
     private function syncProductStock(int $productId, ?int $variationId, int $onHand): void
     {
         if ($variationId) {
