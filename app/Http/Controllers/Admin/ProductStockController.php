@@ -180,11 +180,15 @@ class ProductStockController extends Controller
                 return $this->responseError('Stock on hand cannot be negative.');
             }
 
-            $reserved = (int) $stock->stock_reserved;
-            $available = max(0, $after - $reserved);
+            // Recalculate true reserved from only genuinely-pending PayWay transactions.
+            // Old confirmed orders may have left stock_reserved stuck at a high value
+            // (pre-StockService bug), causing stock_available to stay 0 after adjustment.
+            $trueReserved = $this->calculateActiveReserved($stock->product_id, $stock->product_variation_id);
+            $available    = max(0, $after - $trueReserved);
 
             $stock->update([
                 'stock_on_hand'   => $after,
+                'stock_reserved'  => $trueReserved,
                 'stock_available' => $available,
             ]);
 
@@ -370,5 +374,37 @@ class ProductStockController extends Controller
         } else {
             Product::where('id', $productId)->update(['stock' => $onHand]);
         }
+    }
+
+    /**
+     * Return the qty currently reserved by PayWay transactions that are
+     * genuinely still pending (no order created, unpaid, within 30 min expiry).
+     * Ignores any stale reservations from old confirmed or failed orders.
+     */
+    private function calculateActiveReserved(int $productId, ?int $variationId): int
+    {
+        $rows = DB::table('payway_transactions')
+            ->whereNull('order_id')
+            ->where('payment_status', 'unpaid')
+            ->where('created_at', '>=', now()->subMinutes(30))
+            ->whereNotNull('raw_callback')
+            ->pluck('raw_callback');
+
+        $total = 0;
+        foreach ($rows as $raw) {
+            $data  = is_string($raw) ? json_decode($raw, true) : $raw;
+            $items = $data['pending_order']['items'] ?? [];
+            foreach ($items as $item) {
+                $itemProductId   = (int) ($item['product_id'] ?? 0);
+                $itemVariationId = isset($item['product_variation_id']) ? (int) $item['product_variation_id'] : null;
+
+                if ($itemProductId !== $productId) continue;
+                if ($variationId === null && $itemVariationId !== null) continue;
+                if ($variationId !== null && $itemVariationId !== $variationId) continue;
+
+                $total += (int) ($item['quantity'] ?? 0);
+            }
+        }
+        return $total;
     }
 }
