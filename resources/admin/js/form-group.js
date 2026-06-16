@@ -5,7 +5,7 @@ const Validator = function (value, validates) {
         let status = false;
         switch (name) {
             case "required":
-                status = value != "" && value != null;
+                status = value !== "" && value !== null;
                 break;
             case "email":
                 status = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
@@ -39,7 +39,7 @@ const ValidatorWithError = function (value, validates) {
         const [name, arg] = keys.split(":");
         switch (name) {
             case "required":
-                if (value == "" || value == null) {
+                if (value === "" || value === null) {
                     results.push(name);
                 }
                 break;
