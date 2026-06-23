@@ -18,6 +18,9 @@ class PayWayService
         $this->merchantId = (string) config('payway.merchant_id', '');
         $this->apiKey = (string) config('payway.api_key', '');
         $this->publicKey = (string) config('payway.public_key', $this->apiKey);
+        if ($this->publicKey === '') {
+            $this->publicKey = $this->apiKey;
+        }
         $this->apiUrl = (string) config('payway.api_url', '');
         $this->checkoutBaseUrl = (string) config('payway.checkout_url', '');
     }
