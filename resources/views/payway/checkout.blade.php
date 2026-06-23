@@ -20,7 +20,7 @@
             <input type="hidden" name="email" value="{{ $params['email'] }}">
             <input type="hidden" name="phone" value="{{ $params['phone'] }}">
             <input type="hidden" name="type" value="{{ $params['type'] ?? 'purchase' }}">
-            <input type="radio" name="payment_option" class="payment_option" value="{{ $params['payment_option'] ?? 'abapay_khqr' }}" checked style="display: none;">
+            <input type="hidden" name="payment_option" value="{{ $params['payment_option'] ?? 'abapay_khqr' }}">
             <input type="hidden" name="view_type" value="{{ $params['view_type'] ?? 'popup' }}">
 
             <input type="hidden" name="return_url" value="{{ $params['return_url'] }}">
