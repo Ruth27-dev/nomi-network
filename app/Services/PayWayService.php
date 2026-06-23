@@ -77,7 +77,7 @@ class PayWayService
             .$currency
             .$lifetime;
 
-        return base64_encode(hash_hmac('sha512', $hashStr, $this->publicKey, true));
+        return base64_encode(hash_hmac('sha512', $hashStr, $this->apiKey, true));
     }
 
     public function verifyCallbackHash(string $tranId, string $statusCode, string $receivedHash): bool
