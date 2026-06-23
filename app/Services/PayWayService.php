@@ -9,14 +9,16 @@ class PayWayService
 {
     private string $merchantId;
     private string $apiKey;
+    private string $publicKey;
     private string $apiUrl;
     private string $checkoutBaseUrl;
 
     public function __construct()
     {
-        $this->merchantId      = (string) config('payway.merchant_id', '');
-        $this->apiKey          = (string) config('payway.api_key', '');
-        $this->apiUrl          = (string) config('payway.api_url', '');
+        $this->merchantId = (string) config('payway.merchant_id', '');
+        $this->apiKey = (string) config('payway.api_key', '');
+        $this->publicKey = (string) config('payway.public_key', $this->apiKey);
+        $this->apiUrl = (string) config('payway.api_url', '');
         $this->checkoutBaseUrl = (string) config('payway.checkout_url', '');
     }
 
@@ -27,7 +29,7 @@ class PayWayService
 
     public function generateTranId(): string
     {
-        return now()->format('ymdHis') . strtoupper(substr(md5(uniqid('', true)), 0, 8));
+        return now()->format('ymdHis').strtoupper(substr(md5(uniqid('', true)), 0, 8));
     }
 
     public function getApiUrl(): string
@@ -37,13 +39,9 @@ class PayWayService
 
     public function getReqTime(): string
     {
-        return (string) time();
+        return now()->format('YmdHis');
     }
 
-    /**
-     * Generate HMAC-SHA512 hash for PayWay checkout.
-     * Hash string follows the PayWay checkout payload order.
-     */
     public function generateHash(
         string $reqTime,
         string $tranId,
@@ -53,43 +51,39 @@ class PayWayService
         string $email,
         string $phone,
         string $paymentOption,
-        string $items = '',
         string $returnUrl = '',
         string $cancelUrl = '',
         string $continueSuccessUrl = '',
-        string $returnParams = ''
+        string $currency = 'USD',
+        string $lifetime = '',
+        string $type = 'purchase'
     ): string {
         $hashStr = $reqTime
-            . $this->merchantId
-            . $tranId
-            . $amount
-            . $items
-            . $firstName
-            . $lastName
-            . $email
-            . $phone
-            . $paymentOption
-            . $returnUrl
-            . $cancelUrl
-            . $continueSuccessUrl
-            . $returnParams;
+            .$this->merchantId
+            .$tranId
+            .$amount
+            .$firstName
+            .$lastName
+            .$email
+            .$phone
+            .$type
+            .$paymentOption
+            .$returnUrl
+            .$cancelUrl
+            .$continueSuccessUrl
+            .$currency
+            .$lifetime;
 
-        return base64_encode(hash_hmac('sha512', $hashStr, $this->apiKey, true));
+        return base64_encode(hash_hmac('sha512', $hashStr, $this->publicKey, true));
     }
 
-    /**
-     * Verify the callback hash sent by PayWay.
-     * PayWay signs callbacks with: tran_id + status_code
-     */
     public function verifyCallbackHash(string $tranId, string $statusCode, string $receivedHash): bool
     {
-        $expected = base64_encode(hash_hmac('sha512', $tranId . $statusCode, $this->apiKey, true));
+        $expected = base64_encode(hash_hmac('sha512', $tranId.$statusCode, $this->apiKey, true));
+
         return hash_equals($expected, $receivedHash);
     }
 
-    /**
-     * Build PayWay hosted-view params compatible with legacy and current flows.
-     */
     public function buildHostedPurchaseParams(
         string $tranId,
         string $amount,
@@ -109,34 +103,32 @@ class PayWayService
         $amount = number_format((float) $amount, 2, '.', '');
 
         if ($hashMode === 'legacy_purchase') {
-            // DreamZone-compatible format:
-            // req_time + merchant_id + tran_id + amount + firstname + lastname + email + phone + 'purchase' + payment_option + return_url + continue_success_url
             $concatParams = $reqTime
-                . $this->merchantId
-                . $tranId
-                . $amount
-                . $firstName
-                . $lastName
-                . $email
-                . $phone
-                . 'purchase'
-                . $paymentOption
-                . $encodedReturnUrl
-                . $continueSuccessUrl;
+                .$this->merchantId
+                .$tranId
+                .$amount
+                .$firstName
+                .$lastName
+                .$email
+                .$phone
+                .'purchase'
+                .$paymentOption
+                .$encodedReturnUrl
+                .$continueSuccessUrl;
         } else {
             $concatParams = $reqTime
-                . $this->merchantId
-                . $tranId
-                . $amount
-                . $firstName
-                . $lastName
-                . $email
-                . $phone
-                . $paymentOption
-                . $encodedReturnUrl
-                . $cancelUrl
-                . $continueSuccessUrl
-                . $returnParams;
+                .$this->merchantId
+                .$tranId
+                .$amount
+                .$firstName
+                .$lastName
+                .$email
+                .$phone
+                .$paymentOption
+                .$encodedReturnUrl
+                .$cancelUrl
+                .$continueSuccessUrl
+                .$returnParams;
         }
 
         $hash = base64_encode(hash_hmac('sha512', $concatParams, $this->apiKey, true));
@@ -152,7 +144,7 @@ class PayWayService
             'email' => $email,
             'phone' => $phone,
             'payment_option' => $paymentOption,
-            'view_type' => 'popup', //hosted_view
+            'view_type' => 'popup',
             'return_url' => $encodedReturnUrl,
             'continue_success_url' => $continueSuccessUrl,
             'cancel_url' => $cancelUrl,
@@ -162,27 +154,39 @@ class PayWayService
 
     public function getTransactionDetail(string $tranId): array
     {
-        $reqTime = now()->format('YmdHis');
-        $hash    = base64_encode(hash_hmac('sha512', $reqTime . $this->merchantId . $tranId, $this->apiKey, true));
+        $url = rtrim($this->checkoutBaseUrl, '/').'/api/payment-gateway/v1/payments/transaction-detail';
 
-        $url = rtrim($this->checkoutBaseUrl, '/') . '/api/payment-gateway/v1/payments/transaction-detail';
+        return $this->fetchTransaction($tranId, $url);
+    }
+
+    public function checkTransaction(string $tranId): array
+    {
+        $url = rtrim($this->checkoutBaseUrl, '/').'/api/payment-gateway/v1/payments/check-transaction-2';
+
+        return $this->fetchTransaction($tranId, $url);
+    }
+
+    private function fetchTransaction(string $tranId, string $url): array
+    {
+        $reqTime = now()->format('YmdHis');
+        $hash = base64_encode(hash_hmac('sha512', $reqTime.$this->merchantId.$tranId, $this->apiKey, true));
 
         try {
             $response = Http::timeout(30)->post($url, [
-                'req_time'    => $reqTime,
+                'req_time' => $reqTime,
                 'merchant_id' => $this->merchantId,
-                'tran_id'     => $tranId,
-                'hash'        => $hash,
+                'tran_id' => $tranId,
+                'hash' => $hash,
             ]);
 
             return [
-                'ok'   => $response->successful(),
+                'ok' => $response->successful(),
                 'data' => $response->json(),
             ];
         } catch (\Throwable $e) {
             return [
-                'ok'    => false,
-                'data'  => null,
+                'ok' => false,
+                'data' => null,
                 'error' => $e->getMessage(),
             ];
         }
@@ -192,29 +196,24 @@ class PayWayService
     {
         try {
             $response = Http::asForm()->timeout(30)->post($this->apiUrl, $params);
-
             $json = $response->json();
 
             return [
-                'status'          => $json['status']          ?? null,
-                'qr_string'       => $json['qr_string']       ?? null,
+                'status' => $json['status'] ?? null,
+                'qr_string' => $json['qr_string'] ?? null,
                 'abapay_deeplink' => $json['abapay_deeplink'] ?? null,
                 'checkout_qr_url' => $json['checkout_qr_url'] ?? null,
             ];
         } catch (\Throwable $e) {
             return [
-                'status'          => ['code' => '99', 'message' => $e->getMessage()],
-                'qr_string'       => null,
+                'status' => ['code' => '99', 'message' => $e->getMessage()],
+                'qr_string' => null,
                 'abapay_deeplink' => null,
                 'checkout_qr_url' => null,
             ];
         }
     }
 
-    /**
-     * Build checkout params, cache them, and return a checkout_url for mobile to open in WebView.
-     * Cache TTL: 10 minutes.
-     */
     public function buildCheckoutPayload(
         string $tranId,
         string $amount,
@@ -224,15 +223,19 @@ class PayWayService
         string $phone,
         string $paymentOption,
         ?string $cancelUrl = null,
-        ?string $successUrl = null
+        ?string $successUrl = null,
+        string $currency = 'USD',
+        ?int $lifetime = 5
     ): array {
         $tranId = trim($tranId, "/ \t\n\r\0\x0B");
+        $amount = number_format((float) $amount, 2, '.', '');
+        $currency = strtoupper($currency ?: 'USD');
         $reqTime = $this->getReqTime();
-        $items = base64_encode(json_encode([]));
         $returnUrl = base64_encode((string) config('payway.return_url'));
         $cancelUrl = $cancelUrl ?? (string) config('payway.cancel_url');
         $continueSuccessUrl = $successUrl ?? (string) config('payway.success_url');
-        $returnParams = 'json';
+        $type = 'purchase';
+        $lifetime = 5;
 
         $hash = $this->generateHash(
             $reqTime,
@@ -243,40 +246,41 @@ class PayWayService
             $email,
             $phone,
             $paymentOption,
-            $items,
-            $returnUrl,
-            $cancelUrl,
-            $continueSuccessUrl,
-            $returnParams
+            returnUrl: $returnUrl,
+            cancelUrl: $cancelUrl,
+            continueSuccessUrl: $continueSuccessUrl,
+            currency: $currency,
+            lifetime: (string) $lifetime,
+            type: $type
         );
 
         $params = [
-            'api_url'        => $this->apiUrl,
-            'merchant_id'    => $this->merchantId,
-            'tran_id'        => $tranId,
-            'req_time'       => $reqTime,
-            'hash'           => $hash,
-            'amount'         => $amount,
-            'items'          => $items,
-            'firstname'      => $firstName,
-            'lastname'       => $lastName,
-            'email'          => $email,
-            'phone'          => $phone,
+            'api_url' => $this->apiUrl,
+            'merchant_id' => $this->merchantId,
+            'tran_id' => $tranId,
+            'req_time' => $reqTime,
+            'hash' => $hash,
+            'amount' => $amount,
+            'firstname' => $firstName,
+            'lastname' => $lastName,
+            'email' => $email,
+            'phone' => $phone,
+            'type' => $type,
             'payment_option' => $paymentOption,
-            'view_type'      => 'popup',
-            'return_url'     => $returnUrl,
-            'cancel_url'     => $cancelUrl,
+            'view_type' => 'popup',
+            'return_url' => $returnUrl,
+            'cancel_url' => $cancelUrl,
             'continue_success_url' => $continueSuccessUrl,
-            'return_params'  => $returnParams,
+            'currency' => $currency,
+            'lifetime' => $lifetime,
         ];
 
-        // Cache params for 10 minutes — the web checkout page reads from here
-        Cache::put('payway_checkout_' . $tranId, $params, now()->addMinutes(10));
+        Cache::put('payway_checkout_'.$tranId, $params, now()->addMinutes(10));
 
         return [
-            'tran_id'      => $tranId,
-            'checkout_url' => url('payway/checkout/' . rawurlencode($tranId)),
-            'params'       => $params,
+            'tran_id' => $tranId,
+            'checkout_url' => url('payway/checkout/'.rawurlencode($tranId)),
+            'params' => $params,
         ];
     }
 }

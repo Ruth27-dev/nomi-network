@@ -350,7 +350,7 @@ class PaywayController extends Controller
             return response()->json(['message' => 'tran_id is required'], 422);
         }
 
-        $detail = $this->payWay->getTransactionDetail($tranId);
+        $detail = $this->payWay->checkTransaction($tranId);
 
         if (!$detail['ok']) {
             return response()->json(['message' => 'Failed to fetch transaction from PayWay', 'detail' => $detail], 502);
