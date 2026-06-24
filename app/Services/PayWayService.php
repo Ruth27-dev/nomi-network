@@ -77,6 +77,14 @@ class PayWayService
             .$currency
             .$lifetime;
 
+        \Illuminate\Support\Facades\Log::info('[PayWay] generateHash debug', [
+            'merchantId'         => $this->merchantId,
+            'apiKey_length'      => strlen($this->apiKey),
+            'apiKey_first8'      => substr($this->apiKey, 0, 8),
+            'hashStr_length'     => strlen($hashStr),
+            'hashStr_preview'    => substr($hashStr, 0, 80),
+        ]);
+
         return base64_encode(hash_hmac('sha512', $hashStr, $this->apiKey, true));
     }
 
