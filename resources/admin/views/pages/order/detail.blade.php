@@ -177,6 +177,22 @@
         width: 100%;
     }
 
+    .order-detail-actions button {
+        background-color: #facc15 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 12px !important;
+        white-space: nowrap;
+    }
+
+    .order-detail-actions button:hover {
+        background-color: #eab308 !important;
+    }
+
     .order-tracking-form-grid button {
         background-color: #facc15 !important;
         border-radius: 8px !important;
