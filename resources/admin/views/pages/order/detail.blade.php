@@ -446,7 +446,7 @@
                                     <option value="refunded">Refunded</option>
                                 </select>
                                 <button @click="onUpdatePaymentStatus()"
-                                    class="border border-gray-200 text-gray-600 text-xs px-3 py-2 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+                                    class="bg-yellow-400 hover:bg-yellow-500 text-white text-xs font-semibold px-3 py-2 rounded-lg whitespace-nowrap">
                                     Apply
                                 </button>
                             </div>
