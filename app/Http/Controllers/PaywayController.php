@@ -275,8 +275,8 @@ class PaywayController extends Controller
             }
 
             $successUrl = $hasItems
-                ? 'https://nomihandicraftandservice.org/checkout/success'
-                : 'https://nomihandicraftandservice.org/support/success';
+                ? (string) config('payway.success_url')
+                : (string) config('payway.donate_success_url');
 
             $checkoutPayload = $this->payWay->buildCheckoutPayload(
                 $tran_id,
@@ -323,22 +323,21 @@ class PaywayController extends Controller
 
         DB::beginTransaction();
         try {
-            $dataCallback = $req->data ? (object) json_decode($req->data) : null;
-
-            Log::info('[webhook] decoded callback', (array) $dataCallback);
-
-            $tranId     = $dataCallback->transaction_id ?? $dataCallback->tran_id ?? null;
-            $statusCode = (int) ($dataCallback->payment_status_code ?? -1);
+            [$callback, $tranId, $statusCode] = $this->parseWebhookPayload($req);
 
             $result = $this->applyPaymentStatus($tranId, $statusCode);
+            $this->recordPaywayCallback($tranId, $statusCode, $callback);
 
             DB::commit();
             Log::info('[webhook] done', ['tran_id' => $tranId, 'status_code' => $statusCode]);
-            return $result ? 'payment_success' : 'payment_fail';
+
+            return $result
+                ? response('Success', 200)->header('Content-Type', 'text/plain')
+                : response('Failed', 422)->header('Content-Type', 'text/plain');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('[webhook] exception: ' . $e->getMessage());
-            return 'payment_fail';
+            Log::error('[webhook] exception: ' . $e->getMessage(), $req->all());
+            return response('Failed', 500)->header('Content-Type', 'text/plain');
         }
     }
 
@@ -590,5 +589,85 @@ class PaywayController extends Controller
 
         Log::warning('[applyPaymentStatus] tran_id not found in donations or orders', ['tran_id' => $tranId]);
         return false;
+    }
+
+    private function parseWebhookPayload(Request $request): array
+    {
+        $callback = $request->all();
+
+        if ($request->filled('data')) {
+            $decoded = is_array($request->data)
+                ? $request->data
+                : json_decode((string) $request->data, true);
+
+            if (is_array($decoded)) {
+                $callback = array_merge($callback, $decoded);
+            } else {
+                Log::warning('[webhook] invalid data JSON', ['data' => $request->data]);
+            }
+        }
+
+        Log::info('[webhook] normalized callback', $callback);
+
+        $tranId = $callback['transaction_id']
+            ?? $callback['tran_id']
+            ?? $callback['tranId']
+            ?? null;
+
+        if (!$tranId) {
+            throw new \InvalidArgumentException('PayWay callback missing tran_id.');
+        }
+
+        $statusValue = $callback['payment_status_code']
+            ?? $callback['status_code']
+            ?? $callback['status']
+            ?? $callback['payment_status']
+            ?? null;
+
+        return [$callback, (string) $tranId, $this->normalizeStatusCode($statusValue)];
+    }
+
+    private function normalizeStatusCode(mixed $statusValue): int
+    {
+        if (is_numeric($statusValue)) {
+            return (int) $statusValue;
+        }
+
+        return match (strtolower(trim((string) $statusValue))) {
+            'success', 'successful', 'completed', 'complete', 'paid', 'approved' => 0,
+            'pending' => 2,
+            'declined', 'failed', 'fail', 'cancelled', 'canceled' => 3,
+            'refunded' => 4,
+            default => -1,
+        };
+    }
+
+    private function recordPaywayCallback(string $tranId, int $statusCode, array $callback): void
+    {
+        $paywayTxn = PaywayTransaction::where('tran_id', $tranId)->first();
+
+        if (!$paywayTxn) {
+            return;
+        }
+
+        $rawCallback = $paywayTxn->raw_callback ?: [];
+        $rawCallback['callback'] = $callback;
+        $rawCallback['callback_received_at'] = now()->toDateTimeString();
+
+        $paywayTxn->update([
+            'status_code'    => (string) $statusCode,
+            'payment_status' => $this->paymentStatusFromCode($statusCode),
+            'raw_callback'   => $rawCallback,
+        ]);
+    }
+
+    private function paymentStatusFromCode(int $statusCode): string
+    {
+        return match ($statusCode) {
+            0       => 'paid',
+            2       => 'pending',
+            4       => 'refunded',
+            default => 'failed',
+        };
     }
 }

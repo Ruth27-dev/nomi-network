@@ -116,7 +116,7 @@ class PaymentController extends Controller
                 $phone,
                 $request->payment_option,
                 $cancelUrl,
-                'https://nomihandicraftandservice.org/checkout/success',
+                (string) config('payway.success_url'),
             );
             $tranId = $result['tran_id'];
 
@@ -204,7 +204,7 @@ class PaymentController extends Controller
                 $request->filled('cancel_url') && filter_var($request->cancel_url, FILTER_VALIDATE_URL)
                     ? (string) $request->cancel_url
                     : null,
-                'https://nomihandicraftandservice.org/support/success'
+                (string) config('payway.donate_success_url')
             );
             $tranId = $result['tran_id'];
             $result['payway'] = [

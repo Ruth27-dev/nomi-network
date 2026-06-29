@@ -16,8 +16,9 @@ return [
     'public_key'    => env('PAYWAY_PUBLIC_KEY', env('ABA_PAYWAY_PUBLIC_KEY', env('PAYWAY_API_KEY', env('ABA_PAYWAY_API_KEY', '')))),
     'api_url'       => env('PAYWAY_API_URL', env('ABA_PAYWAY_API_URL', 'https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase')),
     'checkout_url'  => env('PAYWAY_CHECKOUT_URL', 'https://checkout-sandbox.payway.com.kh'),
-    'return_url'    => 'https://admin.nomihandicraftandservice.org/api/web/payway-webhook',
+    'return_url'    => env('PAYWAY_RETURN_URL', rtrim(env('APP_URL', 'http://localhost'), '/').'/api/web/payway-webhook'),
     'cancel_url'    => env('PAYWAY_CANCEL_URL', env('APP_URL', 'http://localhost')),
-    'success_url'   => env('PAYWAY_SUCCESS_URL', env('APP_URL', 'http://localhost')),
+    'success_url'   => env('PAYWAY_SUCCESS_URL', 'https://nomihandicraftandservice.org/checkout/success'),
+    'donate_success_url' => env('PAYWAY_DONATE_SUCCESS_URL', 'https://nomihandicraftandservice.org/support/success'),
 
 ];

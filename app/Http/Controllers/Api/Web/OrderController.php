@@ -578,7 +578,7 @@ class OrderController extends Controller
                 $request->phone,
                 $paymentOption,
                 $cancelUrl,
-                'https://nomihandicraftandservice.org/checkout/success'
+                (string) config('payway.success_url')
             );
 
             DB::commit();
