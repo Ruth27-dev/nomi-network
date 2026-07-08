@@ -19,18 +19,34 @@ class StockService
      */
     public function deductForOrder(Order $order): void
     {
-        $alreadyDeducted = DB::table('stock_history')
-            ->where('order_id', $order->id)
-            ->where('transaction_type', 'sale')
-            ->exists();
-
-        if ($alreadyDeducted) {
-            return;
-        }
-
-        $items = $order->relationLoaded('items') ? $order->items : $order->load('items')->items;
+        $items = ($order->relationLoaded('items') ? $order->items : $order->load('items')->items)
+            ->groupBy(fn ($item) => $item->product_id . ':' . ($item->product_variation_id ?? 'null'))
+            ->map(function ($items) {
+                $first = $items->first();
+                return (object) [
+                    'product_id' => $first->product_id,
+                    'product_variation_id' => $first->product_variation_id,
+                    'quantity' => $items->sum(fn ($item) => max(0, (int) $item->quantity)),
+                ];
+            })
+            ->filter(fn ($item) => $item->quantity > 0);
 
         foreach ($items as $item) {
+            $alreadyDeducted = DB::table('stock_history')
+                ->where('order_id', $order->id)
+                ->where('product_id', $item->product_id)
+                ->where('transaction_type', 'sale')
+                ->where(function ($q) use ($item) {
+                    $item->product_variation_id
+                        ? $q->where('product_variation_id', $item->product_variation_id)
+                        : $q->whereNull('product_variation_id');
+                })
+                ->exists();
+
+            if ($alreadyDeducted) {
+                continue;
+            }
+
             $stock = ProductStock::query()
                 ->where('product_id', $item->product_id)
                 ->where(function ($q) use ($item) {

@@ -70,6 +70,10 @@ SQL);
             return;
         }
 
+        if ($driver !== 'pgsql') {
+            return;
+        }
+
         DB::unprepared(<<<'SQL'
 CREATE TRIGGER trigger_stock_update_on_order_complete
 AFTER UPDATE OF status

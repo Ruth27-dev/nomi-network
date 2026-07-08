@@ -70,6 +70,10 @@ SQL);
             return;
         }
 
+        if ($driver !== 'pgsql') {
+            return;
+        }
+
         DB::unprepared('DROP TRIGGER IF EXISTS trigger_stock_update_on_order_complete ON public.orders;');
         DB::unprepared(<<<'SQL'
 CREATE OR REPLACE FUNCTION update_stock_on_order_complete()
@@ -132,4 +136,3 @@ SQL);
         DB::unprepared('DROP FUNCTION IF EXISTS update_stock_on_order_complete();');
     }
 };
-

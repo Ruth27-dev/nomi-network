@@ -15,6 +15,10 @@ return new class extends Migration
             return;
         }
 
+        if ($driver !== 'pgsql') {
+            return;
+        }
+
         if (!Schema::hasTable('orders') || !Schema::hasTable('order_items')) {
             return;
         }
