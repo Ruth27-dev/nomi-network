@@ -7,8 +7,10 @@ use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Gallery;
 use App\Models\Product;
+use App\Models\ProductStock;
 use App\Models\ProductVariation;
 use App\Models\UploadFile;
+use App\Services\StockService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +18,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function __construct()
+    private StockService $stock;
+
+    public function __construct(StockService $stock)
     {
         parent::__construct();
+        $this->stock = $stock;
         $this->middleware('permission:product-view', ['only' => ['index', 'detail', 'data']]);
         $this->middleware('permission:product-create', ['only' => ['save']]);
         $this->middleware('permission:product-update', ['only' => ['save']]);
@@ -112,6 +117,7 @@ class ProductController extends Controller
                 // Sync all categories to the pivot table
                 $product->categories()->sync($categoryIds);
 
+                $this->syncStock($product->id, null, (int) ($request->stock ?? 0));
                 $this->createVariations($product, $request);
                 $this->syncImages($product, $request);
                 $this->syncProductAttributes($product, $request);
@@ -142,6 +148,8 @@ class ProductController extends Controller
 
                 // Sync all categories to the pivot table (removes old, adds new)
                 $product->categories()->sync($categoryIds);
+
+                $this->syncStock($product->id, null, (int) ($request->stock ?? 0));
 
                 /* ===== DELETE OLD VARIATIONS ===== */
 
@@ -225,7 +233,7 @@ class ProductController extends Controller
             }
             $usedSkus[] = $sku;
 
-            ProductVariation::create([
+            $variation = ProductVariation::create([
                 'product_id' => $product->id,
                 'sku' => $sku,
                 'barcode' => $variate['barcode'] ?? null,
@@ -235,7 +243,29 @@ class ProductController extends Controller
                 'stock' => $variate['stock'] ?? 0,
                 'is_active' => ($variate['status'] ?? 'ACTIVE') === $this->active,
             ]);
+
+            $this->syncStock($product->id, $variation->id, (int) ($variate['stock'] ?? 0));
         }
+    }
+
+    /**
+     * Keep product_stocks.stock_on_hand in sync with the stock value set on
+     * the product/variation admin form. Reserved is recomputed from
+     * genuinely-pending PayWay transactions rather than trusted as-is,
+     * since it may be stale for a row that already existed.
+     */
+    private function syncStock(int $productId, ?int $variationId, int $onHand): void
+    {
+        $trueReserved = $this->stock->computeActiveReserved($productId, $variationId);
+
+        ProductStock::updateOrCreate(
+            ['product_id' => $productId, 'product_variation_id' => $variationId],
+            [
+                'stock_on_hand'   => $onHand,
+                'stock_reserved'  => $trueReserved,
+                'stock_available' => max(0, $onHand - $trueReserved),
+            ]
+        );
     }
 
     private function syncProductAttributes(Product $product, Request $request): void
